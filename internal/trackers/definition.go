@@ -79,6 +79,11 @@ type KindProvider interface {
 	TrackerKind() Kind
 }
 
+// BaseURLProvider declares a tracker's default endpoint.
+type BaseURLProvider interface {
+	DefaultBaseURL() string
+}
+
 // LocalizedMetadataProvider declares a locale consumed by tracker-owned naming or description behavior.
 type LocalizedMetadataProvider interface {
 	LocalizedMetadataLocale() string

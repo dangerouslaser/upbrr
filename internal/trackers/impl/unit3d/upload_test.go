@@ -51,6 +51,34 @@ func (l *captureUnit3DLogger) containsWarning(value string) bool {
 	return false
 }
 
+func TestDefinitionsRetainIndependentSiteProfiles(t *testing.T) {
+	first := NewWithProfile(Profile{
+		Name:         "FIRST",
+		BannedGroups: []string{"GROUP-A"},
+		Site: SiteProfile{
+			ResolveTypeID: func(api.PreparedMetadata) string { return "1" },
+		},
+	})
+	second := NewWithProfile(Profile{
+		Name: "SECOND",
+		Site: SiteProfile{
+			ResolveTypeID: func(api.PreparedMetadata) string { return "2" },
+		},
+	})
+
+	if got := first.profile.Site.ResolveTypeID(api.PreparedMetadata{}); got != "1" {
+		t.Fatalf("first profile type ID = %q, want 1", got)
+	}
+	if got := second.profile.Site.ResolveTypeID(api.PreparedMetadata{}); got != "2" {
+		t.Fatalf("second profile type ID = %q, want 2", got)
+	}
+	groups := first.BannedGroups()
+	groups[0] = "CHANGED"
+	if got := first.BannedGroups()[0]; got != "GROUP-A" {
+		t.Fatalf("definition exposed mutable banned groups: %q", got)
+	}
+}
+
 func TestResolveUnit3DCategory(t *testing.T) {
 	tests := []struct {
 		name string

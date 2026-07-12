@@ -9,6 +9,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "ZNTH",
 		BaseURL: "https://znth.cx",
+		Rules:   Rules(),
 		Site: unit3d.SiteProfile{
 			BuildName:     buildName,
 			ResolveTypeID: typeID,

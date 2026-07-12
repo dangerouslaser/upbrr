@@ -10,5 +10,6 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "SP",
 		BaseURL: "https://seedpool.org",
+		Rules:   Rules(),
 	}
 }

@@ -22,9 +22,9 @@ var (
 	languageTagLookup     map[string]language.Tag
 )
 
-func buildUnit3DName(tracker string, meta api.PreparedMetadata, cfg config.TrackerConfig) string {
-	trackerName := strings.ToUpper(strings.TrimSpace(tracker))
-	if profile, ok := unit3DSiteProfileFor(trackerName); ok && profile.BuildName != nil {
+func buildUnit3DName(_ string, meta api.PreparedMetadata, cfg config.TrackerConfig, profiles ...SiteProfile) string {
+	profile := firstSiteProfile(profiles)
+	if profile.BuildName != nil {
 		return profile.BuildName(meta, cfg)
 	}
 	name := baseReleaseName(meta)

@@ -5,15 +5,11 @@ package unit3d
 
 import (
 	"context"
-	"strings"
-	"sync"
 
 	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
-
-var unit3DSiteProfilesMu sync.RWMutex
 
 // SiteProfile contains optional site-owned Unit3D payload callbacks.
 type SiteProfile struct {
@@ -27,25 +23,9 @@ type SiteProfile struct {
 	FinalizeDescription    func(description string, meta api.PreparedMetadata) string
 }
 
-var unit3DSiteProfiles = map[string]SiteProfile{}
-
-func unit3DSiteProfileFor(tracker string) (SiteProfile, bool) {
-	key := strings.ToUpper(strings.TrimSpace(tracker))
-	if key == "" {
-		return SiteProfile{}, false
+func firstSiteProfile(profiles []SiteProfile) SiteProfile {
+	if len(profiles) == 0 {
+		return SiteProfile{}
 	}
-	unit3DSiteProfilesMu.RLock()
-	defer unit3DSiteProfilesMu.RUnlock()
-	profile, ok := unit3DSiteProfiles[key]
-	return profile, ok
-}
-
-func installSiteProfile(name string, profile SiteProfile) {
-	key := strings.ToUpper(strings.TrimSpace(name))
-	if key == "" {
-		return
-	}
-	unit3DSiteProfilesMu.Lock()
-	unit3DSiteProfiles[key] = profile
-	unit3DSiteProfilesMu.Unlock()
+	return profiles[0]
 }

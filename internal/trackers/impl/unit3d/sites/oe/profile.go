@@ -11,8 +11,10 @@ import (
 
 func Profile() unit3d.Profile {
 	return unit3d.Profile{
-		Name:    "OE",
-		BaseURL: "https://onlyencodes.cc",
+		Name:         "OE",
+		BaseURL:      "https://onlyencodes.cc",
+		Rules:        Rules(),
+		BannedGroups: BannedGroups(),
 		Site: unit3d.SiteProfile{
 			BuildName:     buildName,
 			ResolveTypeID: typeID,

@@ -14,8 +14,9 @@ import (
 // Profile returns CBR's Unit3D site manifest.
 func Profile() unit3d.Profile {
 	return unit3d.Profile{
-		Name:    "CBR",
-		BaseURL: "https://capybarabr.com",
+		Name:         "CBR",
+		BaseURL:      "https://capybarabr.com",
+		BannedGroups: BannedGroups(),
 		Site: unit3d.SiteProfile{
 			BuildName:         buildName,
 			ResolveCategoryID: categoryID,

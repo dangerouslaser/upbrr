@@ -13,6 +13,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "RF",
 		BaseURL: "https://reelflix.cc",
+		Rules:   Rules(),
 		Site: unit3d.SiteProfile{
 			BuildName:           buildName,
 			ResolveTypeID:       typeID,

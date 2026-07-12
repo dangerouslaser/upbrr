@@ -28,8 +28,10 @@ var (
 // Profile returns RHD's Unit3D site manifest.
 func Profile() unit3d.Profile {
 	return unit3d.Profile{
-		Name:    "RHD",
-		BaseURL: "https://rocket-hd.cc",
+		Name:         "RHD",
+		BaseURL:      "https://rocket-hd.cc",
+		Rules:        Rules(),
+		BannedGroups: BannedGroups(),
 		Site: unit3d.SiteProfile{
 			BuildName:           buildName,
 			ResolveResolutionID: resolutionID,

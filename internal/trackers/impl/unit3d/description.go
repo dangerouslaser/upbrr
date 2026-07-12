@@ -14,7 +14,7 @@ import (
 
 func buildUnit3DDescription(
 	ctx context.Context,
-	tracker string,
+	_ string,
 	meta api.PreparedMetadata,
 	appConfig config.Config,
 	trackerConfig config.TrackerConfig,
@@ -22,15 +22,17 @@ func buildUnit3DDescription(
 	keptDescription string,
 	menuImages []api.ScreenshotImage,
 	screenshots []api.ScreenshotImage,
+	profiles ...SiteProfile,
 ) (string, error) {
-	if profile, ok := unit3DSiteProfileFor(tracker); ok && profile.BuildDescription != nil {
+	profile := firstSiteProfile(profiles)
+	if profile.BuildDescription != nil {
 		return profile.BuildDescription(ctx, meta, appConfig, trackerConfig, logger, keptDescription, menuImages, screenshots)
 	}
 	description, err := descriptionunit3d.BuildDescription(ctx, meta, appConfig, trackerConfig, logger, keptDescription, menuImages, screenshots)
 	if err != nil {
 		return "", fmt.Errorf("trackers: %w", err)
 	}
-	if profile, ok := unit3DSiteProfileFor(tracker); ok && profile.FinalizeDescription != nil {
+	if profile.FinalizeDescription != nil {
 		return profile.FinalizeDescription(description, meta), nil
 	}
 	return description, nil

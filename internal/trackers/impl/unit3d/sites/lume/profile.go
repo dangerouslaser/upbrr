@@ -13,6 +13,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "LUME",
 		BaseURL: "https://luminarr.me",
+		Rules:   Rules(),
 		BannedPolicy: &trackers.BannedGroupPolicy{
 			TRaSHGuideURL: "https://raw.githubusercontent.com/TRaSH-Guides/Guides/refs/heads/master/docs/json/radarr/cf/lq.json",
 		},

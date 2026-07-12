@@ -79,6 +79,9 @@ func (r *Registry) Register(def Definition) error {
 	if def != nil {
 		descriptor.Name = def.Name()
 		descriptor.Kind = KindNonUnit3D
+		if provider, ok := def.(BaseURLProvider); ok {
+			descriptor.BaseURL = strings.TrimSpace(provider.DefaultBaseURL())
+		}
 		if provider, ok := def.(KindProvider); ok {
 			descriptor.Kind = provider.TrackerKind()
 		}

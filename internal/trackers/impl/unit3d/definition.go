@@ -60,11 +60,7 @@ func IsConfiguredTrackerWithRegistry(cfg config.Config, tracker string, registry
 }
 
 type Definition struct {
-	name             string
-	baseURL          string
-	uploadArtifact   *trackers.UploadArtifactPolicy
-	claimPolicy      *trackers.ClaimPolicy
-	descriptionGroup string
+	profile Profile
 }
 
 // Profile declares Unit3D site identity and default endpoint metadata.
@@ -84,36 +80,36 @@ type Profile struct {
 }
 
 func New(name string) *Definition {
-	return &Definition{name: strings.ToUpper(strings.TrimSpace(name))}
+	return NewWithProfile(Profile{Name: name})
 }
 
 // NewWithProfile constructs a Unit3D definition from an explicitly composed
 // site profile.
 func NewWithProfile(profile Profile) *Definition {
-	return &Definition{
-		name:             strings.ToUpper(strings.TrimSpace(profile.Name)),
-		baseURL:          strings.TrimSpace(profile.BaseURL),
-		uploadArtifact:   profile.UploadArtifact,
-		claimPolicy:      profile.ClaimPolicy,
-		descriptionGroup: strings.ToLower(strings.TrimSpace(profile.DescriptionGroup)),
-	}
+	profile.Name = strings.ToUpper(strings.TrimSpace(profile.Name))
+	profile.BaseURL = strings.TrimSpace(profile.BaseURL)
+	profile.DescriptionGroup = strings.ToLower(strings.TrimSpace(profile.DescriptionGroup))
+	profile.BannedGroups = append([]string(nil), profile.BannedGroups...)
+	return &Definition{profile: profile}
 }
 
-func (d *Definition) DescriptionGroup() string { return d.descriptionGroup }
+func (d *Definition) DescriptionGroup() string { return d.profile.DescriptionGroup }
+
+func (d *Definition) DefaultBaseURL() string { return d.profile.BaseURL }
 
 func (d *Definition) ClaimPolicy() *trackers.ClaimPolicy {
-	if d.claimPolicy == nil {
+	if d.profile.ClaimPolicy == nil {
 		return nil
 	}
-	policy := *d.claimPolicy
+	policy := *d.profile.ClaimPolicy
 	return &policy
 }
 
 func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
-	if d.uploadArtifact == nil {
+	if d.profile.UploadArtifact == nil {
 		return nil
 	}
-	policy := *d.uploadArtifact
+	policy := *d.profile.UploadArtifact
 	return &policy
 }
 
@@ -125,21 +121,34 @@ func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
 
 // Rules declares validation required by every Unit3D upload.
 func (d *Definition) Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{RequireValidMISetting: true}
+	if d.profile.Rules == nil {
+		return &ruletypes.RuleSet{RequireValidMISetting: true}
+	}
+	rules := *d.profile.Rules
+	rules.RequireValidMISetting = true
+	return &rules
 }
 
+func (d *Definition) BannedGroups() []string { return append([]string(nil), d.profile.BannedGroups...) }
+
+func (d *Definition) BannedGroupPolicy() *trackers.BannedGroupPolicy { return d.profile.BannedPolicy }
+
+func (d *Definition) DupePolicy() *trackers.DupePolicy { return d.profile.DupePolicy }
+
+func (d *Definition) ImageHostPolicy() *trackers.ImageHostPolicy { return d.profile.ImageHost }
+
 func (d *Definition) Name() string {
-	return d.name
+	return d.profile.Name
 }
 
 func (d *Definition) TrackerKind() trackers.Kind { return trackers.KindUnit3D }
 
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
-	if d.baseURL != "" || strings.TrimSpace(req.TrackerConfig.URL) != "" {
+	if d.profile.BaseURL != "" || strings.TrimSpace(req.TrackerConfig.URL) != "" {
 		if strings.TrimSpace(req.TrackerConfig.URL) == "" {
-			req.TrackerConfig.URL = d.baseURL
+			req.TrackerConfig.URL = d.profile.BaseURL
 		}
-		return uploadUnit3D(ctx, req)
+		return uploadUnit3D(ctx, req, d.profile.Site)
 	}
 	select {
 	case <-ctx.Done():
@@ -147,17 +156,17 @@ func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (ap
 	default:
 	}
 	if req.Logger != nil {
-		req.Logger.Infof("trackers: %s upload not implemented (unit3d scaffold)", d.name)
+		req.Logger.Infof("trackers: %s upload not implemented (unit3d scaffold)", d.profile.Name)
 	}
 	return api.UploadSummary{}, internalerrors.ErrNotImplemented
 }
 
 func (d *Definition) BuildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.TrackerDryRunEntry, error) {
-	if d.baseURL != "" || strings.TrimSpace(req.TrackerConfig.URL) != "" {
+	if d.profile.BaseURL != "" || strings.TrimSpace(req.TrackerConfig.URL) != "" {
 		if strings.TrimSpace(req.TrackerConfig.URL) == "" {
-			req.TrackerConfig.URL = d.baseURL
+			req.TrackerConfig.URL = d.profile.BaseURL
 		}
-		return buildUploadDryRunUnit3D(ctx, req)
+		return buildUploadDryRunUnit3D(ctx, req, d.profile.Site)
 	}
 	select {
 	case <-ctx.Done():
@@ -165,7 +174,7 @@ func (d *Definition) BuildUploadDryRun(ctx context.Context, req trackers.UploadR
 	default:
 	}
 	if req.Logger != nil {
-		req.Logger.Infof("trackers: dry-run decision=not_implemented tracker=%s", d.name)
+		req.Logger.Infof("trackers: dry-run decision=not_implemented tracker=%s", d.profile.Name)
 	}
 	return api.TrackerDryRunEntry{}, internalerrors.ErrNotImplemented
 }
@@ -177,7 +186,7 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 	default:
 	}
 	if req.Logger != nil {
-		req.Logger.Debugf("trackers: %s building unit3d description", d.name)
+		req.Logger.Debugf("trackers: %s building unit3d description", d.profile.Name)
 	}
 	var err error
 	assets := trackers.DescriptionAssets{}
@@ -190,7 +199,7 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 				return trackers.DescriptionResult{}, fmt.Errorf("trackers: %w", err)
 			}
 			if req.Logger != nil {
-				req.Logger.Warnf("trackers: description assets failed tracker=%s err=%s", d.name, redaction.RedactValue(err.Error(), nil))
+				req.Logger.Warnf("trackers: description assets failed tracker=%s err=%s", d.profile.Name, redaction.RedactValue(err.Error(), nil))
 			}
 			assets = trackers.DescriptionAssets{}
 		}
@@ -199,7 +208,7 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 	if !assets.Final {
 		description, err = buildUnit3DDescription(
 			ctx,
-			d.name,
+			d.profile.Name,
 			req.Meta,
 			req.AppConfig,
 			req.TrackerConfig,
@@ -207,6 +216,7 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 			assets.Description,
 			assets.MenuImages,
 			assets.Screenshots,
+			d.profile.Site,
 		)
 		if err != nil {
 			return trackers.DescriptionResult{}, err
@@ -239,29 +249,8 @@ func RegisterProfiles(registry *trackers.Registry, profiles []Profile) error {
 		if strings.TrimSpace(profile.Name) == "" {
 			return errors.New("trackers: unit3d profile has empty name")
 		}
-		installSiteProfile(profile.Name, profile.Site)
 		definition := NewWithProfile(profile)
-		rules := definition.Rules()
-		if profile.Rules != nil {
-			cloned := *profile.Rules
-			cloned.RequireValidMISetting = true
-			rules = &cloned
-		}
-		if err := registry.RegisterDescriptor(trackers.Descriptor{
-			Name:             profile.Name,
-			BaseURL:          profile.BaseURL,
-			Definition:       definition,
-			DupeFactory:      definition,
-			Rules:            rules,
-			DupePolicy:       profile.DupePolicy,
-			UploadArtifact:   profile.UploadArtifact,
-			Metadata:         definition.MetadataPolicy(),
-			BannedPolicy:     profile.BannedPolicy,
-			BannedGroups:     append([]string(nil), profile.BannedGroups...),
-			ImageHost:        profile.ImageHost,
-			ClaimPolicy:      profile.ClaimPolicy,
-			DescriptionGroup: profile.DescriptionGroup,
-		}); err != nil {
+		if err := registry.Register(definition); err != nil {
 			return fmt.Errorf("trackers: %w", err)
 		}
 	}

@@ -15,6 +15,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "TIK",
 		BaseURL: "https://cinematik.net",
+		Rules:   Rules(),
 		Site: unit3d.SiteProfile{
 			ResolveTypeID:     typeID,
 			ResolveCategoryID: categoryID,

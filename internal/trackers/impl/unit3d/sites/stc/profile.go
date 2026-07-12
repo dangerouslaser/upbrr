@@ -10,6 +10,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "STC",
 		BaseURL: "https://skipthecommercials.xyz",
+		Rules:   Rules(),
 		Site: unit3d.SiteProfile{
 			ResolveTypeID: typeID,
 		},

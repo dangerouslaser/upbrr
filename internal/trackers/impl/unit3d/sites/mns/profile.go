@@ -10,5 +10,6 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "MNS",
 		BaseURL: "https://midnightscene.cc",
+		Rules:   Rules(),
 	}
 }

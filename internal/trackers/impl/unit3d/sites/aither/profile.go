@@ -18,6 +18,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "AITHER",
 		BaseURL: "https://aither.cc",
+		Rules:   Rules(),
 		Site: unit3d.SiteProfile{
 			BuildName:              buildName,
 			ApplyAdditionalPayload: additionalPayload,

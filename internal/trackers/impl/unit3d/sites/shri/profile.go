@@ -16,6 +16,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "SHRI",
 		BaseURL: "https://shareisland.org",
+		Rules:   Rules(),
 		Site: unit3d.SiteProfile{
 			ResolveTypeID:          typeID,
 			ApplyAdditionalPayload: additionalPayload,

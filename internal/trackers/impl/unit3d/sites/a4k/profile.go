@@ -8,8 +8,10 @@ import (
 
 func Profile() unit3d.Profile {
 	return unit3d.Profile{
-		Name:    "A4K",
-		BaseURL: "https://aura4k.net",
+		Name:         "A4K",
+		BaseURL:      "https://aura4k.net",
+		Rules:        Rules(),
+		BannedGroups: BannedGroups(),
 		Site: unit3d.SiteProfile{
 			ResolveTypeID:       typeID,
 			ResolveResolutionID: resolutionID,

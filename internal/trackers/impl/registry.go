@@ -74,149 +74,60 @@ import (
 	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/utp"
 	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/yus"
 	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/znth"
-	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 )
-
-func withRules(profile unit3d.Profile, rules *ruletypes.RuleSet) unit3d.Profile {
-	profile.Rules = rules
-	return profile
-}
-
-func withBannedGroups(profile unit3d.Profile, groups []string) unit3d.Profile {
-	profile.BannedGroups = append([]string(nil), groups...)
-	return profile
-}
 
 func NewRegistry() (*trackers.Registry, error) {
 	registry := trackers.NewRegistry()
 	profiles := []unit3d.Profile{
-		withRules(
-			withBannedGroups(a4k.Profile(), a4k.BannedGroups()),
-			a4k.Rules(),
-		),
+		a4k.Profile(),
 		acm.Profile(),
-		withRules(aither.Profile(), aither.Rules()),
-		withRules(withBannedGroups(blu.Profile(), blu.BannedGroups()), blu.Rules()),
-		withBannedGroups(cbr.Profile(), cbr.BannedGroups()),
-		withRules(withBannedGroups(dp.Profile(), dp.BannedGroups()), dp.Rules()),
+		aither.Profile(),
+		blu.Profile(),
+		cbr.Profile(),
+		dp.Profile(),
 		emuw.Profile(),
 		friki.Profile(),
-		withRules(withBannedGroups(hhd.Profile(), hhd.BannedGroups()), hhd.Rules()),
+		hhd.Profile(),
 		ihd.Profile(),
 		itt.Profile(),
 		lcd.Profile(),
 		ldu.Profile(),
-		withBannedGroups(lt.Profile(), lt.BannedGroups()),
-		withRules(
-			lume.Profile(),
-			lume.Rules(),
-		),
-		withRules(lst.Profile(), lst.Rules()),
-		withRules(mns.Profile(), mns.Rules()),
+		lt.Profile(),
+		lume.Profile(),
+		lst.Profile(),
+		mns.Profile(),
 		pt.Profile(),
-		withBannedGroups(ptt.Profile(), ptt.BannedGroups()),
+		ptt.Profile(),
 		r4e.Profile(),
-		withRules(withBannedGroups(ras.Profile(), ras.BannedGroups()), ras.Rules()),
-		withRules(rf.Profile(), rf.Rules()),
-		withRules(withBannedGroups(rhd.Profile(), rhd.BannedGroups()), rhd.Rules()),
+		ras.Profile(),
+		rf.Profile(),
+		rhd.Profile(),
 		sam.Profile(),
-		withRules(
-			withBannedGroups(oe.Profile(), oe.BannedGroups()),
-			oe.Rules(),
-		),
-		withRules(withBannedGroups(otw.Profile(), otw.BannedGroups()), otw.Rules()),
-		withRules(shri.Profile(), shri.Rules()),
-		withRules(sp.Profile(), sp.Rules()),
-		withRules(stc.Profile(), stc.Rules()),
-		withRules(tik.Profile(), tik.Rules()),
+		oe.Profile(),
+		otw.Profile(),
+		shri.Profile(),
+		sp.Profile(),
+		stc.Profile(),
+		tik.Profile(),
 		tlz.Profile(),
-		withRules(withBannedGroups(tos.Profile(), tos.BannedGroups()), tos.Rules()),
-		withRules(ttr.Profile(), ttr.Rules()),
-		withRules(withBannedGroups(ulcx.Profile(), ulcx.BannedGroups()), ulcx.Rules()),
-		withRules(znth.Profile(), znth.Rules()),
+		tos.Profile(),
+		ttr.Profile(),
+		ulcx.Profile(),
+		znth.Profile(),
 		utp.Profile(),
-		withBannedGroups(yus.Profile(), yus.BannedGroups()),
+		yus.Profile(),
 	}
 	if err := unit3d.RegisterProfiles(registry, profiles); err != nil {
 		return nil, fmt.Errorf("trackers: %w", err)
 	}
-	if err := registry.Register(hdb.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
+	definitions := []trackers.Definition{
+		hdb.New(), mtv.New(), ant.New(), ar.New(), asc.New(), bhd.New(), bhdtv.New(), bjs.New(), btn.New(), bt.New(), czt.New(), dc.New(), ff.New(),
+		fl.New(), gpw.New(), hds.New(), hdt.New(), is.New(), nbl.New(), ptp.New(), pts.New(), rtf.New(), spd.New(), thr.New(), tl.New(), tvc.New(),
 	}
-	if err := registry.Register(mtv.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(ant.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(ar.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(asc.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(bhd.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(bhdtv.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(bjs.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(btn.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(bt.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(czt.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(dc.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(ff.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(fl.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(gpw.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(hds.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(hdt.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(is.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(nbl.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(ptp.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(pts.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(rtf.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(spd.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(thr.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(tl.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
-	}
-	if err := registry.Register(tvc.New()); err != nil {
-		return nil, fmt.Errorf("trackers: %w", err)
+	for _, definition := range definitions {
+		if err := registry.Register(definition); err != nil {
+			return nil, fmt.Errorf("trackers: %w", err)
+		}
 	}
 	for _, name := range []string{"AZ", "CZ", "PHD"} {
 		if err := registry.Register(azfamily.New(name)); err != nil {

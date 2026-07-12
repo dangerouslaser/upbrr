@@ -15,8 +15,10 @@ import (
 // Profile returns ULCX's Unit3D site manifest.
 func Profile() unit3d.Profile {
 	return unit3d.Profile{
-		Name:    "ULCX",
-		BaseURL: "https://upload.cx",
+		Name:         "ULCX",
+		BaseURL:      "https://upload.cx",
+		Rules:        Rules(),
+		BannedGroups: BannedGroups(),
 		Site: unit3d.SiteProfile{
 			BuildName: buildName,
 		},

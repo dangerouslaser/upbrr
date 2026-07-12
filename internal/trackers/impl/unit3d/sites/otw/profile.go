@@ -10,8 +10,10 @@ import (
 
 func Profile() unit3d.Profile {
 	return unit3d.Profile{
-		Name:    "OTW",
-		BaseURL: "https://oldtoons.world",
+		Name:         "OTW",
+		BaseURL:      "https://oldtoons.world",
+		Rules:        Rules(),
+		BannedGroups: BannedGroups(),
 		Site: unit3d.SiteProfile{
 			ResolveTypeID: typeID,
 		},

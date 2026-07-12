@@ -15,6 +15,7 @@ func Profile() unit3d.Profile {
 	return unit3d.Profile{
 		Name:    "LST",
 		BaseURL: "https://lst.gg",
+		Rules:   Rules(),
 		Site: unit3d.SiteProfile{
 			ApplyAdditionalPayload: additionalPayload,
 		},

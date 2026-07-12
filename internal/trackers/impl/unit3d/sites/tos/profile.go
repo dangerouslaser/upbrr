@@ -14,8 +14,10 @@ import (
 // Profile returns TOS's Unit3D site manifest.
 func Profile() unit3d.Profile {
 	return unit3d.Profile{
-		Name:    "TOS",
-		BaseURL: "https://theoldschool.cc",
+		Name:         "TOS",
+		BaseURL:      "https://theoldschool.cc",
+		Rules:        Rules(),
+		BannedGroups: BannedGroups(),
 		UploadArtifact: &trackers.UploadArtifactPolicy{
 			Source: "TheOldSchool",
 		},

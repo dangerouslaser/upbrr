@@ -19,7 +19,7 @@ import (
 	"github.com/autobrr/upbrr/internal/dvdvideo/engine"
 	"github.com/autobrr/upbrr/internal/dvdvideo/graph"
 	"github.com/autobrr/upbrr/internal/dvdvideo/render"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/services/db"
 	"github.com/autobrr/upbrr/pkg/api"
 )

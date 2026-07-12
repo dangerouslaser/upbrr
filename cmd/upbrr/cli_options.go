@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/autobrr/upbrr/internal/imagehostpolicy"
+	imagehostpolicy "github.com/autobrr/upbrr/internal/imagehosting/policy"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 

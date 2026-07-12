@@ -19,10 +19,10 @@ import (
 	"time"
 
 	"github.com/autobrr/upbrr/internal/config"
+	imagehost "github.com/autobrr/upbrr/internal/imagehosting/host"
 	"github.com/autobrr/upbrr/internal/logging"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	dbsvc "github.com/autobrr/upbrr/internal/services/db"
-	"github.com/autobrr/upbrr/internal/services/imagehost"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -52,6 +52,7 @@ var descriptionSlotImageBlockedIPRanges = []netip.Prefix{
 
 var descriptionSlotImageLookupIPAddrs = net.DefaultResolver.LookupIPAddr
 
+//nolint:unparam // Compatibility helper is test-only; production passes the service logger through the registry-aware variant.
 func ensureDescriptionImageHost(
 	ctx context.Context,
 	tracker string,
@@ -62,7 +63,24 @@ func ensureDescriptionImageHost(
 	images api.ImageHostingService,
 	logger api.Logger,
 ) (descriptionImageHostResolution, error) {
-	return ensureDescriptionImageHostWithData(ctx, tracker, meta, appCfg, trackerCfg, repo, images, logger, nil)
+	if logger == nil {
+		logger = api.NopLogger{}
+	}
+	return ensureDescriptionImageHostWithRegistry(ctx, tracker, meta, appCfg, trackerCfg, repo, images, logger, nil)
+}
+
+func ensureDescriptionImageHostWithRegistry(
+	ctx context.Context,
+	tracker string,
+	meta api.PreparedMetadata,
+	appCfg config.Config,
+	trackerCfg config.TrackerConfig,
+	repo api.MetadataRepository,
+	images api.ImageHostingService,
+	logger api.Logger,
+	registry *Registry,
+) (descriptionImageHostResolution, error) {
+	return ensureDescriptionImageHostWithDataAndRegistry(ctx, tracker, meta, appCfg, trackerCfg, repo, images, logger, registry, nil)
 }
 
 // ensureDescriptionImageHostWithData resolves description screenshots against a
@@ -80,7 +98,23 @@ func ensureDescriptionImageHostWithData(
 	preloaded *preloadedDescriptionAssetData,
 	preferredHosts ...string,
 ) (descriptionImageHostResolution, error) {
-	policy, err := resolveImageHostPolicyForMetadata(tracker, appCfg, trackerCfg, meta, meta.ImageHostOverrides)
+	return ensureDescriptionImageHostWithDataAndRegistry(ctx, tracker, meta, appCfg, trackerCfg, repo, images, logger, nil, preloaded, preferredHosts...)
+}
+
+func ensureDescriptionImageHostWithDataAndRegistry(
+	ctx context.Context,
+	tracker string,
+	meta api.PreparedMetadata,
+	appCfg config.Config,
+	trackerCfg config.TrackerConfig,
+	repo api.MetadataRepository,
+	images api.ImageHostingService,
+	logger api.Logger,
+	registry *Registry,
+	preloaded *preloadedDescriptionAssetData,
+	preferredHosts ...string,
+) (descriptionImageHostResolution, error) {
+	policy, err := resolveImageHostPolicyForMetadataWithRegistry(registry, tracker, appCfg, trackerCfg, meta.ImageHostOverrides)
 	if err != nil {
 		return descriptionImageHostResolution{}, err
 	}

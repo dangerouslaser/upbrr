@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/autobrr/upbrr/internal/imagehostpolicy"
+	imagehostpolicy "github.com/autobrr/upbrr/internal/imagehosting/policy"
 )
 
 // Validate is the CLI's fail-fast check. These tests target every failure

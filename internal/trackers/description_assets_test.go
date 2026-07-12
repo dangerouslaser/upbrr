@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/autobrr/upbrr/internal/config"
+	descriptionunit3d "github.com/autobrr/upbrr/internal/description/unit3d"
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	dbsvc "github.com/autobrr/upbrr/internal/services/db"
-	descriptionunit3d "github.com/autobrr/upbrr/internal/services/description/unit3d"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -1185,23 +1185,10 @@ func TestResolveDescriptionAssetsStripsEmbeddedNFOBlocksFromTrackerDescriptions(
 	}
 }
 
-func TestResolveDescriptionAssetsStripsDefaultSignatureForANT(t *testing.T) {
-	repo := &stubRepo{
-		trackerRecords: []api.TrackerMetadata{
-			{Tracker: "ANT", Description: "[align=right][url=https://github.com/autobrr/upbrr][size=10]upbrr[/size][/url][/align]\n\nBody"},
-		},
-	}
-	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
-
-	assets, err := ResolveDescriptionAssets(context.Background(), "ANT", meta, repo, api.NopLogger{})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if strings.Contains(assets.Description, "upbrr") {
-		t.Fatalf("expected default signature removed for ANT, got %q", assets.Description)
-	}
-	if assets.Description != "Body" {
-		t.Fatalf("expected cleaned ANT description, got %q", assets.Description)
+func TestStripDefaultDescriptionSignature(t *testing.T) {
+	value := "[align=right][url=https://github.com/autobrr/upbrr][size=10]upbrr[/size][/url][/align]\n\nBody"
+	if got := StripDefaultDescriptionSignature(value); got != "Body" {
+		t.Fatalf("cleaned description = %q", got)
 	}
 }
 

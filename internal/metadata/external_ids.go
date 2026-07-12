@@ -28,7 +28,7 @@ import (
 	"github.com/autobrr/upbrr/internal/metadata/tmdb"
 	"github.com/autobrr/upbrr/internal/metadata/tvdb"
 	"github.com/autobrr/upbrr/internal/metadata/tvmaze"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
 	"github.com/autobrr/upbrr/internal/services/db"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -758,7 +758,10 @@ func (s *Service) ResolveExternalIDs(ctx context.Context, meta api.PreparedMetad
 	clearTVDBForNonTVCategory(meta, &ids, &metadata)
 	meta = s.applyTVEpisodeMetadata(ctx, meta, &ids, &metadata, tmdbClient, tvdbClient, tvmazeClient)
 
-	needsPTBR := trackers.AnyNeedsPTBRLocalizedMetadata(meta.Trackers) || trackers.AnyNeedsPTBRLocalizedMetadata(meta.MatchedTrackers)
+	needsPTBR := s.registry.NeedsLocalizedMetadata(meta.Trackers, "pt-BR") || s.registry.NeedsLocalizedMetadata(meta.MatchedTrackers, "pt-BR")
+	if s.registry == nil {
+		needsPTBR = trackers.AnyNeedsPTBRLocalizedMetadata(meta.Trackers) || trackers.AnyNeedsPTBRLocalizedMetadata(meta.MatchedTrackers)
+	}
 
 	if tmdbClient != nil && needsPTBR && ids.TMDBID != 0 {
 		var mainData, seasonData, episodeData map[string]any

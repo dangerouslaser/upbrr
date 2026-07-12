@@ -31,13 +31,12 @@ import (
 
 	"github.com/autobrr/upbrr/internal/config"
 	cookiepkg "github.com/autobrr/upbrr/internal/cookies"
+	imagehost "github.com/autobrr/upbrr/internal/imagehosting/host"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/redaction"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
 	"github.com/autobrr/upbrr/internal/services/db"
-	"github.com/autobrr/upbrr/internal/services/imagehost"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -73,7 +72,7 @@ var (
 
 // ErrSubmitted2FARejected marks a PTP failure after a submitted manual 2FA code
 // reached the tracker and was rejected.
-var ErrSubmitted2FARejected = errors.New("trackers: PTP submitted 2FA rejected")
+var ErrSubmitted2FARejected = trackers.ErrSubmitted2FARejected
 
 type uploadState struct {
 	baseURL     string
@@ -259,7 +258,7 @@ func buildDescription(meta api.PreparedMetadata, trackerConfig config.TrackerCon
 		return baseDescription
 	}
 	if baseDescription != "" {
-		report := bbcode.CleanPTPDescription(baseDescription, meta.DiscType)
+		report := CleanDescription(baseDescription, meta.DiscType)
 		baseDescription = strings.TrimSpace(report.Description)
 	}
 
@@ -428,7 +427,7 @@ func rehostPosterToSelectedHost(ctx context.Context, req trackers.UploadRequest,
 		return trimmedURL
 	}
 
-	selectedHost, err := trackers.PreferredImageUploadHost("PTP", req.TrackerConfig, req.Meta.ImageHostOverrides)
+	selectedHost, err := trackers.PreferredImageUploadHostWithRegistry(req.Registry, "PTP", req.TrackerConfig, req.Meta.ImageHostOverrides)
 	if err != nil {
 		logPosterRehostFailure(req.Logger, "", err)
 		return trimmedURL

@@ -18,13 +18,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/autobrr/upbrr/internal/bbcode"
+	"github.com/autobrr/upbrr/internal/description/unit3d"
 	"github.com/autobrr/upbrr/internal/httpclient"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/services/db"
-	"github.com/autobrr/upbrr/internal/services/description/unit3d"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -173,6 +173,7 @@ func prepareUploadState(ctx context.Context, req trackers.UploadRequest) (upload
 		trackers.LogDescriptionAssetResolutionFailure(req.Logger, req.Tracker, err)
 		descriptionAssets = trackers.DescriptionAssets{}
 	}
+	descriptionAssets.Description = trackers.StripDefaultDescriptionSignature(descriptionAssets.Description)
 	description := buildDescription(req, descriptionAssets)
 
 	answers := questionnaireAnswers(req.Meta)
@@ -292,7 +293,7 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	// Join and finalize
 	description := strings.Join(parts, "\n\n")
 
-	finalized := bbcode.FinalizeTrackerDescription("ANT", description)
+	finalized := finalizeDescription(description)
 
 	// Character replacements
 	replacer := strings.NewReplacer("•", "-", "’", "'", "–", "-")

@@ -9,9 +9,8 @@ import (
 	"strings"
 
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/services/db"
-	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -41,7 +40,15 @@ func ReadBDinfoOrMediaInfo(dbPath string, meta api.PreparedMetadata) string {
 		bdinfo, _ := ReadBDInfo(dbPath, meta)
 		return strings.TrimSpace(bdinfo)
 	}
-	return metautil.FirstNonEmptyTrimmed(commonhttp.ReadOptionalFile(meta.MediaInfoTextPath), commonhttp.ReadOptionalFile(meta.DVDVOBMediaInfoText))
+	return metautil.FirstNonEmptyTrimmed(readOptionalTextFile(meta.MediaInfoTextPath), readOptionalTextFile(meta.DVDVOBMediaInfoText))
+}
+
+func readOptionalTextFile(path string) string {
+	payload, err := readTextFile(path)
+	if err != nil {
+		return ""
+	}
+	return payload
 }
 
 // existsFile checks if a file exists.

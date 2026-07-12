@@ -9,6 +9,7 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
+// UploadDryRunBuilder renders the request a tracker would submit without uploading it.
 type UploadDryRunBuilder interface {
 	BuildUploadDryRun(ctx context.Context, req UploadRequest) (api.TrackerDryRunEntry, error)
 }

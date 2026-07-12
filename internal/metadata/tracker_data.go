@@ -15,17 +15,16 @@ import (
 	"github.com/autobrr/upbrr/internal/config"
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
 	"github.com/autobrr/upbrr/internal/redaction"
 	"github.com/autobrr/upbrr/internal/services/db"
-	"github.com/autobrr/upbrr/internal/trackerdata"
 	trackerscatalog "github.com/autobrr/upbrr/internal/trackers"
+	trackerdata "github.com/autobrr/upbrr/internal/trackers/data"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
 const (
 	defaultTrackerCooldown = 15 * time.Second
-	ptpTrackerCooldown     = 60 * time.Second
 	trackerLookupWorkers   = 4
 )
 
@@ -56,7 +55,7 @@ func (s *Service) EnrichTrackerData(ctx context.Context, meta api.PreparedMetada
 
 	trackers := normalizeTrackers(candidates)
 	if s.logger != nil {
-		configured, missing := configuredTrackers(s.cfg)
+		configured, missing := configuredTrackers(s.cfg, s.registry)
 		s.logger.Debugf("metadata: tracker candidates %v", trackers)
 		if len(configured) > 0 {
 			s.logger.Debugf("metadata: trackers configured %v", configured)
@@ -69,9 +68,9 @@ func (s *Service) EnrichTrackerData(ctx context.Context, meta api.PreparedMetada
 		logPathedTrackerDetails(meta, s.logger)
 		logClientSearchIDs(meta, s.logger)
 	}
-	trackers = filterConfiguredTrackers(s.cfg, trackers, s.logger)
-	trackers = orderTrackersByPriority(trackers)
-	trackers = reorderTrackersForMetadataNeeds(trackers, meta.Options)
+	trackers = filterConfiguredTrackers(s.cfg, trackers, s.logger, s.registry)
+	trackers = orderTrackersByPriority(trackers, s.registry)
+	trackers = reorderTrackersForMetadataNeeds(trackers, meta.Options, s.registry)
 	trackers = applyPreferredTracker(trackers, s.cfg.Trackers.PreferredTracker)
 	if len(trackers) == 0 {
 		if s.logger != nil {
@@ -85,7 +84,7 @@ func (s *Service) EnrichTrackerData(ctx context.Context, meta api.PreparedMetada
 
 	now := time.Now().UTC()
 	meta.TrackerData = append([]api.TrackerMetadata{}, meta.TrackerData...)
-	unit3dClient := trackerdata.NewClient(s.cfg, s.logger, nil)
+	unit3dClient := trackerdata.NewClientWithRegistry(s.cfg, s.logger, nil, s.registry)
 	eligible := make([]string, 0, len(trackers))
 	for _, tracker := range trackers {
 		select {
@@ -309,7 +308,8 @@ func (s *Service) lookupTrackerData(
 		UpdatedAt:  now,
 	}
 
-	if trackerdata.IsUnit3DTracker(tracker) {
+	kind, registered := s.registry.LookupKind(tracker)
+	if (registered && kind == trackerscatalog.KindUnit3D) || (s.registry == nil && trackerdata.IsUnit3DTracker(tracker)) {
 		fileName := trackerLookupFileName(meta, record.TrackerID, s.cfg.Metadata.SkipTrackerFilenameLookup)
 		if s.logger != nil {
 			s.logger.Tracef("metadata: unit3d lookup start tracker=%s id=%q file=%q", tracker, record.TrackerID, fileName)
@@ -484,7 +484,7 @@ func (s *Service) isTrackerCoolingDown(ctx context.Context, tracker string, now 
 		}
 		return false
 	}
-	cooldown := trackerCooldown(tracker)
+	cooldown := trackerCooldown(s.registry, tracker)
 	if cooldown <= 0 {
 		return false
 	}
@@ -497,9 +497,9 @@ func (s *Service) isTrackerCoolingDown(ctx context.Context, tracker string, now 
 	return false
 }
 
-func trackerCooldown(tracker string) time.Duration {
-	if strings.EqualFold(tracker, "PTP") {
-		return ptpTrackerCooldown
+func trackerCooldown(registry *trackerscatalog.Registry, tracker string) time.Duration {
+	if policy, ok := registry.LookupDataPolicy(tracker); ok {
+		return policy.Cooldown
 	}
 	return defaultTrackerCooldown
 }
@@ -539,11 +539,14 @@ func normalizeTrackers(values []string) []string {
 	return out
 }
 
-func orderTrackersByPriority(trackers []string) []string {
+func orderTrackersByPriority(trackers []string, registry *trackerscatalog.Registry) []string {
 	if len(trackers) == 0 {
 		return trackers
 	}
 	trackerPriority := trackerscatalog.TrackerPriority()
+	if registry != nil {
+		trackerPriority = registry.Priority()
+	}
 	priority := make(map[string]int, len(trackerPriority))
 	for idx, value := range trackerPriority {
 		priority[strings.ToUpper(value)] = idx
@@ -569,30 +572,28 @@ func orderTrackersByPriority(trackers []string) []string {
 	return trackers
 }
 
-func reorderTrackersForMetadataNeeds(trackers []string, opts api.UploadOptions) []string {
-	if len(trackers) == 0 {
-		return trackers
+func reorderTrackersForMetadataNeeds(trackerNames []string, opts api.UploadOptions, registry *trackerscatalog.Registry) []string {
+	if len(trackerNames) == 0 {
+		return trackerNames
 	}
 	if opts.OnlyID || !opts.KeepImages {
-		return trackers
+		return trackerNames
 	}
 
-	nonBTN := make([]string, 0, len(trackers))
-	btnCount := 0
-	for _, tracker := range trackers {
-		if strings.EqualFold(strings.TrimSpace(tracker), "BTN") {
-			btnCount++
+	preferred := make([]string, 0, len(trackerNames))
+	deferred := make([]string, 0, len(trackerNames))
+	for _, tracker := range trackerNames {
+		policy, ok := registry.LookupDataPolicy(tracker)
+		if ok && policy.DeferWhenCollectingImages {
+			deferred = append(deferred, tracker)
 			continue
 		}
-		nonBTN = append(nonBTN, tracker)
+		preferred = append(preferred, tracker)
 	}
-	if btnCount == 0 {
-		return trackers
+	if len(deferred) == 0 {
+		return trackerNames
 	}
-	for idx := 0; idx < btnCount; idx++ {
-		nonBTN = append(nonBTN, "BTN")
-	}
-	return nonBTN
+	return append(preferred, deferred...)
 }
 
 func applyPreferredTracker(trackers []string, preferred string) []string {
@@ -621,7 +622,7 @@ func applyPreferredTracker(trackers []string, preferred string) []string {
 	return trackers
 }
 
-func configuredTrackers(cfg config.Config) ([]string, []string) {
+func configuredTrackers(cfg config.Config, registry *trackerscatalog.Registry) ([]string, []string) {
 	configured := make([]string, 0)
 	missing := make([]string, 0)
 	for name, entry := range cfg.Trackers.Trackers {
@@ -630,32 +631,39 @@ func configuredTrackers(cfg config.Config) ([]string, []string) {
 			continue
 		}
 		upper := strings.ToUpper(trimmed)
-		if !trackerLookupConfigured(upper, entry) {
+		ready, owned := registry.DataLookupConfigured(upper, cfg)
+		if !owned {
+			ready = customTrackerLookupConfigured(entry)
+		}
+		if !ready {
 			missing = append(missing, upper)
 			continue
 		}
 		configured = append(configured, upper)
 	}
-	if len(config.ResolveBTNAPIToken(cfg)) >= minTrackerTokenLen {
-		configured = append(configured, "BTN")
+	for _, name := range registry.Names() {
+		if ready, owned := registry.DataLookupConfigured(name, cfg); owned && ready {
+			configured = append(configured, name)
+		}
 	}
 	configured = uniqueSorted(configured)
 	missing = uniqueSorted(missing)
 	return configured, missing
 }
 
-func filterConfiguredTrackers(cfg config.Config, trackers []string, logger api.Logger) []string {
+func filterConfiguredTrackers(cfg config.Config, trackers []string, logger api.Logger, registry *trackerscatalog.Registry) []string {
 	if len(trackers) == 0 {
 		return trackers
 	}
 
 	filtered := make([]string, 0, len(trackers))
 	for _, tracker := range trackers {
-		if strings.EqualFold(strings.TrimSpace(tracker), "BTN") {
-			if len(config.ResolveBTNAPIToken(cfg)) >= minTrackerTokenLen {
+		configured, owned := registry.DataLookupConfigured(tracker, cfg)
+		if owned {
+			if configured {
 				filtered = append(filtered, tracker)
 			} else if logger != nil {
-				logger.Debugf("metadata: tracker %s missing BTN api token", tracker)
+				logger.Debugf("metadata: tracker %s missing lookup credentials", tracker)
 			}
 			continue
 		}
@@ -666,15 +674,10 @@ func filterConfiguredTrackers(cfg config.Config, trackers []string, logger api.L
 			}
 			continue
 		}
-		if !trackerLookupConfigured(tracker, entry) {
+		configured = customTrackerLookupConfigured(entry)
+		if !configured {
 			if logger != nil {
 				logger.Debugf("metadata: tracker %s missing lookup credentials", tracker)
-			}
-			continue
-		}
-		if strings.EqualFold(strings.TrimSpace(tracker), "ANT") && strings.TrimSpace(entry.APIKey) == "" {
-			if logger != nil {
-				logger.Debugf("metadata: tracker %s missing api_key", tracker)
 			}
 			continue
 		}
@@ -683,22 +686,11 @@ func filterConfiguredTrackers(cfg config.Config, trackers []string, logger api.L
 	return filtered
 }
 
-const minTrackerTokenLen = 25
-
-func trackerLookupConfigured(tracker string, entry config.TrackerConfig) bool {
-	switch strings.ToUpper(strings.TrimSpace(tracker)) {
-	case "BHD":
-		return len(strings.TrimSpace(entry.APIKey)) >= minTrackerTokenLen &&
-			len(strings.TrimSpace(entry.BhdRSSKey)) >= minTrackerTokenLen
-	case "PTP":
-		return strings.TrimSpace(entry.PTPAPIUser) != "" && strings.TrimSpace(entry.PTPAPIKey) != ""
-	case "HDB":
-		return strings.TrimSpace(entry.Username) != "" && strings.TrimSpace(entry.Passkey) != ""
-	case "ANT":
-		return strings.TrimSpace(entry.APIKey) != ""
-	default:
-		return strings.TrimSpace(entry.APIKey) != "" || strings.TrimSpace(entry.AnnounceURL) != ""
-	}
+func customTrackerLookupConfigured(entry config.TrackerConfig) bool {
+	return strings.TrimSpace(entry.APIKey) != "" ||
+		strings.TrimSpace(entry.AnnounceURL) != "" ||
+		(strings.TrimSpace(entry.Username) != "" && strings.TrimSpace(entry.Passkey) != "") ||
+		(strings.TrimSpace(entry.PTPAPIUser) != "" && strings.TrimSpace(entry.PTPAPIKey) != "")
 }
 
 func applyTrackerDataResult(record *api.TrackerMetadata, result trackerdata.Result) {

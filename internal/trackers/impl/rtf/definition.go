@@ -10,20 +10,24 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
-type definition struct{}
+type Definition struct{}
 
-func New() trackers.Definition  { return definition{} }
-func (definition) Name() string { return "RTF" }
+func New() *Definition          { return &Definition{} }
+func (Definition) Name() string { return "RTF" }
 
-func (definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
+func (Definition) DupePolicy() *trackers.DupePolicy {
+	return &trackers.DupePolicy{ContainsFilenameMatch: true}
+}
+
+func (Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
 	return upload(ctx, req)
 }
 
-func (definition) BuildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.TrackerDryRunEntry, error) {
+func (Definition) BuildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.TrackerDryRunEntry, error) {
 	return buildUploadDryRun(ctx, req)
 }
 
-func (definition) BuildDescription(ctx context.Context, req trackers.DescriptionRequest) (trackers.DescriptionResult, error) {
+func (Definition) BuildDescription(ctx context.Context, req trackers.DescriptionRequest) (trackers.DescriptionResult, error) {
 	var (
 		err    error
 		assets trackers.DescriptionAssets

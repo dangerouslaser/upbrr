@@ -10,7 +10,7 @@ import (
 
 	"github.com/moistari/rls"
 
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
 )
 
 type ParsedRelease struct {

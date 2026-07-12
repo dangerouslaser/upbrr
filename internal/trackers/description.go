@@ -11,6 +11,7 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
+// DescriptionRequest supplies one tracker's description-building inputs.
 type DescriptionRequest struct {
 	Tracker       string
 	Meta          api.PreparedMetadata
@@ -21,11 +22,13 @@ type DescriptionRequest struct {
 	Assets        *DescriptionAssets
 }
 
+// DescriptionResult contains rendered description text and optional diagnostics.
 type DescriptionResult struct {
 	Group       string
 	Description string
 }
 
+// DescriptionBuilder renders a tracker-specific upload description.
 type DescriptionBuilder interface {
 	BuildDescription(ctx context.Context, req DescriptionRequest) (DescriptionResult, error)
 }

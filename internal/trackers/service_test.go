@@ -24,9 +24,8 @@ import (
 
 	"github.com/autobrr/upbrr/internal/config"
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	dbsvc "github.com/autobrr/upbrr/internal/services/db"
-	descriptionhdb "github.com/autobrr/upbrr/internal/services/description/hdb"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -136,7 +135,11 @@ func TestUploadBannedGroup(t *testing.T) {
 	t.Parallel()
 
 	cfg := config.Config{Trackers: config.TrackersConfig{DefaultTrackers: config.CSVList{"TOS"}}}
-	svc := NewService(cfg, nil, nil)
+	registry := NewRegistry()
+	if err := registry.RegisterDescriptor(Descriptor{Name: "TOS", Definition: trackingUploadDefinition{name: "TOS"}, BannedGroups: []string{"FL3ER"}}); err != nil {
+		t.Fatalf("register TOS: %v", err)
+	}
+	svc := NewServiceWithRegistry(cfg, nil, nil, registry)
 	_, err := svc.Upload(context.Background(), api.PreparedMetadata{SourcePath: "/tmp/file", Tag: "-FL3ER"})
 	if !errors.Is(err, internalerrors.ErrBannedGroup) {
 		t.Fatalf("expected banned group error, got %v", err)
@@ -154,7 +157,7 @@ func TestUploadSkipsDynamicBannedRefreshForEmptyEffectiveGroup(t *testing.T) {
 	defer server.Close()
 
 	registry := NewRegistry()
-	if err := registry.Register(trackingUploadDefinition{name: "AITHER"}); err != nil {
+	if err := registry.RegisterDescriptor(Descriptor{Name: "AITHER", BaseURL: "https://aither.cc", Definition: trackingUploadDefinition{name: "AITHER"}, BannedPolicy: &BannedGroupPolicy{EndpointPath: "/api/blacklists/releasegroups", RequireAPIKey: true}}); err != nil {
 		t.Fatalf("register stub: %v", err)
 	}
 	cfg := config.Config{
@@ -228,9 +231,12 @@ func TestNormalizeTrackersDedup(t *testing.T) {
 }
 
 type stubDryRunDefinition struct {
-	name      string
-	dryRunErr error
+	name         string
+	dryRunErr    error
+	bannedGroups []string
 }
+
+func (s stubDryRunDefinition) BannedGroups() []string { return s.bannedGroups }
 
 type stubUploadArtifactDefinition struct {
 	name string
@@ -490,19 +496,36 @@ func (testHDBPreparationDefinition) Upload(context.Context, UploadRequest) (api.
 }
 
 func (testHDBPreparationDefinition) BuildDescription(ctx context.Context, req DescriptionRequest) (DescriptionResult, error) {
+	_ = ctx
 	assets := DescriptionAssets{}
 	if req.Assets != nil {
 		assets = *req.Assets
 	}
-	description, err := descriptionhdb.BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.MenuImages, assets.Screenshots)
-	if err != nil {
-		return DescriptionResult{}, fmt.Errorf("trackers: %w", err)
+	var description strings.Builder
+	description.WriteString(assets.Description)
+	for _, image := range assets.Screenshots {
+		if strings.TrimSpace(image.RawURL) != "" {
+			description.WriteString("\n[img]")
+			description.WriteString(image.RawURL)
+			description.WriteString("[/img]")
+		}
 	}
-	return DescriptionResult{Group: "hdb", Description: description}, nil
+	return DescriptionResult{Group: "hdb", Description: description.String()}, nil
 }
 
 func (t trackingUploadDefinition) Name() string {
 	return t.name
+}
+
+func (t trackingUploadDefinition) UploadArtifactPolicy() *UploadArtifactPolicy {
+	switch t.name {
+	case "HDB":
+		return &UploadArtifactPolicy{Source: "HDBits"}
+	case "PTP":
+		return &UploadArtifactPolicy{Source: "PTP"}
+	default:
+		return nil
+	}
 }
 
 func (t trackingUploadDefinition) Upload(_ context.Context, req UploadRequest) (api.UploadSummary, error) {
@@ -2119,7 +2142,7 @@ func TestBuildUploadDryRunAnnotatesBannedGroupWithoutBlockingPayload(t *testing.
 	t.Parallel()
 
 	registry := NewRegistry()
-	if err := registry.Register(stubDryRunDefinition{name: "ANT"}); err != nil {
+	if err := registry.Register(stubDryRunDefinition{name: "ANT", bannedGroups: []string{"AFG"}}); err != nil {
 		t.Fatalf("register stub: %v", err)
 	}
 
@@ -2153,7 +2176,7 @@ func TestBuildUploadDryRunAnnotatesBannedGroupOnBuilderError(t *testing.T) {
 	t.Parallel()
 
 	registry := NewRegistry()
-	if err := registry.Register(stubDryRunDefinition{name: "ANT", dryRunErr: errors.New("build failed")}); err != nil {
+	if err := registry.Register(stubDryRunDefinition{name: "ANT", dryRunErr: errors.New("build failed"), bannedGroups: []string{"AFG"}}); err != nil {
 		t.Fatalf("register stub: %v", err)
 	}
 

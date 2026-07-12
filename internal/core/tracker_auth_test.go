@@ -9,7 +9,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/autobrr/upbrr/internal/trackerauth"
+	trackerauth "github.com/autobrr/upbrr/internal/trackers/auth"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 

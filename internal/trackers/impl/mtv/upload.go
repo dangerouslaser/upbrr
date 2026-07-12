@@ -26,10 +26,9 @@ import (
 
 	"github.com/autobrr/upbrr/internal/config"
 	cookiepkg "github.com/autobrr/upbrr/internal/cookies"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/services/db"
-	descriptionmtv "github.com/autobrr/upbrr/internal/services/description/mtv"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -46,7 +45,7 @@ var mtvTokenPattern = regexp.MustCompile(`name="token"\s+value="([^"]{16,128})"`
 
 // ErrSubmitted2FARejected marks an MTV failure after a submitted manual 2FA code
 // reached the tracker and was rejected.
-var ErrSubmitted2FARejected = errors.New("trackers: MTV submitted 2FA rejected")
+var ErrSubmitted2FARejected = trackers.ErrSubmitted2FARejected
 
 var errMTVAuthKeyNotFound = errors.New("trackers: MTV auth key not found")
 
@@ -101,7 +100,7 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	}
 	descText := strings.TrimSpace(assets.Description)
 	if !assets.Final {
-		descText, err = descriptionmtv.BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.Screenshots)
+		descText, err = BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.Screenshots)
 		if err != nil {
 			return api.UploadSummary{}, fmt.Errorf("trackers: %w", err)
 		}
@@ -171,7 +170,7 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 	}
 	descText := strings.TrimSpace(assets.Description)
 	if !assets.Final {
-		descText, err = descriptionmtv.BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.Screenshots)
+		descText, err = BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.Screenshots)
 		if err != nil {
 			return api.TrackerDryRunEntry{}, fmt.Errorf("trackers: %w", err)
 		}

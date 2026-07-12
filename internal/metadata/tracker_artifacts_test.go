@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/autobrr/upbrr/internal/bbcode"
 	"github.com/autobrr/upbrr/internal/config"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
-	"github.com/autobrr/upbrr/internal/trackerdata"
+	trackerdata "github.com/autobrr/upbrr/internal/trackers/data"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 

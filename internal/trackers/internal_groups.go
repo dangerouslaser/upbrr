@@ -10,6 +10,7 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
+// IsInternalGroup reports whether meta's release group is configured as internal for tracker.
 func IsInternalGroup(cfg config.Config, tracker string, meta api.PreparedMetadata) bool {
 	if strings.TrimSpace(meta.Tag) == "" {
 		return false

@@ -19,9 +19,8 @@ import (
 	"time"
 	"unicode"
 
+	descriptionunit3d "github.com/autobrr/upbrr/internal/description/unit3d"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
-	descriptionunit3d "github.com/autobrr/upbrr/internal/services/description/unit3d"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 
@@ -287,7 +286,7 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 
 	// Join and finalize
 	description := strings.Join(parts, "\n\n")
-	finalized := bbcode.FinalizeTrackerDescription("SPD", description)
+	finalized := finalizeDescription(description)
 
 	// Debug saving
 	if meta.Options.Debug {

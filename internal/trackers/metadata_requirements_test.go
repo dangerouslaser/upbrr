@@ -13,6 +13,7 @@ import (
 
 func TestMetadataRequirementMatrix(t *testing.T) {
 	t.Parallel()
+	registry := newMetadataRegistry(t)
 	tests := []struct {
 		name     string
 		tracker  string
@@ -80,7 +81,7 @@ func TestMetadataRequirementMatrix(t *testing.T) {
 			t.Parallel()
 			meta := api.PreparedMetadata{ExternalIDs: tc.ids, ExternalMetadata: tc.metadata}
 			meta.ExternalIDs.Category = tc.category
-			failures, evaluated := evaluateMetadataRequirements(tc.tracker, meta)
+			failures, evaluated := evaluateMetadataRequirementsWithRegistry(registry, tc.tracker, meta)
 			if !evaluated {
 				t.Fatal("expected metadata policy evaluation")
 			}
@@ -103,7 +104,7 @@ func TestMetadataRequirementRejectsStaleSourceData(t *testing.T) {
 		SourcePath:  "current",
 		ExternalIDs: api.ExternalIDs{SourcePath: "stale", Category: "movie", TMDBID: 1},
 	}
-	failures, _ := evaluateMetadataRequirements("ANT", meta)
+	failures, _ := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), "ANT", meta)
 	if !api.HasBlockingRuleFailures(failures) {
 		t.Fatalf("expected stale ID to fail, got %#v", failures)
 	}
@@ -117,38 +118,95 @@ func TestMetadataRequirementRejectsMismatchedProviderSnapshot(t *testing.T) {
 			TMDB: &api.TMDBMetadata{TMDBID: 2, Title: "Example Release"},
 		},
 	}
-	failures, _ := evaluateMetadataRequirements("ANT", meta)
+	failures, _ := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), "ANT", meta)
 	if !api.HasBlockingRuleFailures(failures) {
 		t.Fatalf("expected mismatched TMDB snapshot to fail, got %#v", failures)
 	}
 }
 
-func TestMetadataPolicyForReturnsClonedRequirements(t *testing.T) {
-	t.Parallel()
-	first, ok := MetadataPolicyFor("HDB")
-	if !ok {
-		t.Fatal("expected HDB policy")
+func newMetadataRegistry(t *testing.T) *Registry {
+	t.Helper()
+	registry := NewRegistry()
+	policy := &TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldTMDB}}}}
+	if err := registry.RegisterDescriptor(Descriptor{Name: "ANT", Definition: stubDefinition{name: "ANT"}, Metadata: policy}); err != nil {
+		t.Fatalf("register ANT metadata policy: %v", err)
 	}
-	first.Requirements[0].AnyOf[0] = MetadataFieldTMDBIDOnly
-	second, _ := MetadataPolicyFor("HDB")
-	if second.Requirements[0].AnyOf[0] != MetadataFieldIMDBIDOnly {
+	bhdPolicy := &TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldIMDB}}}}
+	if err := registry.RegisterDescriptor(Descriptor{Name: "BHD", Definition: stubDefinition{name: "BHD"}, Metadata: bhdPolicy}); err != nil {
+		t.Fatalf("register BHD metadata policy: %v", err)
+	}
+	btnPolicy := &TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldIMDB, MetadataFieldTVDB}}}}
+	if err := registry.RegisterDescriptor(Descriptor{Name: "BTN", Definition: stubDefinition{name: "BTN"}, Metadata: btnPolicy}); err != nil {
+		t.Fatalf("register BTN metadata policy: %v", err)
+	}
+	hdbPolicy := &TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{
+		{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly}},
+		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly, MetadataFieldTVDBIDOnly}},
+	}}
+	if err := registry.RegisterDescriptor(Descriptor{Name: "HDB", Definition: stubDefinition{name: "HDB"}, Metadata: hdbPolicy}); err != nil {
+		t.Fatalf("register HDB metadata policy: %v", err)
+	}
+	register := func(name string, policy TrackerMetadataPolicy) {
+		t.Helper()
+		if err := registry.RegisterDescriptor(Descriptor{Name: name, Definition: stubDefinition{name: name}, Metadata: &policy}); err != nil {
+			t.Fatalf("register %s metadata policy: %v", name, err)
+		}
+	}
+	register("AITHER", TrackerMetadataPolicy{Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB}}}})
+	register("PTP", TrackerMetadataPolicy{Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly}, Severity: api.RuleFailureSeverityWarning}}})
+	register("NBL", TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTVmaze}}}})
+	register("MTV", TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{
+		{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}},
+		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTVDBTitle}},
+	}})
+	register("AR", TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{
+		{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}},
+		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB, MetadataFieldTVDB}},
+		{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldPoster}},
+	}})
+	for _, name := range []string{"SPD", "THR", "TVC", "TL"} {
+		register(name, TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}}}})
+	}
+	register("BJS", TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB}}}})
+	multiID := TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{
+		{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldTMDBIDOnly, MetadataFieldIMDBIDOnly}},
+		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTMDBIDOnly, MetadataFieldIMDBIDOnly, MetadataFieldTVDBIDOnly}},
+	}}
+	for _, name := range []string{"AZ", "CZ", "PHD"} {
+		register(name, multiID)
+	}
+	register("CZT", TrackerMetadataPolicy{Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly}}}})
+	return registry
+}
+
+func TestRegistryMetadataPolicyReturnsClonedRequirements(t *testing.T) {
+	t.Parallel()
+	registry := newMetadataRegistry(t)
+	first, ok := registry.LookupMetadataPolicy("MTV")
+	if !ok {
+		t.Fatal("expected MTV policy")
+	}
+	first.Requirements[0].AnyOf[0] = MetadataFieldPoster
+	second, _ := registry.LookupMetadataPolicy("MTV")
+	if second.Requirements[0].AnyOf[0] != MetadataFieldTMDB {
 		t.Fatalf("policy was mutated: %#v", second)
 	}
 }
 
-func TestMetadataPolicyLookupNormalizationAndExactFamilyMatch(t *testing.T) {
+func TestRegistryMetadataPolicyLookupNormalizationAndExactMatch(t *testing.T) {
 	t.Parallel()
-	if _, ok := MetadataPolicyFor(" aither "); !ok {
+	registry := newMetadataRegistry(t)
+	if _, ok := registry.LookupMetadataPolicy(" aither "); !ok {
 		t.Fatal("expected normalized Unit3D policy lookup")
 	}
-	if _, ok := MetadataPolicyFor("AITHER_EXTRA"); ok {
+	if _, ok := registry.LookupMetadataPolicy("AITHER_EXTRA"); ok {
 		t.Fatal("unexpected prefix match for unknown tracker")
 	}
 }
 
 func TestMetadataRequirementNeedsKnownCategory(t *testing.T) {
 	t.Parallel()
-	failures, evaluated := evaluateMetadataRequirements("HDB", api.PreparedMetadata{ExternalIDs: api.ExternalIDs{IMDBID: 1234567}})
+	failures, evaluated := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), "HDB", api.PreparedMetadata{ExternalIDs: api.ExternalIDs{IMDBID: 1234567}})
 	if !evaluated || len(failures) != 1 || failures[0].Rule != "require_metadata_category" || !api.HasBlockingRuleFailures(failures) {
 		t.Fatalf("expected blocking category result, got %#v", failures)
 	}
@@ -164,7 +222,7 @@ func TestTVDBTitleRequirementRejectsStaleProviderMetadata(t *testing.T) {
 			TVDB:       &api.TVDBMetadata{TVDBID: 2, Name: "Example Series"},
 		},
 	}
-	failures, _ := evaluateMetadataRequirements("MTV", meta)
+	failures, _ := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), "MTV", meta)
 	found := false
 	for _, failure := range failures {
 		if failure.Rule == "require_tvdb_title" {
@@ -179,7 +237,7 @@ func TestTVDBTitleRequirementRejectsStaleProviderMetadata(t *testing.T) {
 
 func TestPTPMetadataWarningDoesNotBlock(t *testing.T) {
 	t.Parallel()
-	failures := EvaluateRules(context.Background(), "PTP", api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "movie"}}, nil)
+	failures := EvaluateRulesWithRegistry(context.Background(), newMetadataRegistry(t), "PTP", api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "movie"}}, nil)
 	if len(failures) != 1 || failures[0].Severity != api.RuleFailureSeverityWarning || api.HasBlockingRuleFailures(failures) {
 		t.Fatalf("expected non-blocking PTP warning, got %#v", failures)
 	}
@@ -191,7 +249,7 @@ func TestMetadataRequirementTMDBOrIMDbTrackersRejectIDsAlone(t *testing.T) {
 		t.Run(tracker, func(t *testing.T) {
 			t.Parallel()
 			meta := api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "tv", TMDBID: 1, IMDBID: 1234567}}
-			failures, evaluated := evaluateMetadataRequirements(tracker, meta)
+			failures, evaluated := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), tracker, meta)
 			if !evaluated || !api.HasBlockingRuleFailures(failures) {
 				t.Fatalf("expected IDs alone to fail for %s, got %#v", tracker, failures)
 			}
@@ -208,7 +266,7 @@ func TestARMetadataPosterMayComeFromDifferentProvider(t *testing.T) {
 			IMDB: &api.IMDBMetadata{IMDBID: 1234567, Title: "Example Release"},
 		},
 	}
-	failures, _ := evaluateMetadataRequirements("AR", meta)
+	failures, _ := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), "AR", meta)
 	if api.HasBlockingRuleFailures(failures) {
 		t.Fatalf("expected IMDb identity plus TMDB poster to pass, got %#v", failures)
 	}
@@ -223,7 +281,7 @@ func TestARMetadataPosterRejectsMismatchedSnapshot(t *testing.T) {
 			TVmaze: &api.TVmazeMetadata{TVmazeID: 4, PosterMedium: "https://img.example/poster.jpg"},
 		},
 	}
-	failures, _ := evaluateMetadataRequirements("AR", meta)
+	failures, _ := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), "AR", meta)
 	if len(failures) != 1 || failures[0].Rule != "require_metadata_poster" || !api.HasBlockingRuleFailures(failures) {
 		t.Fatalf("expected blocking poster failure, got %#v", failures)
 	}
@@ -239,7 +297,7 @@ func TestARMetadataPosterRejectsStaleSnapshots(t *testing.T) {
 			IMDB:       &api.IMDBMetadata{IMDBID: 1234567, Title: "Example Release", Cover: "https://img.example/poster.jpg"},
 		},
 	}
-	failures, _ := evaluateMetadataRequirements("AR", meta)
+	failures, _ := evaluateMetadataRequirementsWithRegistry(newMetadataRegistry(t), "AR", meta)
 	for _, failure := range failures {
 		if failure.Rule == "require_metadata_poster" && failure.Severity == api.RuleFailureSeverityBlocking {
 			return
@@ -250,8 +308,13 @@ func TestARMetadataPosterRejectsStaleSnapshots(t *testing.T) {
 
 func TestOnlyNBLDeclaresTVmazeIdentityRequirement(t *testing.T) {
 	t.Parallel()
+	registry := newMetadataRegistry(t)
 	foundNBL := false
-	for tracker, policy := range trackerMetadataPolicies {
+	for _, tracker := range registry.Names() {
+		policy, ok := registry.LookupMetadataPolicy(tracker)
+		if !ok {
+			continue
+		}
 		for _, requirement := range policy.Requirements {
 			if !containsMetadataField(requirement.AnyOf, MetadataFieldTVmaze) {
 				continue

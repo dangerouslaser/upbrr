@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/autobrr/upbrr/internal/bbcode"
 	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/services/db"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -23,7 +23,7 @@ func buildDescription(meta api.PreparedMetadata, cfg config.Config, assets track
 		return base
 	}
 
-	cleaned := bbcode.CleanBHDDescription(base, bbcode.BHDOptions{
+	cleaned := CleanDescription(base, BBCodeOptions{
 		Framestor: hasGroup(meta.Tag, "framestor"),
 		Flux:      hasGroup(meta.Tag, "flux"),
 	})

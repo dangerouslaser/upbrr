@@ -19,9 +19,8 @@ import (
 	"time"
 
 	"github.com/autobrr/upbrr/internal/config"
+	imagehost "github.com/autobrr/upbrr/internal/imagehosting/host"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
-	"github.com/autobrr/upbrr/internal/services/imagehost"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -214,7 +213,7 @@ func buildDescription(meta api.PreparedMetadata, cfg config.TrackerConfig, asset
 	if base := strings.TrimSpace(assets.Description); base != "" {
 		parts = append(parts, "[center][b]Notes / Extra Info[/b]\n"+base+"[/center]")
 	}
-	return bbcode.FinalizeTrackerDescription("TVC", strings.TrimSpace(strings.Join(parts, "\n\n")))
+	return finalizeDescription(strings.TrimSpace(strings.Join(parts, "\n\n")))
 }
 
 func buildQuestionnaire(meta api.PreparedMetadata) *api.TrackerQuestionnaire {

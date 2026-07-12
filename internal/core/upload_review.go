@@ -254,13 +254,13 @@ func (c *Core) resolveUploadReviewTrackers(req api.Request, meta api.PreparedMet
 		remove = removeReviewedTrackerNames(remove, reviewedMatchedTrackers)
 		remove = mergeTrackerRemovals(remove, req.TrackersRemove)
 	}
-	return resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, remove, c.logger, includeDefaults, includeDefaults)
+	return resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, remove, c.logger, c.registry, includeDefaults, includeDefaults)
 }
 
 // resolveUploadReviewPTBRMetadata refreshes localized TMDB metadata after review
 // tracker resolution when selected or default tracker targets require pt-BR data.
 func (c *Core) resolveUploadReviewPTBRMetadata(ctx context.Context, meta api.PreparedMetadata, resolvedTrackers []string) (api.PreparedMetadata, error) {
-	if c.services.Metadata == nil || !uploadReviewNeedsPTBRMetadata(meta, resolvedTrackers) {
+	if c.services.Metadata == nil || !uploadReviewNeedsPTBRMetadata(meta, resolvedTrackers, c.registry) {
 		return meta, nil
 	}
 	refreshMeta := deepCopyPreparedMetadata(meta)
@@ -273,16 +273,19 @@ func (c *Core) resolveUploadReviewPTBRMetadata(ctx context.Context, meta api.Pre
 }
 
 // uploadReviewNeedsPTBRMetadata reports whether a review dry-run needs a pt-BR refresh.
-func uploadReviewNeedsPTBRMetadata(meta api.PreparedMetadata, resolvedTrackers []string) bool {
-	if !hasPTBRTracker(resolvedTrackers) || hasLocalizedPTBR(meta) {
+func uploadReviewNeedsPTBRMetadata(meta api.PreparedMetadata, resolvedTrackers []string, registries ...*trackerspkg.Registry) bool {
+	if !hasPTBRTracker(resolvedTrackers, registries...) || hasLocalizedPTBR(meta) {
 		return false
 	}
 	return hasKnownTMDBID(meta)
 }
 
 // hasPTBRTracker reports whether any tracker consumes localized pt-BR TMDB data.
-func hasPTBRTracker(trackers []string) bool {
-	return trackerspkg.AnyNeedsPTBRLocalizedMetadata(trackers)
+func hasPTBRTracker(trackerNames []string, registries ...*trackerspkg.Registry) bool {
+	if len(registries) > 0 && registries[0] != nil {
+		return registries[0].NeedsLocalizedMetadata(trackerNames, "pt-BR")
+	}
+	return trackerspkg.AnyNeedsPTBRLocalizedMetadata(trackerNames)
 }
 
 // hasLocalizedPTBR reports whether TMDB metadata already contains complete pt-BR localized data.
@@ -367,15 +370,15 @@ func formatBlockedReasons(reasons []api.TrackerBlockReason) string {
 	return strings.Join(labels, ", ")
 }
 
-func applyRequestToPreparedMeta(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger) api.PreparedMetadata {
-	return applyRequestToPreparedMetaWithDerivedFields(meta, req, cfg, logger, true)
+func applyRequestToPreparedMeta(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger, registries ...*trackerspkg.Registry) api.PreparedMetadata {
+	return applyRequestToPreparedMetaWithDerivedFields(meta, req, cfg, logger, true, registries...)
 }
 
-func applyRequestToPreparedMetaBeforeRefresh(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger) api.PreparedMetadata {
-	return applyRequestToPreparedMetaWithDerivedFields(meta, req, cfg, logger, false)
+func applyRequestToPreparedMetaBeforeRefresh(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger, registries ...*trackerspkg.Registry) api.PreparedMetadata {
+	return applyRequestToPreparedMetaWithDerivedFields(meta, req, cfg, logger, false, registries...)
 }
 
-func applyRequestToPreparedMetaWithDerivedFields(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger, rebuildDerivedFields bool) api.PreparedMetadata {
+func applyRequestToPreparedMetaWithDerivedFields(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger, rebuildDerivedFields bool, registries ...*trackerspkg.Registry) api.PreparedMetadata {
 	meta = deepCopyPreparedMetadata(meta)
 	existingTrackerIDs := cloneStringMap(meta.TrackerIDs)
 	existingTrackersRemove, existingMatchedTrackers := duplicateTrackerStateForRequest(meta, req)
@@ -405,7 +408,11 @@ func applyRequestToPreparedMetaWithDerivedFields(meta api.PreparedMetadata, req 
 	meta.TrackerQuestionnaireAnswers = cloneTrackerQuestionnaireAnswers(req.TrackerQuestionnaireAnswers)
 	applyMetadataOverridesToPreparedMeta(&meta)
 	if rebuildDerivedFields {
-		metadata.ApplyRequestScopedAudioPolicy(&meta, cfg, logger)
+		var registry *trackerspkg.Registry
+		if len(registries) > 0 {
+			registry = registries[0]
+		}
+		metadata.ApplyRequestScopedAudioPolicyWithRegistry(&meta, cfg, logger, registry)
 		metadata.RebuildReleaseName(&meta, logger)
 	}
 	applyTorrentOverridesToPreparedMeta(&meta)
@@ -466,7 +473,7 @@ func mergeTrackerIDOverrides(existing map[string]string, overrides map[string]st
 
 func (c *Core) applyRequestToCachedPreparedMeta(ctx context.Context, meta api.PreparedMetadata, req api.Request) (api.PreparedMetadata, error) {
 	if c.services.Metadata == nil {
-		meta = applyRequestToPreparedMeta(meta, req, c.cfg, c.logger)
+		meta = applyRequestToPreparedMeta(meta, req, c.cfg, c.logger, c.registry)
 		return meta, nil
 	}
 	meta = applyRequestToPreparedMetaBeforeRefresh(meta, req, c.cfg, c.logger)

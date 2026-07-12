@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	descsvc "github.com/autobrr/upbrr/internal/services/description"
+	descsvc "github.com/autobrr/upbrr/internal/description"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 

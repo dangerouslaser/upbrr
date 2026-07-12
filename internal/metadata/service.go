@@ -23,11 +23,12 @@ import (
 	"github.com/autobrr/upbrr/internal/metadata/mediainfo"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
 	"github.com/autobrr/upbrr/internal/metadata/seasonep"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/redaction"
 	"github.com/autobrr/upbrr/internal/services/bdinfo"
 	"github.com/autobrr/upbrr/internal/services/db"
-	"github.com/autobrr/upbrr/internal/trackerdata"
+	"github.com/autobrr/upbrr/internal/trackers"
+	trackerdata "github.com/autobrr/upbrr/internal/trackers/data"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -50,6 +51,7 @@ type Service struct {
 	radarr   ArrLookupClient
 	tracker  TrackerDataLookup
 	bluray   *bluraycom.Client
+	registry *trackers.Registry
 }
 
 type cachedBDMVSummary struct {
@@ -128,6 +130,10 @@ func WithConfig(cfg config.Config) Option {
 	return func(s *Service) {
 		s.cfg = cfg
 	}
+}
+
+func WithTrackerRegistry(registry *trackers.Registry) Option {
+	return func(s *Service) { s.registry = registry }
 }
 
 func WithTMDBClient(client TMDBClient) Option {
@@ -231,7 +237,7 @@ func NewService(repo db.MetadataRepository, opts ...Option) *Service {
 		service.scene = detector
 	}
 	if service.tracker == nil {
-		service.tracker = trackerdata.NewClient(service.cfg, service.logger, nil)
+		service.tracker = trackerdata.NewClientWithRegistry(service.cfg, service.logger, nil, service.registry)
 	}
 	if service.bluray == nil {
 		service.bluray = bluraycom.NewClient(nil, service.logger)
@@ -364,7 +370,7 @@ func (s *Service) Prepare(ctx context.Context, req api.Request) (meta api.Prepar
 		ReleaseNameOverrides:   req.ReleaseNameOverrides,
 	}
 	applyTorrentOverridesToPreparedMeta(&meta)
-	applySourceLookupOverride(&meta)
+	applySourceLookupOverrideWithRegistry(&meta, s.registry)
 	meta.Release = ParseReleaseInfo(primary)
 
 	discType, err := filesystem.DetectDiscType(ctx, primary)

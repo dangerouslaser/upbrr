@@ -5,13 +5,28 @@ package trackers
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
+	"github.com/autobrr/upbrr/internal/config"
+	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
 type stubDefinition struct {
 	name string
+}
+
+type stubDupeDefinition struct{ stubDefinition }
+
+type stubAuthDefinition struct{ stubDefinition }
+
+func (stubAuthDefinition) AuthSessionResolver() AuthSessionResolver {
+	return func(context.Context, config.TrackerConfig, string, api.TrackerAuthLoginRequest) error { return nil }
+}
+
+func (stubDupeDefinition) Search(context.Context, api.PreparedMetadata, string) ([]api.DupeEntry, []string, error) {
+	return nil, nil, nil
 }
 
 func (s stubDefinition) Name() string {
@@ -35,6 +50,16 @@ func TestRegistryRegisterLookup(t *testing.T) {
 	}
 }
 
+func TestRegistryRegistersAuthResolver(t *testing.T) {
+	registry := NewRegistry()
+	if err := registry.Register(stubAuthDefinition{stubDefinition{name: "AUTH"}}); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+	if _, ok := registry.LookupAuthSessionResolver("auth"); !ok {
+		t.Fatal("expected auth resolver")
+	}
+}
+
 func TestRegistryRegisterDuplicate(t *testing.T) {
 	registry := NewRegistry()
 	if err := registry.Register(stubDefinition{name: "BLU"}); err != nil {
@@ -42,5 +67,46 @@ func TestRegistryRegisterDuplicate(t *testing.T) {
 	}
 	if err := registry.Register(stubDefinition{name: "blu"}); err == nil {
 		t.Fatalf("expected duplicate register error")
+	}
+}
+
+func TestRegistryRegisterDescriptorRejectsMismatchedName(t *testing.T) {
+	registry := NewRegistry()
+	err := registry.RegisterDescriptor(Descriptor{Name: "BLU", Definition: stubDefinition{name: "AITHER"}})
+	if err == nil {
+		t.Fatal("expected mismatched descriptor name error")
+	}
+}
+
+func TestRegistryDiscoversCapabilitiesAndSortsNames(t *testing.T) {
+	registry := NewRegistry()
+	for _, definition := range []Definition{
+		stubDefinition{name: "ZNTH"},
+		stubDupeDefinition{stubDefinition{name: "BLU"}},
+	} {
+		if err := registry.Register(definition); err != nil {
+			t.Fatalf("register: %v", err)
+		}
+	}
+	if _, ok := registry.LookupDupeSearcher("blu"); !ok {
+		t.Fatal("expected BLU dupe capability")
+	}
+	if _, ok := registry.LookupDupeSearcher("ZNTH"); ok {
+		t.Fatal("did not expect ZNTH dupe capability")
+	}
+	if got, want := registry.Names(), []string{"BLU", "ZNTH"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("names = %v, want %v", got, want)
+	}
+}
+
+func TestRegistryRuleCapability(t *testing.T) {
+	registry := NewRegistry()
+	rules := ruletypes.RuleSet{RequireMovieOnly: true}
+	if err := registry.RegisterDescriptor(Descriptor{Name: "BLU", Definition: stubDefinition{name: "BLU"}, Rules: &rules}); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+	got, ok := registry.LookupRules("blu")
+	if !ok || !got.RequireMovieOnly {
+		t.Fatalf("rules = %#v, ok=%t", got, ok)
 	}
 }

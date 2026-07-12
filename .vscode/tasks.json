@@ -97,6 +97,25 @@
       }
     },
     {
+      "label": "pathpolicy",
+      "type": "shell",
+      "command": "go",
+      "args": ["run", "./cmd/pathpolicy"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": {
+        "owner": "go",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      }
+    },
+    {
       "label": "format-frontend",
       "type": "shell",
       "command": "pnpm",
@@ -224,7 +243,8 @@
         "lint-style-frontend",
         "typecheck-frontend",
         "format-check-frontend",
-        "logpolicy"
+        "logpolicy",
+        "pathpolicy"
       ],
       "group": "test",
       "problemMatcher": []

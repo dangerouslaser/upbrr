@@ -13,17 +13,24 @@ import (
 	"strings"
 
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
-	"github.com/autobrr/upbrr/internal/services/imagehost"
+	imagehost "github.com/autobrr/upbrr/internal/imagehosting/host"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
+// DescriptionAssets contains persisted description text and images selected for one tracker.
 type DescriptionAssets struct {
+	// Description is the persisted or generated BBCode selected for the tracker.
 	Description string
+	// Screenshots contains non-menu images selected for the final description.
 	Screenshots []api.ScreenshotImage
-	MenuImages  []api.ScreenshotImage
-	Slots       []api.ScreenshotSlot
-	Override    bool
-	Final       bool
+	// MenuImages contains selected disc-menu images.
+	MenuImages []api.ScreenshotImage
+	// Slots preserves screenshot ordering and uploaded variants.
+	Slots []api.ScreenshotSlot
+	// Override reports that Description came from a saved user override.
+	Override bool
+	// Final reports that screenshot selection has been finalized.
+	Final bool
 }
 
 var embeddedNFOBlockPatterns = []*regexp.Regexp{
@@ -39,6 +46,7 @@ var knownBotImagePattern = regexp.MustCompile(`(?is)\[img(?:=[^\]]*)?\]\s*https:
 var emptyCenterPattern = regexp.MustCompile(`(?is)\[center\]\s*\[/center\]`)
 
 type preloadedDescriptionAssetData struct {
+	registry              *Registry
 	descriptionOverrides  map[string]api.DescriptionOverride
 	groupDescriptions     map[string]string
 	trackerDescriptions   map[string]string
@@ -50,11 +58,26 @@ type preloadedDescriptionAssetData struct {
 	screenshotSlotsLoaded bool
 }
 
+func preloadedRegistry(preloaded *preloadedDescriptionAssetData) *Registry {
+	if preloaded == nil {
+		return nil
+	}
+	return preloaded.registry
+}
+
+func firstRegistry(registries []*Registry) *Registry {
+	if len(registries) == 0 {
+		return nil
+	}
+	return registries[0]
+}
+
 func clonePreloadedDescriptionAssetData(preloaded *preloadedDescriptionAssetData) *preloadedDescriptionAssetData {
 	if preloaded == nil {
 		return nil
 	}
 	return &preloadedDescriptionAssetData{
+		registry:              preloaded.registry,
 		descriptionOverrides:  cloneDescriptionOverrides(preloaded.descriptionOverrides),
 		groupDescriptions:     cloneStringMap(preloaded.groupDescriptions),
 		trackerDescriptions:   cloneStringMap(preloaded.trackerDescriptions),
@@ -106,8 +129,23 @@ func cloneTrackerMetadata(records []api.TrackerMetadata) []api.TrackerMetadata {
 	return cloned
 }
 
+// DescriptionOverrideGroupForTracker returns the override group used by tracker.
 func DescriptionOverrideGroupForTracker(tracker string) string {
+	return DescriptionOverrideGroupForTrackerWithRegistry(tracker, nil)
+}
+
+// DescriptionOverrideGroupForTrackerWithRegistry resolves tracker-owned description grouping.
+func DescriptionOverrideGroupForTrackerWithRegistry(tracker string, registry *Registry) string {
 	normalized := strings.ToUpper(strings.TrimSpace(tracker))
+	if descriptor, ok := registry.LookupDescriptor(normalized); ok {
+		if group := strings.ToLower(strings.TrimSpace(descriptor.DescriptionGroup)); group != "" {
+			return group
+		}
+		if descriptor.Kind == KindUnit3D {
+			return "unit3d"
+		}
+		return strings.ToLower(normalized)
+	}
 	switch {
 	case normalized == "":
 		return ""
@@ -125,6 +163,7 @@ func normalizeDescriptionOverrideGroupKey(groupKey string) string {
 	return strings.ToLower(strings.TrimSpace(groupKey))
 }
 
+// ResolveDescriptionAssets loads the description override and selected images for tracker.
 func ResolveDescriptionAssets(ctx context.Context, tracker string, meta api.PreparedMetadata, repo api.MetadataRepository, logger api.Logger) (DescriptionAssets, error) {
 	return resolveDescriptionAssets(ctx, tracker, meta, repo, logger, nil)
 }
@@ -138,6 +177,7 @@ func ResolveDescriptionAssetsWithPrepared(ctx context.Context, tracker string, m
 	return ResolveDescriptionAssets(ctx, tracker, meta, repo, logger)
 }
 
+// LogDescriptionAssetResolutionFailure records a redacted tracker asset-resolution failure.
 func LogDescriptionAssetResolutionFailure(logger api.Logger, tracker string, err error) {
 	if err == nil || logger == nil {
 		return
@@ -342,7 +382,7 @@ func resolveTrackerDescription(ctx context.Context, tracker string, meta api.Pre
 		return meta.DescriptionOverride, true, false
 	}
 	if repo != nil && strings.TrimSpace(meta.SourcePath) != "" {
-		for _, groupKey := range descriptionOverrideLookupKeys(meta.DescriptionGroups, tracker) {
+		for _, groupKey := range descriptionOverrideLookupKeys(meta.DescriptionGroups, tracker, preloadedRegistry(preloaded)) {
 			override, err := descriptionOverrideFromSource(ctx, meta, repo, groupKey, preloaded)
 			if err == nil {
 				trimmed := strings.TrimSpace(override.Description)
@@ -390,7 +430,7 @@ func descriptionGroupFromPreparedMeta(meta api.PreparedMetadata, tracker string,
 		return ""
 	}
 
-	for _, groupKey := range descriptionOverrideLookupKeys(meta.DescriptionGroups, tracker) {
+	for _, groupKey := range descriptionOverrideLookupKeys(meta.DescriptionGroups, tracker, preloadedRegistry(preloaded)) {
 		if description, ok := groupDescriptions[strings.ToUpper(strings.TrimSpace(groupKey))]; ok {
 			return description
 		}
@@ -409,16 +449,16 @@ func descriptionGroupFromPreparedMeta(meta api.PreparedMetadata, tracker string,
 	return ""
 }
 
-func descriptionOverrideLookupKeys(groups []api.DescriptionBuilderGroup, tracker string) []string {
-	keys := matchingPreparationDescriptionGroupKeys(groups, tracker)
-	canonical := strings.TrimSpace(DescriptionOverrideGroupForTracker(tracker))
+func descriptionOverrideLookupKeys(groups []api.DescriptionBuilderGroup, tracker string, registries ...*Registry) []string {
+	keys := matchingPreparationDescriptionGroupKeys(groups, tracker, registries...)
+	canonical := strings.TrimSpace(DescriptionOverrideGroupForTrackerWithRegistry(tracker, firstRegistry(registries)))
 	if canonical == "" {
 		return keys
 	}
 	return appendUniqueDescriptionGroupKey(keys, canonical)
 }
 
-func matchingPreparationDescriptionGroupKeys(groups []api.DescriptionBuilderGroup, tracker string) []string {
+func matchingPreparationDescriptionGroupKeys(groups []api.DescriptionBuilderGroup, tracker string, registries ...*Registry) []string {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -428,7 +468,7 @@ func matchingPreparationDescriptionGroupKeys(groups []api.DescriptionBuilderGrou
 		return nil
 	}
 
-	canonicalGroup := strings.ToLower(strings.TrimSpace(DescriptionOverrideGroupForTracker(tracker)))
+	canonicalGroup := strings.ToLower(strings.TrimSpace(DescriptionOverrideGroupForTrackerWithRegistry(tracker, firstRegistry(registries))))
 	if canonicalGroup == "" {
 		return nil
 	}
@@ -604,7 +644,7 @@ func resolveDescriptionScreenshots(ctx context.Context, tracker string, meta api
 	return nil, resolveTrackerScreenshots(urls), nil
 }
 
-func preloadDescriptionAssetData(ctx context.Context, meta api.PreparedMetadata, repo api.MetadataRepository) (*preloadedDescriptionAssetData, error) {
+func preloadDescriptionAssetData(ctx context.Context, meta api.PreparedMetadata, repo api.MetadataRepository, registry *Registry) (*preloadedDescriptionAssetData, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, fmt.Errorf("trackers: preload description assets canceled: %w", err)
 	}
@@ -614,6 +654,7 @@ func preloadDescriptionAssetData(ctx context.Context, meta api.PreparedMetadata,
 
 	preloaded := &preloadedDescriptionAssetData{
 		descriptionOverrides: make(map[string]api.DescriptionOverride),
+		registry:             registry,
 	}
 	preloaded.groupDescriptions, preloaded.trackerDescriptions, preloaded.ambiguousTrackers = preparedDescriptionGroupLookups(meta.DescriptionGroups, nil)
 
@@ -928,19 +969,20 @@ func stripEmbeddedNFOBlocks(value string) string {
 	return strings.TrimSpace(cleaned)
 }
 
-func sanitizeTrackerDescription(tracker string, value string) string {
+func sanitizeTrackerDescription(_ string, value string) string {
 	cleaned := stripEmbeddedNFOBlocks(value)
 	cleaned = unit3DBotSignaturePattern.ReplaceAllString(cleaned, "")
 	cleaned = knownBotSignaturePattern.ReplaceAllString(cleaned, "")
 	cleaned = knownBotImagePattern.ReplaceAllString(cleaned, "")
+	cleaned = defaultSignaturePattern.ReplaceAllString(cleaned, "")
 	cleaned = emptyCenterPattern.ReplaceAllString(cleaned, "")
 	cleaned = descriptionSpacingPattern.ReplaceAllString(cleaned, "\n\n")
-	switch strings.ToUpper(strings.TrimSpace(tracker)) {
-	case "ANT", "NBL":
-		cleaned = defaultSignaturePattern.ReplaceAllString(cleaned, "")
-		cleaned = descriptionSpacingPattern.ReplaceAllString(cleaned, "\n\n")
-		return strings.TrimSpace(cleaned)
-	default:
-		return strings.TrimSpace(cleaned)
-	}
+	return strings.TrimSpace(cleaned)
+}
+
+// StripDefaultDescriptionSignature removes the generic uploader signature.
+func StripDefaultDescriptionSignature(value string) string {
+	cleaned := defaultSignaturePattern.ReplaceAllString(value, "")
+	cleaned = descriptionSpacingPattern.ReplaceAllString(cleaned, "\n\n")
+	return strings.TrimSpace(cleaned)
 }

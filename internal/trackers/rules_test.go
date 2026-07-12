@@ -1,7 +1,7 @@
 // Copyright (c) 2025-2026, Audionut and the autobrr contributors.
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-package trackers
+package trackers_test
 
 import (
 	"context"
@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/autobrr/upbrr/internal/trackers"
+	"github.com/autobrr/upbrr/internal/trackers/impl"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -54,7 +56,19 @@ func evaluateNonMetadataRulesForTest(ctx context.Context, tracker string, meta a
 	if strings.TrimSpace(meta.ExternalMetadata.TVmaze.Name) == "" {
 		meta.ExternalMetadata.TVmaze.Name = "Example Series"
 	}
-	return EvaluateRules(ctx, tracker, meta, nil)
+	registry, err := impl.NewRegistry()
+	if err != nil {
+		panic(err)
+	}
+	return trackers.EvaluateRulesWithRegistry(ctx, registry, tracker, meta, nil)
+}
+
+func evaluateBHDRulesWithRegistryForTest(ctx context.Context, meta api.PreparedMetadata) []api.RuleFailure {
+	registry, err := impl.NewRegistry()
+	if err != nil {
+		panic(err)
+	}
+	return trackers.EvaluateRulesWithRegistry(ctx, registry, "BHD", meta, nil)
 }
 
 func TestEvaluateRulesRequiresUniqueID(t *testing.T) {
@@ -65,31 +79,6 @@ func TestEvaluateRulesRequiresUniqueID(t *testing.T) {
 	}
 	if failures[0].Rule != "require_unique_id" {
 		t.Fatalf("unexpected rule key: %s", failures[0].Rule)
-	}
-}
-
-func TestResolveCategoryIgnoresEmptyTVMetadata(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name     string
-		metadata api.ExternalMetadata
-	}{
-		{name: "TVDB", metadata: api.ExternalMetadata{TVDB: &api.TVDBMetadata{}}},
-		{name: "TVmaze", metadata: api.ExternalMetadata{TVmaze: &api.TVmazeMetadata{}}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			meta := api.PreparedMetadata{
-				ExternalMetadata: tt.metadata,
-				Release:          api.ReleaseInfo{Category: "movie"},
-			}
-			if got := resolveCategory(meta); got != "movie" {
-				t.Fatalf("expected movie fallback, got %q", got)
-			}
-		})
 	}
 }
 
@@ -307,7 +296,7 @@ func TestEvaluateRulesBHDBlocksAdultContent(t *testing.T) {
 		},
 	}
 
-	failures := EvaluateRules(context.Background(), "BHD", meta, nil)
+	failures := evaluateBHDRulesWithRegistryForTest(context.Background(), meta)
 	if len(failures) != 1 {
 		t.Fatalf("expected 1 failure, got %#v", failures)
 	}
@@ -333,7 +322,7 @@ func TestEvaluateRulesBHDIgnoresStaleAdultMetadata(t *testing.T) {
 		},
 	}
 
-	failures := EvaluateRules(context.Background(), "BHD", meta, nil)
+	failures := evaluateBHDRulesWithRegistryForTest(context.Background(), meta)
 	if hasRuleFailure(failures, "block_adult") {
 		t.Fatalf("expected stale adult metadata to be ignored, got %#v", failures)
 	}
@@ -352,7 +341,7 @@ func TestEvaluateRulesBHDBlocksAdultMetadataForExactSourcePath(t *testing.T) {
 		},
 	}
 
-	failures := EvaluateRules(context.Background(), "BHD", meta, nil)
+	failures := evaluateBHDRulesWithRegistryForTest(context.Background(), meta)
 	if !hasRuleFailure(failures, "block_adult") {
 		t.Fatal("expected exact-source adult metadata to be applied")
 	}
@@ -393,7 +382,7 @@ func TestEvaluateRulesBHDIgnoresCaseOnlyDistinctAdultMetadata(t *testing.T) {
 		},
 	}
 
-	failures := EvaluateRules(context.Background(), "BHD", meta, nil)
+	failures := evaluateBHDRulesWithRegistryForTest(context.Background(), meta)
 	if hasRuleFailure(failures, "block_adult") {
 		t.Fatal("expected case-only-distinct adult metadata to be ignored")
 	}

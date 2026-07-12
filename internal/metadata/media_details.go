@@ -19,8 +19,8 @@ import (
 	"github.com/autobrr/upbrr/internal/languageutil"
 	"github.com/autobrr/upbrr/internal/metadata/discparse"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/redaction"
 	"github.com/autobrr/upbrr/internal/services/db"
 	"github.com/autobrr/upbrr/internal/trackers"
@@ -184,7 +184,7 @@ func (s *Service) ApplyMediaDetails(ctx context.Context, meta api.PreparedMetada
 	}
 
 	applyMetadataOverrides(&meta)
-	ApplyRequestScopedAudioPolicy(&meta, s.cfg, s.logger)
+	ApplyRequestScopedAudioPolicyWithRegistry(&meta, s.cfg, s.logger, s.registry)
 	RebuildReleaseName(&meta, s.logger)
 
 	// Scene detection runs here — after external IDs are resolved and the release
@@ -282,7 +282,7 @@ func (s *Service) RefreshPreparedMetadata(ctx context.Context, meta api.Prepared
 		meta.HDR = filenameHDR
 	}
 	normalizeMediaInfoSettings(&meta)
-	ApplyRequestScopedAudioPolicy(&meta, refreshService.cfg, refreshService.logger)
+	ApplyRequestScopedAudioPolicyWithRegistry(&meta, refreshService.cfg, refreshService.logger, refreshService.registry)
 	RebuildReleaseName(&meta, refreshService.logger)
 
 	var err error
@@ -630,6 +630,10 @@ func isCommentaryOrCompatibilityAudioValue(value string) bool {
 // ApplyRequestScopedAudioPolicy updates audio labels and tracker audio blocks
 // for the request's active tracker set.
 func ApplyRequestScopedAudioPolicy(meta *api.PreparedMetadata, cfg config.Config, logger api.Logger) {
+	ApplyRequestScopedAudioPolicyWithRegistry(meta, cfg, logger, nil)
+}
+
+func ApplyRequestScopedAudioPolicyWithRegistry(meta *api.PreparedMetadata, cfg config.Config, logger api.Logger, registry *trackers.Registry) {
 	if meta == nil {
 		return
 	}
@@ -637,7 +641,7 @@ func ApplyRequestScopedAudioPolicy(meta *api.PreparedMetadata, cfg config.Config
 	meta.Audio = applyAudioLanguagePrefix(meta.Audio, *meta)
 	meta.BlockedTrackers = removeTrackerBlockReason(meta.BlockedTrackers, api.TrackerBlockReasonAudio)
 	meta.TrackerRuleFailures = removeTrackerRule(meta.TrackerRuleFailures, "audio_bloat")
-	applyAudioBloatPolicy(meta, trackers.ResolveTrackersWithDefaults(cfg, meta.Trackers, meta.TrackersRemove, logger), logger)
+	applyAudioBloatPolicy(meta, trackers.ResolveTrackersWithDefaultsAndRegistry(cfg, meta.Trackers, meta.TrackersRemove, logger, registry), logger, registry)
 }
 
 // RebuildReleaseName regenerates the prepared release-name fields from the
@@ -691,12 +695,12 @@ func applyAudioLanguagePrefix(audio string, meta api.PreparedMetadata) string {
 	return strings.TrimSpace(prefix + " " + base)
 }
 
-func applyAudioBloatPolicy(meta *api.PreparedMetadata, candidateTrackers []string, logger api.Logger) {
+func applyAudioBloatPolicy(meta *api.PreparedMetadata, candidateTrackers []string, logger api.Logger, registry *trackers.Registry) {
 	if meta == nil || strings.TrimSpace(meta.DiscType) != "" {
 		return
 	}
 
-	blocked, warned := resolveAudioBloatPolicy(*meta, candidateTrackers)
+	blocked, warned := resolveAudioBloatPolicyWithRegistry(*meta, candidateTrackers, registry)
 	if len(blocked) == 0 && len(warned) == 0 {
 		return
 	}
@@ -718,7 +722,7 @@ func applyAudioBloatPolicy(meta *api.PreparedMetadata, candidateTrackers []strin
 	}
 }
 
-func resolveAudioBloatPolicy(meta api.PreparedMetadata, candidateTrackers []string) (map[string][]string, map[string][]string) {
+func resolveAudioBloatPolicyWithRegistry(meta api.PreparedMetadata, candidateTrackers []string, registry *trackers.Registry) (map[string][]string, map[string][]string) {
 	original := canonicalAudioLanguage(originalAudioLanguage(meta))
 	if original == "" || original == "unknown" {
 		return nil, nil
@@ -759,11 +763,18 @@ func resolveAudioBloatPolicy(meta api.PreparedMetadata, candidateTrackers []stri
 	}
 	trackerAllowedLanguages := map[string][]string{
 		"AITHER": {"english"},
-		"ANT":    {"english"},
 		"SPD":    {"romanian"},
 	}
 	hardBlockedForEnglishOriginal := map[string]struct{}{
-		"ANT": {}, "BHD": {}, "MTV": {},
+		"MTV": {},
+	}
+	for _, tracker := range resolvedTrackers {
+		if policy, ok := registry.LookupAudioPolicy(tracker); ok {
+			trackerAllowedLanguages[tracker] = policy.AllowedLanguages
+			if policy.BlockEnglishOriginalWithForeign {
+				hardBlockedForEnglishOriginal[tracker] = struct{}{}
+			}
+		}
 	}
 	isEnglishOriginalWithNonEnglish := original == "english" && hasEnglish && hasOther
 

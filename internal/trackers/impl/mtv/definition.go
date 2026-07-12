@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	descriptionmtv "github.com/autobrr/upbrr/internal/services/description/mtv"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -22,6 +21,10 @@ func New() *Definition {
 
 func (d *Definition) Name() string {
 	return "MTV"
+}
+
+func (d *Definition) DupePolicy() *trackers.DupePolicy {
+	return &trackers.DupePolicy{ContainsFilenameMatch: true, NormalizeMTVName: true}
 }
 
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
@@ -58,7 +61,7 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 
 	description := strings.TrimSpace(assets.Description)
 	if !assets.Final {
-		description, err = descriptionmtv.BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.Screenshots)
+		description, err = BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.Screenshots)
 		if err != nil {
 			return trackers.DescriptionResult{}, fmt.Errorf("trackers: MTV description build: %w", err)
 		}

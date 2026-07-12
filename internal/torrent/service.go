@@ -20,23 +20,29 @@ import (
 
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
 	"github.com/autobrr/upbrr/internal/filesystem"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/redaction"
-	"github.com/autobrr/upbrr/internal/torrentmeta"
+	torrentmeta "github.com/autobrr/upbrr/internal/torrent/metainfo"
+	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
 type Service struct {
-	logger  api.Logger
-	tmpRoot string
+	logger   api.Logger
+	tmpRoot  string
+	registry *trackers.Registry
 }
 
 func NewService(logger api.Logger, tmpRoot string) *Service {
+	return NewServiceWithRegistry(logger, tmpRoot, nil)
+}
+
+func NewServiceWithRegistry(logger api.Logger, tmpRoot string, registry *trackers.Registry) *Service {
 	if logger == nil {
 		logger = api.NopLogger{}
 	}
-	return &Service{logger: logger, tmpRoot: strings.TrimSpace(tmpRoot)}
+	return &Service{logger: logger, tmpRoot: strings.TrimSpace(tmpRoot), registry: registry}
 }
 
 func (s *Service) Create(ctx context.Context, meta api.PreparedMetadata) (api.TorrentResult, error) {
@@ -53,7 +59,7 @@ func (s *Service) Create(ctx context.Context, meta api.PreparedMetadata) (api.To
 	meta.SourcePath = source
 
 	s.logger.Debugf("torrent: preparing for %s", source)
-	policy := resolveTrackerPolicy(meta)
+	policy := resolveTrackerPolicy(meta, s.registry)
 	forceRehash := torrentOverrideEnabled(meta.TorrentOverrides.Rehash)
 	reuseOnly := torrentOverrideEnabled(meta.TorrentOverrides.NoHash)
 	if forceRehash && reuseOnly {

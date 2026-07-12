@@ -14,7 +14,7 @@ import (
 	gomediainfo "github.com/autobrr/go-mediainfo"
 
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 

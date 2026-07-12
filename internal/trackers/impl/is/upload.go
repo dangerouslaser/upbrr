@@ -17,7 +17,6 @@ import (
 	"github.com/autobrr/upbrr/internal/cookies"
 	"github.com/autobrr/upbrr/internal/httpclient"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 
@@ -241,7 +240,7 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 			parts = append(parts, "Screenshots:\n"+strings.Join(shotLines, "\n"))
 		}
 	}
-	return bbcode.FinalizeTrackerDescription("IS", strings.TrimSpace(strings.Join(parts, "\n\n")))
+	return finalizeDescription(strings.TrimSpace(strings.Join(parts, "\n\n")))
 }
 
 func buildMessage(meta api.PreparedMetadata) string {

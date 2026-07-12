@@ -21,14 +21,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/autobrr/upbrr/internal/bbcode"
 	"github.com/autobrr/upbrr/internal/config"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	dbsvc "github.com/autobrr/upbrr/internal/services/db"
-	"github.com/autobrr/upbrr/internal/trackerdata"
 	"github.com/autobrr/upbrr/internal/trackers"
+	trackerdata "github.com/autobrr/upbrr/internal/trackers/data"
+	btnimpl "github.com/autobrr/upbrr/internal/trackers/impl/btn"
 	"github.com/autobrr/upbrr/pkg/api"
 )
+
+const minTrackerTokenLen = 25
 
 type stubTrackerLookup struct {
 	results map[string]trackerdata.Result
@@ -412,7 +415,7 @@ func TestApplyTrackerClaimsBlocksAitherAndCachesClaims(t *testing.T) {
 	}
 
 	logger := &recordingLogger{}
-	svc := NewService(&fakeRepo{}, WithConfig(cfg), WithLogger(logger))
+	svc := NewService(&fakeRepo{}, WithConfig(cfg), WithLogger(logger), WithTrackerRegistry(newClaimTestRegistry(t)))
 	meta := api.PreparedMetadata{
 		SourcePath: "/media/Example.Show.S02E03.mkv",
 		Trackers:   []string{"AITHER"},
@@ -574,7 +577,7 @@ func TestApplyTrackerClaimsUsesRequestedBTNWhenTrackerIDsContainDifferentTracker
 	}
 	logger := &recordingLogger{}
 
-	svc := NewService(&fakeRepo{}, WithConfig(cfg), WithLogger(logger))
+	svc := NewService(&fakeRepo{}, WithConfig(cfg), WithLogger(logger), WithTrackerRegistry(newClaimTestRegistry(t)))
 
 	cachePath := filepath.Join(tempDir, "cache", "banned", "BTN_claimed_releases.json")
 	if err := writeBTNClaimedCacheFixture(cachePath, time.Now().Unix(), map[string]struct{}{
@@ -628,16 +631,17 @@ func TestApplyTrackerClaimsUsesRequestedBTNWhenTrackerIDsContainDifferentTracker
 
 func TestResolveTrackerClaimProviderSupportsKnownTrackers(t *testing.T) {
 	t.Parallel()
+	service := &Service{registry: newClaimTestRegistry(t)}
 
-	btnProvider, ok := resolveTrackerClaimProvider("btn")
+	btnProvider, ok := service.resolveTrackerClaimProvider("btn")
 	if !ok {
 		t.Fatalf("expected BTN provider")
 	}
-	if _, ok := btnProvider.(btnTrackerClaimProvider); !ok {
+	if _, ok := btnProvider.(registryTrackerClaimProvider); !ok {
 		t.Fatalf("expected BTN provider type, got %T", btnProvider)
 	}
 
-	aitherProvider, ok := resolveTrackerClaimProvider("AITHER")
+	aitherProvider, ok := service.resolveTrackerClaimProvider("AITHER")
 	if !ok {
 		t.Fatalf("expected AITHER provider")
 	}
@@ -645,9 +649,21 @@ func TestResolveTrackerClaimProviderSupportsKnownTrackers(t *testing.T) {
 		t.Fatalf("expected API provider type, got %T", aitherProvider)
 	}
 
-	if _, ok := resolveTrackerClaimProvider("PTP"); ok {
+	if _, ok := service.resolveTrackerClaimProvider("PTP"); ok {
 		t.Fatalf("did not expect provider for unsupported tracker")
 	}
+}
+
+func newClaimTestRegistry(t *testing.T) *trackers.Registry {
+	t.Helper()
+	registry := trackers.NewRegistry()
+	if err := registry.Register(btnimpl.New()); err != nil {
+		t.Fatalf("register claim provider: %v", err)
+	}
+	if err := registry.Register(aitherRuleDefinition{}); err != nil {
+		t.Fatalf("register AITHER claim policy: %v", err)
+	}
+	return registry
 }
 
 func TestBTNTrackerClaimProviderUsesSharedCachePathAnd48HourTTL(t *testing.T) {
@@ -854,7 +870,7 @@ func TestEnrichTrackerDataDeprioritizesBTNWhenKeepingImages(t *testing.T) {
 			},
 		},
 	}
-	svc := NewService(repo, WithConfig(cfg), WithTrackerDataLookup(lookup))
+	svc := NewService(repo, WithConfig(cfg), WithTrackerDataLookup(lookup), WithTrackerRegistry(newClaimTestRegistry(t)))
 
 	meta := api.PreparedMetadata{
 		SourcePath: filepath.Join(t.TempDir(), "Example.Release.2026.S01.1080p.WEB-DL-GRP"),
@@ -900,7 +916,7 @@ func TestEnrichTrackerDataKeepsBTNAsFallbackWhenKeepingImages(t *testing.T) {
 			},
 		},
 	}
-	svc := NewService(repo, WithConfig(cfg), WithTrackerDataLookup(lookup))
+	svc := NewService(repo, WithConfig(cfg), WithTrackerDataLookup(lookup), WithTrackerRegistry(newClaimTestRegistry(t)))
 
 	meta := api.PreparedMetadata{
 		SourcePath: filepath.Join(t.TempDir(), "Example.Release.2026.S01.1080p.WEB-DL-GRP"),

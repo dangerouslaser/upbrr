@@ -24,6 +24,31 @@ func (d *Definition) Name() string {
 	return "BTN"
 }
 
+func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
+	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeTV, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDB, trackers.MetadataFieldTVDB}}}}
+}
+
+func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
+	return &trackers.UploadArtifactPolicy{Source: "BTN", RequireAnnounce: true}
+}
+
+func (d *Definition) DataLookupConfigured(cfg config.Config) bool {
+	return len(config.ResolveBTNAPIToken(cfg)) >= 25
+}
+
+func (d *Definition) DataLookupPolicy() *trackers.DataLookupPolicy {
+	return &trackers.DataLookupPolicy{DeferWhenCollectingImages: true}
+}
+
+func (d *Definition) BannedGroups() []string {
+	return []string{
+		"3LTON", "4yEo", "7VFr33104D", "AFG", "AniHLS", "AnimeRG", "AniURL", "DeadFish", "ELiTE", "eSc",
+		"EVO", "FGT", "FUM", "GalaxyTV", "GRANiTEN", "HAiKU", "Hi10", "ION10", "JFF", "JIVE", "LOAD", "MeGusta",
+		"mSD", "NhaNc3", "NOIVTC", "PHOENiX", "PlaySD", "playXD", "Pr1M371M3", "RAPiDCOWS", "REsuRRecTioN", "RMTeam",
+		"ROBOTS", "RUBiK", "SPASM", "Telly", "TM", "URANiME", "ViSiON", "W45Ps", "xRed", "XS", "ZKBL", "ZmN", "ZMNT", "[Oj]",
+	}
+}
+
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
 	return upload(ctx, req)
 }

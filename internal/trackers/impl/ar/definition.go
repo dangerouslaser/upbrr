@@ -22,6 +22,10 @@ func (d *Definition) Name() string {
 	return "AR"
 }
 
+func (d *Definition) DupePolicy() *trackers.DupePolicy {
+	return &trackers.DupePolicy{ContainsFilenameMatch: true}
+}
+
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
 	return upload(ctx, req)
 }

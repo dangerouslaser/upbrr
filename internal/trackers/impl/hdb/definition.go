@@ -9,7 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	descriptionhdb "github.com/autobrr/upbrr/internal/services/description/hdb"
+	"github.com/autobrr/upbrr/internal/config"
+
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -22,6 +23,30 @@ func New() *Definition {
 
 func (d *Definition) Name() string {
 	return "HDB"
+}
+
+func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
+	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{
+		{Scope: trackers.MetadataScopeMovie, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDBIDOnly}},
+		{Scope: trackers.MetadataScopeTV, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDBIDOnly, trackers.MetadataFieldTVDBIDOnly}},
+	}}
+}
+
+func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
+	return &trackers.UploadArtifactPolicy{Source: "HDBits"}
+}
+
+func (d *Definition) ArtifactPolicy() *trackers.ArtifactPolicy {
+	return &trackers.ArtifactPolicy{MaxPieceSizeMiB: 16}
+}
+
+func (d *Definition) DataLookupConfigured(cfg config.Config) bool {
+	for name, entry := range cfg.Trackers.Trackers {
+		if strings.EqualFold(strings.TrimSpace(name), "HDB") {
+			return strings.TrimSpace(entry.Username) != "" && strings.TrimSpace(entry.Passkey) != ""
+		}
+	}
+	return false
 }
 
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
@@ -52,7 +77,7 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 
 	description := strings.TrimSpace(assets.Description)
 	if !assets.Final {
-		description, err = descriptionhdb.BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.MenuImages, assets.Screenshots)
+		description, err = BuildDescription(ctx, req.Meta, req.AppConfig, assets.Description, assets.MenuImages, assets.Screenshots)
 		if err != nil {
 			return trackers.DescriptionResult{}, fmt.Errorf("trackers: HDB description build: %w", err)
 		}

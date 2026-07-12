@@ -39,9 +39,10 @@ go test -race -v -timeout 20m ./internal/guiapp ./internal/webserver ./internal/
 
 1. Entrypoints build request/options from CLI args, Wails method input, or web route payload.
 2. `internal/core` prepares metadata, config, services, repository access, validation, screenshots/images, tracker review, and upload.
-3. Services under `internal/services` handle metadata, torrents, image hosts, dupe checks, screenshots, and tracker orchestration.
-4. Tracker implementations under `internal/trackers/impl` produce tracker-specific payloads and rule handling.
-5. DB/repository layers persist config, history, images, upload records, and status.
+3. Domain packages handle metadata, torrents, torrent clients, images, descriptions, paths, screenshots, and remaining services.
+4. Generic tracker orchestration under `internal/trackers` consumes typed registry capabilities; auth, dupe, and data coordinators live in dedicated subpackages.
+5. Tracker implementations under `internal/trackers/impl/<tracker>` own tracker-specific endpoints, payloads, auth, lookup, rules, descriptions, and policy. Unit3D sites live under `internal/trackers/impl/unit3d/sites/<tracker>`.
+6. DB/repository layers persist config, history, images, upload records, and status.
 
 Preserve behavior across CLI, Wails GUI, and embedded web unless intentionally changing an entrypoint.
 
@@ -80,7 +81,7 @@ Preserve behavior across CLI, Wails GUI, and embedded web unless intentionally c
 - Slash-data such as torrent paths, URLs, and API payload paths use `path` only with import-local `//nolint:depguard // <reason>`.
 - Slash-data -> local FS: validate slash path, then `filepath.FromSlash`.
 - Reject POSIX + Windows escapes on every OS: leading `/`, leading `\`, drive letters, UNC, `..`.
-- Use `internal/pathutil.IsWithinRoot` / `SamePath`; no ad-hoc `filepath.Rel` + prefix guards.
+- Use `internal/pathing.IsWithinRoot` / `SamePath`; no ad-hoc `filepath.Rel` + prefix guards.
 - Tests: `t.TempDir`, `filepath.Join`, `filepath.ToSlash`; no hardcoded OS-rooted literals/raw slash assertions for local FS.
 - `cmd/pathpolicy` flags wrong path APIs, string-built local paths, slash-data FS calls/assertions, and ad-hoc guards. Rare exceptions need `//pathpolicy:allow <reason>` same/previous line.
 
@@ -105,7 +106,8 @@ Current expected local/generated ignores: `dist/`, `gui/frontend/dist/`, `gui/bu
 
 ## Domain Guardrails
 
-- Tracker changes often touch `internal/trackers/impl/*`, `internal/trackers/impl/registry.go`, `internal/trackers/catalog.go`, `internal/trackers/unit3dmeta`, `internal/config/defaults/example.yaml`, and policy tests.
+- Tracker behavior belongs in `internal/trackers/impl/<tracker>`; Unit3D site exceptions belong in `internal/trackers/impl/unit3d/sites/<tracker>`. Register capabilities explicitly in `internal/trackers/impl/registry.go`; generic packages must not import individual implementations.
+- Tracker changes may also require shared registry contract/parity tests, `internal/config/defaults/example.yaml`, and compatibility catalog tests. Do not add new tracker-name dispatch to `internal/trackers/catalog.go` or `internal/trackers/unit3dmeta`; those are compatibility read models.
 - DB schema changes use stable, additive, forward-only, idempotent SQLite migrations where practical; preserve `schema_migrations` and the legacy `user_version` bridge.
 - Runtime bridge changes involving `globalThis.go.guiapp.App` need matching Wails `internal/guiapp` methods, web `/api/app/*` routes, browser bridge request shapes, and unit/embedded browser verification.
 - Generated/built outputs are mostly ignored; do not commit populated `internal/guiapp/assets` unless deliberately updating generated artifacts.

@@ -20,8 +20,12 @@ import (
 	mkbrr "github.com/autobrr/mkbrr/torrent"
 
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
+	"github.com/autobrr/upbrr/internal/trackers"
+	"github.com/autobrr/upbrr/internal/trackers/impl/ant"
 	"github.com/autobrr/upbrr/pkg/api"
 )
+
+const antMaxTorrentBytesForTest int64 = 250 << 10
 
 func TestCreateReusesTorrent(t *testing.T) {
 	t.Parallel()
@@ -1143,7 +1147,7 @@ func TestPTPPiecePolicyBoundaries(t *testing.T) {
 
 	for _, tc := range cases {
 		meta := api.PreparedMetadata{Trackers: []string{"PTP"}, SourceSize: int64(tc.size)}
-		policy := resolveTrackerPolicy(meta)
+		policy := resolveTrackerPolicy(meta, nil)
 		got, ok := policy.requiredPieceExp(meta)
 		if !ok {
 			t.Fatalf("expected piece exponent for size %d", tc.size)
@@ -1188,11 +1192,15 @@ func TestCreateRegeneratesOversizedANTTorrent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stat client torrent: %v", err)
 	}
-	if info.Size() <= antMaxTorrentBytes {
+	if info.Size() <= antMaxTorrentBytesForTest {
 		t.Fatalf("expected oversized ANT torrent fixture, got %d bytes", info.Size())
 	}
 
-	service := NewService(api.NopLogger{}, t.TempDir())
+	registry := trackers.NewRegistry()
+	if err := registry.Register(ant.New()); err != nil {
+		t.Fatalf("register ANT: %v", err)
+	}
+	service := NewServiceWithRegistry(api.NopLogger{}, t.TempDir(), registry)
 	result, err := service.Create(context.Background(), api.PreparedMetadata{
 		SourcePath:        source,
 		SourceSize:        sourceSize,
@@ -1209,8 +1217,8 @@ func TestCreateRegeneratesOversizedANTTorrent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stat regenerated torrent: %v", err)
 	}
-	if regenerated.Size() > antMaxTorrentBytes {
-		t.Fatalf("expected regenerated torrent <= %d bytes, got %d", antMaxTorrentBytes, regenerated.Size())
+	if regenerated.Size() > antMaxTorrentBytesForTest {
+		t.Fatalf("expected regenerated torrent <= %d bytes, got %d", antMaxTorrentBytesForTest, regenerated.Size())
 	}
 }
 

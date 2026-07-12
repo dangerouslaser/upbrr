@@ -67,71 +67,16 @@ type TrackerMetadataPolicy struct {
 	Requirements []MetadataRequirement
 }
 
-// trackerMetadataPolicies maps normalized tracker names to their required
-// provider evidence; requirements within one entry are cumulative.
-var trackerMetadataPolicies = map[string]TrackerMetadataPolicy{
-	"PTP": {Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly}, Severity: api.RuleFailureSeverityWarning}}},
-	"HDB": {RequireKnownCategory: true, Requirements: []MetadataRequirement{
-		{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly}},
-		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly, MetadataFieldTVDBIDOnly}},
-	}},
-	"NBL": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTVmaze}}}},
-	"ANT": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldTMDB}}}},
-	"BHD": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldIMDB}}}},
-	"MTV": {RequireKnownCategory: true, Requirements: []MetadataRequirement{
-		{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}},
-		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTVDBTitle}},
-	}},
-	"BTN": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldIMDB, MetadataFieldTVDB}}}},
-	"AR": {RequireKnownCategory: true, Requirements: []MetadataRequirement{
-		{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}},
-		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB, MetadataFieldTVDB}},
-		{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldPoster}},
-	}},
-	"SPD": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}}}},
-	"THR": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}}}},
-	"TVC": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}}}},
-	"TL":  {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB, MetadataFieldIMDB}}}},
-	"BJS": {RequireKnownCategory: true, Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB}}}},
-	"AZ":  multiIDMetadataPolicy(),
-	"CZ":  multiIDMetadataPolicy(),
-	"PHD": multiIDMetadataPolicy(),
-	"CZT": {Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldIMDBIDOnly}}}},
-}
-
-// multiIDMetadataPolicy returns the shared movie and TV policy for trackers
-// that accept several provider identifiers.
-func multiIDMetadataPolicy() TrackerMetadataPolicy {
-	return TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []MetadataRequirement{
-		{Scope: MetadataScopeMovie, AnyOf: []MetadataField{MetadataFieldTMDBIDOnly, MetadataFieldIMDBIDOnly}},
-		{Scope: MetadataScopeTV, AnyOf: []MetadataField{MetadataFieldTMDBIDOnly, MetadataFieldIMDBIDOnly, MetadataFieldTVDBIDOnly}},
-	}}
-}
-
-// MetadataPolicyFor returns an independent copy of a tracker's metadata policy.
-// Tracker names are case-insensitive and whitespace-trimmed. Known Unit3D
-// trackers without an explicit policy require a current TMDB ID.
-func MetadataPolicyFor(tracker string) (TrackerMetadataPolicy, bool) {
-	name := strings.ToUpper(strings.TrimSpace(tracker))
-	policy, ok := trackerMetadataPolicies[name]
-	if !ok && IsUnit3DTracker(name) {
-		policy = TrackerMetadataPolicy{Requirements: []MetadataRequirement{{Scope: MetadataScopeAny, AnyOf: []MetadataField{MetadataFieldTMDB}}}}
-		ok = true
-	}
-	if !ok {
-		return TrackerMetadataPolicy{}, false
-	}
+func cloneMetadataPolicy(policy TrackerMetadataPolicy) TrackerMetadataPolicy {
 	policy.Requirements = slices.Clone(policy.Requirements)
 	for i := range policy.Requirements {
 		policy.Requirements[i].AnyOf = slices.Clone(policy.Requirements[i].AnyOf)
 	}
-	return policy, true
+	return policy
 }
 
-// evaluateMetadataRequirements returns policy results and whether the tracker
-// has a metadata policy. An evaluated policy may produce a non-nil empty slice.
-func evaluateMetadataRequirements(tracker string, meta api.PreparedMetadata) ([]api.RuleFailure, bool) {
-	policy, ok := MetadataPolicyFor(tracker)
+func evaluateMetadataRequirementsWithRegistry(registry *Registry, tracker string, meta api.PreparedMetadata) ([]api.RuleFailure, bool) {
+	policy, ok := registry.LookupMetadataPolicy(tracker)
 	if !ok {
 		return nil, false
 	}

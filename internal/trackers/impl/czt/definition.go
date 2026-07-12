@@ -16,6 +16,10 @@ type definition struct{}
 func New() trackers.Definition  { return definition{} }
 func (definition) Name() string { return "CZT" }
 
+func (definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
+	return &trackers.TrackerMetadataPolicy{Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDBIDOnly}}}}
+}
+
 // Upload submits a CZTeam upload request and returns the persisted registered
 // torrent artifact on tracker success.
 func (definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {

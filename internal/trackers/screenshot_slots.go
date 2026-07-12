@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
-	"github.com/autobrr/upbrr/internal/services/imagehost"
+	imagehost "github.com/autobrr/upbrr/internal/imagehosting/host"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -718,12 +718,14 @@ func normalizeSlotOrders(slots []api.ScreenshotSlot) []api.ScreenshotSlot {
 	return slots
 }
 
+// SlotUploadAttachmentResult contains updated screenshot slots and unmatched uploads.
 type SlotUploadAttachmentResult struct {
 	MatchedUploads   int
 	FallbackMatched  int
 	UnmatchedUploads int
 }
 
+// ApplyUploadedVariantsToSlots attaches uploaded variants to their matching screenshot slots.
 func ApplyUploadedVariantsToSlots(slots []api.ScreenshotSlot, uploads []api.UploadedImageLink) SlotUploadAttachmentResult {
 	if len(slots) == 0 || len(uploads) == 0 {
 		return SlotUploadAttachmentResult{}

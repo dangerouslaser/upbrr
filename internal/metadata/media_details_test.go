@@ -12,8 +12,51 @@ import (
 
 	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/metadata/discparse"
+	"github.com/autobrr/upbrr/internal/trackers"
+	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 	"github.com/autobrr/upbrr/pkg/api"
 )
+
+type antRuleDefinition struct{}
+type bhdPolicyDefinition struct{}
+type aitherRuleDefinition struct{}
+
+func (antRuleDefinition) Name() string { return "ANT" }
+func (antRuleDefinition) Upload(context.Context, trackers.UploadRequest) (api.UploadSummary, error) {
+	return api.UploadSummary{}, nil
+}
+func (antRuleDefinition) Rules() *ruletypes.RuleSet {
+	return &ruletypes.RuleSet{RequireMovieOnly: true}
+}
+func (antRuleDefinition) AudioPolicy() *trackers.AudioPolicy {
+	return &trackers.AudioPolicy{AllowedLanguages: []string{"english"}, BlockEnglishOriginalWithForeign: true}
+}
+func (aitherRuleDefinition) Name() string { return "AITHER" }
+func (aitherRuleDefinition) Upload(context.Context, trackers.UploadRequest) (api.UploadSummary, error) {
+	return api.UploadSummary{}, nil
+}
+func (aitherRuleDefinition) ClaimPolicy() *trackers.ClaimPolicy {
+	return &trackers.ClaimPolicy{APIBacked: true}
+}
+func (bhdPolicyDefinition) Name() string { return "BHD" }
+func (bhdPolicyDefinition) Upload(context.Context, trackers.UploadRequest) (api.UploadSummary, error) {
+	return api.UploadSummary{}, nil
+}
+func (bhdPolicyDefinition) AudioPolicy() *trackers.AudioPolicy {
+	return &trackers.AudioPolicy{BlockEnglishOriginalWithForeign: true}
+}
+
+func antRuleRegistry(t *testing.T) *trackers.Registry {
+	t.Helper()
+	registry := trackers.NewRegistry()
+	if err := registry.Register(antRuleDefinition{}); err != nil {
+		t.Fatalf("register ANT rules: %v", err)
+	}
+	if err := registry.Register(bhdPolicyDefinition{}); err != nil {
+		t.Fatalf("register BHD policy: %v", err)
+	}
+	return registry
+}
 
 func TestEditionFromMetaMultiPlaylistAggregatesIMDbMatches(t *testing.T) {
 	meta := api.PreparedMetadata{
@@ -1089,7 +1132,7 @@ func TestRefreshPreparedMetadataKeepsDistinctMediaHDR(t *testing.T) {
 
 func TestRefreshPreparedMetadataClearsResolvedRuleFailures(t *testing.T) {
 	repo := &fakeRepo{}
-	svc := NewService(repo, WithConfig(config.Config{}))
+	svc := NewService(repo, WithConfig(config.Config{}), WithTrackerRegistry(antRuleRegistry(t)))
 	meta := api.PreparedMetadata{
 		SourcePath: "/media/example.mkv",
 		Trackers:   []string{"ANT"},
@@ -1127,7 +1170,7 @@ func TestRefreshPreparedMetadataClearsResolvedRuleFailures(t *testing.T) {
 
 func TestRefreshPreparedMetadataKeepsRepoForRulePersistence(t *testing.T) {
 	repo := &fakeRepo{}
-	svc := NewService(repo, WithConfig(config.Config{}))
+	svc := NewService(repo, WithConfig(config.Config{}), WithTrackerRegistry(antRuleRegistry(t)))
 	meta := api.PreparedMetadata{
 		SourcePath: "/media/example.mkv",
 		Trackers:   []string{"ANT"},
@@ -1153,7 +1196,15 @@ func TestRefreshPreparedMetadataKeepsRepoForRulePersistence(t *testing.T) {
 }
 
 func TestRefreshPreparedMetadataNormalizesStaleMISettingsForNonEncodes(t *testing.T) {
-	svc := NewService(&fakeRepo{}, WithConfig(config.Config{}))
+	registry := trackers.NewRegistry()
+	if err := registry.RegisterDescriptor(trackers.Descriptor{
+		Name:       "AITHER",
+		Definition: aitherRuleDefinition{},
+		Rules:      &ruletypes.RuleSet{RequireValidMISetting: true},
+	}); err != nil {
+		t.Fatalf("register AITHER rules: %v", err)
+	}
+	svc := NewService(&fakeRepo{}, WithConfig(config.Config{}), WithTrackerRegistry(registry))
 	cases := []struct {
 		name       string
 		meta       api.PreparedMetadata
@@ -1267,12 +1318,12 @@ func TestAudioFromMediaNormalizesBDInfoCodecWithAtmos(t *testing.T) {
 }
 
 func TestResolveAudioBloatPolicyBlocksStrictTrackersForEnglishOriginal(t *testing.T) {
-	blocked, warned := resolveAudioBloatPolicy(api.PreparedMetadata{
+	blocked, warned := resolveAudioBloatPolicyWithRegistry(api.PreparedMetadata{
 		AudioLanguages: []string{"English", "French"},
 		ExternalMetadata: api.ExternalMetadata{
 			TMDB: &api.TMDBMetadata{OriginalLanguage: "en"},
 		},
-	}, []string{"ANT", "BHD", "MTV", "AITHER", "ASC"})
+	}, []string{"ANT", "BHD", "MTV", "AITHER", "ASC"}, antRuleRegistry(t))
 
 	if got := blocked["ANT"]; len(got) != 1 || got[0] != "French" {
 		t.Fatalf("expected ANT blocked for French bloat, got %#v", blocked)
@@ -1292,12 +1343,12 @@ func TestResolveAudioBloatPolicyBlocksStrictTrackersForEnglishOriginal(t *testin
 }
 
 func TestResolveAudioBloatPolicyWarnsButDoesNotBlockNonEnglishOriginal(t *testing.T) {
-	blocked, warned := resolveAudioBloatPolicy(api.PreparedMetadata{
+	blocked, warned := resolveAudioBloatPolicyWithRegistry(api.PreparedMetadata{
 		AudioLanguages: []string{"English", "Japanese", "French"},
 		ExternalMetadata: api.ExternalMetadata{
 			TMDB: &api.TMDBMetadata{OriginalLanguage: "ja"},
 		},
-	}, []string{"ANT", "BHD", "SPD"})
+	}, []string{"ANT", "BHD", "SPD"}, antRuleRegistry(t))
 
 	if blocked != nil {
 		t.Fatalf("expected no blocked trackers, got %#v", blocked)

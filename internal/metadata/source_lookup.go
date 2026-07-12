@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/autobrr/upbrr/internal/trackers"
-	"github.com/autobrr/upbrr/internal/trackers/unit3dmeta"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -36,6 +35,10 @@ type sourceLookupResolution struct {
 }
 
 func applySourceLookupOverride(meta *api.PreparedMetadata) {
+	applySourceLookupOverrideWithRegistry(meta, nil)
+}
+
+func applySourceLookupOverrideWithRegistry(meta *api.PreparedMetadata, registry *trackers.Registry) {
 	if meta == nil {
 		return
 	}
@@ -45,7 +48,7 @@ func applySourceLookupOverride(meta *api.PreparedMetadata) {
 		return
 	}
 
-	resolution, err := resolveSourceLookupURL(raw)
+	resolution, err := resolveSourceLookupURLWithRegistry(raw, registry)
 	if err != nil {
 		meta.LookupWarnings = append(meta.LookupWarnings, "Source URL lookup failed; using default metadata lookup flow.")
 		return
@@ -103,6 +106,10 @@ func applySourceLookupOverride(meta *api.PreparedMetadata) {
 }
 
 func resolveSourceLookupURL(raw string) (sourceLookupResolution, error) {
+	return resolveSourceLookupURLWithRegistry(raw, nil)
+}
+
+func resolveSourceLookupURLWithRegistry(raw string, registry *trackers.Registry) (sourceLookupResolution, error) {
 	parsed, err := url.Parse(strings.TrimSpace(raw))
 	if err != nil {
 		return sourceLookupResolution{}, fmt.Errorf("metadata: parse source lookup URL: %w", err)
@@ -117,7 +124,7 @@ func resolveSourceLookupURL(raw string) (sourceLookupResolution, error) {
 		return sourceLookupResolution{}, url.InvalidHostError("missing host")
 	}
 
-	if tracker, trackerID, ok := extractUnit3DTrackerID(host, parsed.Path); ok {
+	if tracker, trackerID, ok := extractUnit3DTrackerID(host, parsed.Path, registry); ok {
 		return sourceLookupResolution{Tracker: tracker, TrackerID: trackerID, Mode: "tracker"}, nil
 	}
 
@@ -178,9 +185,10 @@ func extractTVDBIDFromQuery(host string, query url.Values) (int, bool) {
 	return id, true
 }
 
-func extractUnit3DTrackerID(host string, path string) (string, string, bool) {
-	for _, tracker := range trackers.Unit3DTrackers() {
-		baseURL, ok := unit3dmeta.BaseURL(tracker)
+func extractUnit3DTrackerID(host string, path string, registry *trackers.Registry) (string, string, bool) {
+	trackerNames := registry.NamesByKind(trackers.KindUnit3D)
+	for _, tracker := range trackerNames {
+		baseURL, ok := registry.LookupBaseURL(tracker)
 		if !ok {
 			continue
 		}

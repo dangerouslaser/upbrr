@@ -239,7 +239,10 @@ Alternatively, `make precommit` and `make prepush` run the configured Lefthook c
 
 - The frontend build output is embedded into the Go app from `internal/guiapp/assets`.
 - The GUI, CLI, and embedded web server share the same core services and config model under `internal/`.
-- Tracker-specific code lives primarily under `internal/trackers/impl`. Shared tracker behaviour goes in `internal/trackers`, not in the impls.
+- Tracker-specific code lives under `internal/trackers/impl/<tracker>`. Unit3D protocol behavior lives in `internal/trackers/impl/unit3d`, with site profiles and exceptions under `internal/trackers/impl/unit3d/sites/<tracker>`.
+- Shared tracker contracts and registry-driven orchestration live under `internal/trackers`; generic auth, dupe, and tracker-data coordinators are in its `auth`, `dupe`, and `data` subpackages.
+- Generic release/path/torrent-client infrastructure lives under `internal/releasepolicy`, `internal/pathing`, and `internal/torrentclient`. Torrent metainfo helpers live under `internal/torrent/metainfo`.
+- Generic BBCode, description, and image-hosting infrastructure lives under `internal/bbcode`, `internal/description`, and `internal/imagehosting`; tracker-specific policy stays with its tracker implementation.
 - `pkg/api` holds request/response types shared across surfaces.
 - The repo currently includes generated and built assets in a few locations; review changes carefully and avoid committing build output by accident.
 
@@ -281,13 +284,13 @@ upbrr targets Windows, Linux, and macOS. Do not assume POSIX path behavior in Go
 - Use `path` only for slash-delimited data formats, such as torrent-internal file names, URLs, or API payloads defined to use `/`.
 - At boundaries between torrent/API paths and local filesystem paths, normalize deliberately: validate slash paths first, then convert with `filepath.FromSlash`.
 - Security/path traversal checks must reject both POSIX and Windows absolute or escaping forms on every OS: leading `/`, leading `\`, drive-letter paths, UNC paths, and `..` segments.
-- Use `internal/pathutil.IsWithinRoot` and `internal/pathutil.SamePath` for local root containment and path equality. Do not add ad-hoc `filepath.Rel` plus string-prefix guards; `pathpolicy` rejects those helper names outside `internal/pathutil`.
+- Use `internal/pathing.IsWithinRoot` and `internal/pathing.SamePath` for local root containment and path equality. Do not add ad-hoc `filepath.Rel` plus string-prefix guards; `pathpolicy` rejects those helper names outside `internal/pathing`.
 - Tests should not assert raw `"/foo/"` substrings against local filesystem paths. Use `filepath.ToSlash(path)` for cross-platform assertions, or build expected paths with `filepath.Join`.
 - Tests should not pass hardcoded OS-rooted literals such as `C:\...`, `\\server\share`, or `/tmp/...` into `filepath` calls. Use `t.TempDir` or existing path variables.
 - Do not build local filesystem paths with string concatenation, `fmt.Sprintf`, or `strings.Join(..., "/")`. Use `filepath.Join`.
 - Use `path.Base`, `path.Ext`, and related `path` APIs for URL/API paths. Use `filepath.Base`, `filepath.Ext`, and related `filepath` APIs for local paths. Legit stdlib `path` imports need import-local `//nolint:depguard // <slash-data reason>`.
 
-`make pathpolicy` runs the repo-local AST checker for hardcoded OS-rooted literals in `filepath` calls, string-built local paths, wrong `path`/`filepath` package use, slash-data filesystem calls, slash assertions without `filepath.ToSlash`, and ad-hoc local path guard helpers outside `internal/pathutil`. Rare intentional checker exceptions need `//pathpolicy:allow <reason>` on the same or previous line. `make lint`, pre-commit, and pre-push run it automatically.
+`make pathpolicy` runs the repo-local AST checker for hardcoded OS-rooted literals in `filepath` calls, string-built local paths, wrong `path`/`filepath` package use, slash-data filesystem calls, slash assertions without `filepath.ToSlash`, and ad-hoc local path guard helpers outside `internal/pathing`. Rare intentional checker exceptions need `//pathpolicy:allow <reason>` on the same or previous line. `make lint`, pre-commit, and pre-push run it automatically.
 
 ## AI agent instructions
 

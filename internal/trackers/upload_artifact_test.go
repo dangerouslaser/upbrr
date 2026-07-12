@@ -293,10 +293,10 @@ func TestPrepareTrackerUploadTorrentCreatesSpecificArtifact(t *testing.T) {
 	})
 
 	dbPath := filepath.Join(tmp, "state", "upbrr.db")
-	meta, err := PrepareTrackerUploadTorrent(api.PreparedMetadata{
+	meta, err := PrepareTrackerUploadTorrentWithRegistry(api.PreparedMetadata{
 		SourcePath:  sourcePath,
 		TorrentPath: baseTorrentPath,
-	}, dbPath, "HDB", config.TrackerConfig{AnnounceURL: "https://new.example/announce"})
+	}, dbPath, "HDB", config.TrackerConfig{AnnounceURL: "https://new.example/announce"}, hdbArtifactRegistry(t))
 	if err != nil {
 		t.Fatalf("prepare tracker torrent: %v", err)
 	}
@@ -332,10 +332,14 @@ func TestPrepareTrackerUploadTorrentUsesDefaultAnnounce(t *testing.T) {
 	baseTorrentPath := filepath.Join(tmp, "base.torrent")
 	writeTestMetaInfo(t, baseTorrentPath, metainfo.MetaInfo{InfoBytes: testInfoBytes(t, "")})
 
-	meta, err := PrepareTrackerUploadTorrent(api.PreparedMetadata{
+	registry := NewRegistry()
+	if err := registry.RegisterDescriptor(Descriptor{Name: "AZ", Definition: stubDefinition{name: "AZ"}, UploadArtifact: &UploadArtifactPolicy{Source: "AvistaZ", DefaultAnnounce: "https://tracker.avistaz.to/announce"}}); err != nil {
+		t.Fatalf("register AZ artifact policy: %v", err)
+	}
+	meta, err := PrepareTrackerUploadTorrentWithRegistry(api.PreparedMetadata{
 		SourcePath:  sourcePath,
 		TorrentPath: baseTorrentPath,
-	}, filepath.Join(tmp, "state", "upbrr.db"), "AZ", config.TrackerConfig{})
+	}, filepath.Join(tmp, "state", "upbrr.db"), "AZ", config.TrackerConfig{}, registry)
 	if err != nil {
 		t.Fatalf("prepare tracker torrent: %v", err)
 	}
@@ -357,10 +361,10 @@ func TestPrepareTrackerUploadTorrentUsesBTNAnnounceURL(t *testing.T) {
 	baseTorrentPath := filepath.Join(tmp, "base.torrent")
 	writeTestMetaInfo(t, baseTorrentPath, metainfo.MetaInfo{InfoBytes: testInfoBytes(t, "")})
 
-	meta, err := PrepareTrackerUploadTorrent(api.PreparedMetadata{
+	meta, err := PrepareTrackerUploadTorrentWithRegistry(api.PreparedMetadata{
 		SourcePath:  sourcePath,
 		TorrentPath: baseTorrentPath,
-	}, filepath.Join(tmp, "state", "upbrr.db"), "BTN", config.TrackerConfig{AnnounceURL: "https://tracker.btn.example/announce/passkey"})
+	}, filepath.Join(tmp, "state", "upbrr.db"), "BTN", config.TrackerConfig{AnnounceURL: "https://tracker.btn.example/announce/passkey"}, btnArtifactRegistry(t))
 	if err != nil {
 		t.Fatalf("prepare tracker torrent: %v", err)
 	}
@@ -390,7 +394,7 @@ func TestPrepareTrackerUploadTorrentSkipsBTNWithoutAnnounceURL(t *testing.T) {
 		SourcePath:  sourcePath,
 		TorrentPath: baseTorrentPath,
 	}
-	got, err := PrepareTrackerUploadTorrent(meta, dbPath, "BTN", config.TrackerConfig{})
+	got, err := PrepareTrackerUploadTorrentWithRegistry(meta, dbPath, "BTN", config.TrackerConfig{}, btnArtifactRegistry(t))
 	if err != nil {
 		t.Fatalf("prepare tracker torrent: %v", err)
 	}
@@ -410,13 +414,33 @@ func TestPrepareTrackerUploadTorrentNoSpecLeavesMetaUnchanged(t *testing.T) {
 	t.Parallel()
 
 	meta := api.PreparedMetadata{TorrentPath: filepath.Join(t.TempDir(), "base.torrent")}
-	got, err := PrepareTrackerUploadTorrent(meta, "", "BTN", config.TrackerConfig{})
+	got, err := PrepareTrackerUploadTorrent(meta, "", "UNKNOWN", config.TrackerConfig{})
 	if err != nil {
 		t.Fatalf("prepare tracker torrent: %v", err)
 	}
 	if got.TorrentPath != meta.TorrentPath {
 		t.Fatalf("expected torrent path unchanged, got %q", got.TorrentPath)
 	}
+}
+
+func btnArtifactRegistry(t *testing.T) *Registry {
+	t.Helper()
+	registry := NewRegistry()
+	policy := &UploadArtifactPolicy{Source: "BTN", RequireAnnounce: true}
+	if err := registry.RegisterDescriptor(Descriptor{Name: "BTN", Definition: stubDefinition{name: "BTN"}, UploadArtifact: policy}); err != nil {
+		t.Fatalf("register BTN artifact policy: %v", err)
+	}
+	return registry
+}
+
+func hdbArtifactRegistry(t *testing.T) *Registry {
+	t.Helper()
+	registry := NewRegistry()
+	policy := &UploadArtifactPolicy{Source: "HDBits"}
+	if err := registry.RegisterDescriptor(Descriptor{Name: "HDB", Definition: stubDefinition{name: "HDB"}, UploadArtifact: policy}); err != nil {
+		t.Fatalf("register HDB artifact policy: %v", err)
+	}
+	return registry
 }
 
 func TestPrepareDryRunInjectionTorrentCreatesGenericTrackerArtifact(t *testing.T) {

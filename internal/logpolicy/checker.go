@@ -3322,7 +3322,7 @@ func isSafeLocalPathOutputCall(call *ast.CallExpr, aliases map[string]string) bo
 			importPath = aliases[pkg.Name]
 		}
 		return (importPath == "path/filepath" || pkg.Name == "filepath") && fun.Sel.Name == "Base" ||
-			(importPath == "github.com/autobrr/upbrr/internal/pathutil" || pkg.Name == "pathutil") && fun.Sel.Name == "Base"
+			(importPath == "github.com/autobrr/upbrr/internal/pathing" || pkg.Name == "pathutil") && fun.Sel.Name == "Base"
 	default:
 		return false
 	}
@@ -3366,7 +3366,7 @@ func isLocalPathProducingCall(call *ast.CallExpr, aliases map[string]string) boo
 				}
 			case "github.com/autobrr/upbrr/internal/services/db":
 				return selector.Sel.Name == "Subdir"
-			case "github.com/autobrr/upbrr/internal/paths":
+			case "github.com/autobrr/upbrr/internal/pathing/layout":
 				return strings.Contains(strings.ToLower(selector.Sel.Name), "path") || selector.Sel.Name == "ReleaseTempDir"
 			}
 		}
@@ -3477,7 +3477,7 @@ func isSafeDryRunOutputExpr(expr ast.Expr) bool {
 // checkUnit3DQueryCredentialAuth prevents API credentials from returning to
 // request URLs after Unit3D authentication has moved to Bearer headers.
 func checkUnit3DQueryCredentialAuth(fset *token.FileSet, relPath string, file *ast.File, allows map[int]*logpolicyAllow) []Violation {
-	if relPath != "internal/trackerdata/unit3d.go" && !strings.HasPrefix(relPath, "internal/trackers/impl/unit3d/") {
+	if relPath != "internal/trackers/data/unit3d.go" && !strings.HasPrefix(relPath, "internal/trackers/impl/unit3d/") {
 		return nil
 	}
 	violations := make([]Violation, 0)

@@ -29,6 +29,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/moistari/rls"
 	xhtml "golang.org/x/net/html"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
@@ -36,10 +37,9 @@ import (
 
 	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/cookies"
-	"github.com/autobrr/upbrr/internal/metadata"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/redaction"
 	"github.com/autobrr/upbrr/internal/services/db"
 	"github.com/autobrr/upbrr/internal/trackers"
@@ -184,7 +184,7 @@ var (
 
 // ErrSubmitted2FARejected marks a BTN failure after a submitted manual 2FA code
 // reached the tracker and was rejected.
-var ErrSubmitted2FARejected = errors.New("trackers: BTN submitted 2FA rejected")
+var ErrSubmitted2FARejected = trackers.ErrSubmitted2FARejected
 
 var (
 	errBTNCookiesMissing          = errors.New("trackers: BTN cookies not configured")
@@ -1391,7 +1391,7 @@ func btnTVPayloadMetadataMessage(meta api.PreparedMetadata) string {
 // prepared scene and season-pack metadata, group tag and username
 func resolveOrigin(meta api.PreparedMetadata) string {
 	group := strings.TrimSpace(meta.Release.Group)
-	if metadata.DetectSeasonPackGroupTags(meta).Mixed {
+	if seasonPackHasMixedGroups(meta) {
 		return "Mixed"
 	}
 	if isBTNSceneRelease(meta) {
@@ -1401,6 +1401,38 @@ func resolveOrigin(meta api.PreparedMetadata) string {
 		return "None"
 	}
 	return "P2P"
+}
+
+func seasonPackHasMixedGroups(meta api.PreparedMetadata) bool {
+	if !meta.TVPack || len(meta.FileList) < 2 {
+		return false
+	}
+
+	groups := make(map[string]struct{})
+	for _, file := range meta.FileList {
+		base := pathutil.Base(strings.TrimSpace(file))
+		if base == "" || base == "." || base == "/" {
+			continue
+		}
+		parsed := rls.ParseString(base)
+		group := strings.TrimSpace(parsed.Group)
+		if group == "" {
+			site := strings.TrimSpace(parsed.Site)
+			if site != "" && strings.HasPrefix(strings.TrimSpace(base), "["+site+"]") {
+				group = site
+			}
+		}
+		group = strings.ToLower(strings.TrimSpace(strings.TrimPrefix(group, "-")))
+		switch group {
+		case "", "nogrp", "nogroup", "unknown", "unk":
+			continue
+		}
+		groups[group] = struct{}{}
+		if len(groups) > 1 {
+			return true
+		}
+	}
+	return false
 }
 
 // stripEpisodeTitle removes generated episode-title text from BTN upload names

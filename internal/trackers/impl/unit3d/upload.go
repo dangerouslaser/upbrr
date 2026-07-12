@@ -20,14 +20,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/autobrr/upbrr/internal/paths"
+	descriptionunit3d "github.com/autobrr/upbrr/internal/description/unit3d"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/redaction"
 	"github.com/autobrr/upbrr/internal/services/db"
-	descriptionunit3d "github.com/autobrr/upbrr/internal/services/description/unit3d"
-	"github.com/autobrr/upbrr/internal/trackerdata"
 	"github.com/autobrr/upbrr/internal/trackers"
+	trackerdata "github.com/autobrr/upbrr/internal/trackers/data"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
-	"github.com/autobrr/upbrr/internal/trackers/unit3dmeta"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -58,7 +57,7 @@ func uploadUnit3D(ctx context.Context, req trackers.UploadRequest) (api.UploadSu
 		return api.UploadSummary{}, err
 	}
 
-	baseURL, uploadURL := resolveUnit3DURLs(trackerName, req.TrackerConfig.URL)
+	baseURL, uploadURL := resolveUnit3DURLs(req.TrackerConfig.URL)
 	logger.Debugf("trackers: %s upload URL: %s", trackerName, uploadURL)
 
 	originalName := strings.TrimSpace(req.Meta.ReleaseName)
@@ -229,22 +228,8 @@ func uploadUnit3D(ctx context.Context, req trackers.UploadRequest) (api.UploadSu
 	return summary, nil
 }
 
-func defaultUnit3DBaseURL(tracker string) string {
-	if baseURL, ok := unit3dmeta.BaseURL(tracker); ok {
-		return baseURL
-	}
-	baseURL, ok := unit3dmeta.BaseURL(unit3dmeta.DefaultTracker())
-	if ok {
-		return baseURL
-	}
-	return ""
-}
-
-func resolveUnit3DURLs(tracker string, configuredBaseURL string) (string, string) {
+func resolveUnit3DURLs(configuredBaseURL string) (string, string) {
 	baseURL := strings.TrimSpace(configuredBaseURL)
-	if baseURL == "" {
-		baseURL = defaultUnit3DBaseURL(tracker)
-	}
 	return baseURL, strings.TrimRight(baseURL, "/") + "/api/torrents/upload"
 }
 
@@ -364,7 +349,7 @@ func buildUploadDryRunUnit3D(ctx context.Context, req trackers.UploadRequest) (a
 		return api.TrackerDryRunEntry{}, fmt.Errorf("trackers: %s mediainfo missing required fields", trackerName)
 	}
 
-	_, uploadURL := resolveUnit3DURLs(trackerName, req.TrackerConfig.URL)
+	_, uploadURL := resolveUnit3DURLs(req.TrackerConfig.URL)
 
 	originalName := strings.TrimSpace(req.Meta.ReleaseName)
 	if originalName == "" {
@@ -688,19 +673,19 @@ func buildUnit3DData(req trackers.UploadRequest, name, description, mediainfo, b
 
 func applyUnit3DAdditionalPayload(req trackers.UploadRequest, data map[string]string) {
 	profile, ok := unit3DSiteProfileFor(req.Tracker)
-	if !ok || profile.applyAdditionalPayload == nil {
+	if !ok || profile.ApplyAdditionalPayload == nil {
 		return
 	}
-	profile.applyAdditionalPayload(req, data)
+	profile.ApplyAdditionalPayload(req, data)
 }
 
 func resolveUnit3DTypeIDForTracker(tracker string, meta api.PreparedMetadata) (string, error) {
 	trackerName := strings.ToUpper(strings.TrimSpace(tracker))
 	profile, ok := unit3DSiteProfileFor(trackerName)
-	if !ok || profile.resolveTypeID == nil {
+	if !ok || profile.ResolveTypeID == nil {
 		return resolveUnit3DTypeID(meta)
 	}
-	typeID := profile.resolveTypeID(meta)
+	typeID := profile.ResolveTypeID(meta)
 	if strings.TrimSpace(typeID) == "" || typeID == "0" {
 		resolvedType := inferUnit3DType(meta)
 		if resolvedType == "" {
@@ -713,16 +698,16 @@ func resolveUnit3DTypeIDForTracker(tracker string, meta api.PreparedMetadata) (s
 
 func resolveUnit3DResolutionIDForTracker(tracker string, meta api.PreparedMetadata) string {
 	profile, ok := unit3DSiteProfileFor(tracker)
-	if ok && profile.resolveResolutionID != nil {
-		return profile.resolveResolutionID(meta)
+	if ok && profile.ResolveResolutionID != nil {
+		return profile.ResolveResolutionID(meta)
 	}
 	return resolveUnit3DResolutionID(meta)
 }
 
 func resolveUnit3DCategoryIDForTracker(tracker string, meta api.PreparedMetadata) string {
 	profile, ok := unit3DSiteProfileFor(tracker)
-	if ok && profile.resolveCategoryID != nil {
-		return profile.resolveCategoryID(meta)
+	if ok && profile.ResolveCategoryID != nil {
+		return profile.ResolveCategoryID(meta)
 	}
 	return resolveUnit3DCategoryID(meta)
 }
@@ -735,8 +720,8 @@ func resolveKeywords(meta api.PreparedMetadata) string {
 }
 
 func resolveKeywordsForTracker(tracker string, meta api.PreparedMetadata) string {
-	if strings.EqualFold(strings.TrimSpace(tracker), "ACM") {
-		return resolveACMKeywords(meta)
+	if profile, ok := unit3DSiteProfileFor(tracker); ok && profile.ResolveKeywords != nil {
+		return profile.ResolveKeywords(meta)
 	}
 	return resolveKeywords(meta)
 }

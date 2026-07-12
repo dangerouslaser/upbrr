@@ -19,7 +19,7 @@ func (s *Service) applyTrackerRules(ctx context.Context, meta api.PreparedMetada
 		return meta, nil
 	}
 
-	resolved := trackers.ResolveTrackersWithDefaults(s.cfg, meta.Trackers, meta.TrackersRemove, s.logger)
+	resolved := trackers.ResolveTrackersWithDefaultsAndRegistry(s.cfg, meta.Trackers, meta.TrackersRemove, s.logger, s.registry)
 	if len(resolved) == 0 {
 		return meta, nil
 	}
@@ -33,7 +33,7 @@ func (s *Service) applyTrackerRules(ctx context.Context, meta api.PreparedMetada
 		}
 
 		name := strings.ToUpper(strings.TrimSpace(tracker))
-		failures := trackers.EvaluateRules(ctx, tracker, meta, s.logger)
+		failures := trackers.EvaluateRulesWithRegistry(ctx, s.registry, tracker, meta, s.logger)
 		if failures == nil {
 			if combined := ruleFailures[name]; len(combined) > 0 && s.repo != nil {
 				if err := s.persistRuleFailures(ctx, meta.SourcePath, tracker, combined); err != nil {

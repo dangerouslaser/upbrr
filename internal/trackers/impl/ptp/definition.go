@@ -8,7 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -21,6 +23,31 @@ func New() *Definition {
 
 func (d *Definition) Name() string {
 	return "PTP"
+}
+
+func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
+	return &trackers.TrackerMetadataPolicy{Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDBIDOnly}, Severity: api.RuleFailureSeverityWarning}}}
+}
+
+func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
+	return &trackers.UploadArtifactPolicy{Source: "PTP"}
+}
+
+func (d *Definition) DataLookupConfigured(cfg config.Config) bool {
+	for name, entry := range cfg.Trackers.Trackers {
+		if strings.EqualFold(strings.TrimSpace(name), "PTP") {
+			return strings.TrimSpace(entry.PTPAPIUser) != "" && strings.TrimSpace(entry.PTPAPIKey) != ""
+		}
+	}
+	return false
+}
+
+func (d *Definition) DataLookupPolicy() *trackers.DataLookupPolicy {
+	return &trackers.DataLookupPolicy{Cooldown: time.Minute}
+}
+
+func (d *Definition) BannedGroups() []string {
+	return []string{"aXXo", "BMDru", "BRrip", "CM8", "CrEwSaDe", "CTFOH", "d3g", "DNL", "FaNGDiNG0", "HD2DVD", "HDT", "HDTime", "ION10", "iPlanet", "KiNGDOM", "mHD", "mSD", "nHD", "nikt0", "nSD", "NhaNc3", "OFT", "PRODJi", "SANTi", "SPiRiT", "STUTTERSHIT", "ViSION", "VXT", "WAF", "x0r", "YIFY", "LAMA", "WORLD"}
 }
 
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {

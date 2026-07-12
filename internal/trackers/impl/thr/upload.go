@@ -22,7 +22,6 @@ import (
 
 	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -355,7 +354,7 @@ func buildDescription(meta api.PreparedMetadata, assets trackers.DescriptionAsse
 		}
 	}
 	parts = append(parts, `[size=2][url=https://www.torrenthr.org/forums.php?action=viewtopic&topicid=8977]upbrr[/url][/size]`)
-	return bbcode.FinalizeTrackerDescription("THR", strings.TrimSpace(strings.Join(parts, "\n")))
+	return finalizeDescription(strings.TrimSpace(strings.Join(parts, "\n")))
 }
 
 func buildQuestionnaire(meta api.PreparedMetadata) *api.TrackerQuestionnaire {

@@ -23,12 +23,11 @@ import (
 	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/httpclient"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/redaction"
 	"github.com/autobrr/upbrr/internal/services/db"
 	"github.com/autobrr/upbrr/internal/trackers"
-	"github.com/autobrr/upbrr/internal/trackers/bhdmeta"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -409,7 +408,7 @@ func writeFailureArtifact(req trackers.UploadRequest, payload []byte, name strin
 
 func resolveUploadName(meta api.PreparedMetadata) string {
 	name := metautil.FirstNonEmptyTrimmed(strings.TrimSpace(meta.ReleaseName), strings.TrimSpace(meta.ReleaseNameNoTag), strings.TrimSpace(meta.Filename), pathutil.Base(meta.SourcePath))
-	if bhdmeta.IsDVDSource(meta.Source) {
+	if IsDVDSource(meta.Source) {
 		audio := strings.Join(strings.Fields(strings.TrimSpace(meta.Audio)), " ")
 		if audio != "" && strings.TrimSpace(meta.VideoCodec) != "" {
 			name = strings.Replace(name, audio, strings.TrimSpace(meta.VideoCodec)+" "+audio, 1)
@@ -444,11 +443,11 @@ func validateBHDContainer(meta api.PreparedMetadata) error {
 }
 
 func resolveSource(meta api.PreparedMetadata) (string, bool) {
-	return bhdmeta.SourceForMetadata(meta)
+	return SourceForMetadata(meta)
 }
 
 func resolveType(meta api.PreparedMetadata) string {
-	return bhdmeta.Type(meta)
+	return Type(meta)
 }
 
 func resolveEdition(meta api.PreparedMetadata, tags []string) (bool, string) {
@@ -557,7 +556,7 @@ func resolveRegion(region string) string {
 }
 
 func isSD(meta api.PreparedMetadata) bool {
-	return bhdmeta.IsSD(meta)
+	return IsSD(meta)
 }
 
 func boolFlag(value bool) string {

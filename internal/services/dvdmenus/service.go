@@ -22,8 +22,8 @@ import (
 	"github.com/autobrr/upbrr/internal/dvdvideo/graph"
 	"github.com/autobrr/upbrr/internal/dvdvideo/render"
 	internalerrors "github.com/autobrr/upbrr/internal/errors"
-	"github.com/autobrr/upbrr/internal/paths"
-	"github.com/autobrr/upbrr/internal/pathutil"
+	pathutil "github.com/autobrr/upbrr/internal/pathing"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/services/screenshots"
 	"github.com/autobrr/upbrr/pkg/api"
 )

@@ -9,7 +9,7 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
-func TestBuildCBRName(t *testing.T) {
+func TestFormatLocalizedName(t *testing.T) {
 	tests := []struct {
 		name      string
 		meta      api.PreparedMetadata
@@ -265,8 +265,8 @@ func TestBuildCBRName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := BuildCBRName(tt.meta, tt.customTag); got != tt.want {
-				t.Errorf("BuildCBRName() = %q, want %q", got, tt.want)
+			if got := FormatLocalizedName(tt.meta, tt.customTag); got != tt.want {
+				t.Errorf("FormatLocalizedName() = %q, want %q", got, tt.want)
 			}
 		})
 	}

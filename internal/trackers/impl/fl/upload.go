@@ -25,7 +25,6 @@ import (
 	"github.com/autobrr/upbrr/internal/cookies"
 	"github.com/autobrr/upbrr/internal/httpclient"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -329,7 +328,7 @@ func downloadPersonalizedTorrent(ctx context.Context, client *http.Client, id st
 }
 
 func buildDescription(assets trackers.DescriptionAssets) string {
-	return bbcode.FinalizeTrackerDescription("FL", strings.TrimSpace(assets.Description))
+	return finalizeDescription(strings.TrimSpace(assets.Description))
 }
 
 func buildQuestionnaire(meta api.PreparedMetadata, computedName string) *api.TrackerQuestionnaire {

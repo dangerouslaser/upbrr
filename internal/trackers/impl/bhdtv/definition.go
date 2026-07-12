@@ -47,3 +47,8 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 		Description: description,
 	}, nil
 }
+
+// Search reports BHDTV's existing manual duplicate-check requirement.
+func (d *Definition) Search(_ context.Context, _ api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
+	return []api.DupeEntry{{Name: "Dupes must be checked Manually"}}, []string{"BHDTV API dupe search is not available; manual check required"}, nil
+}

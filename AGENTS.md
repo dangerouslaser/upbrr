@@ -45,7 +45,10 @@ Before commit, also run `git diff --check`, changed-package `make gofix-check-ch
 
 ## Repo Map
 
-- CLI `cmd/upbrr`; core `internal/core`; services `internal/services`; trackers `internal/trackers`; config `internal/config`.
+- CLI `cmd/upbrr`; core `internal/core`; config `internal/config`; remaining domain services `internal/services`.
+- Tracker contracts/orchestration `internal/trackers`; implementations `internal/trackers/impl`; Unit3D sites `internal/trackers/impl/unit3d/sites`.
+- Tracker auth/dupe/data coordinators `internal/trackers/{auth,dupe,data}`; generic BBCode/description/image hosting `internal/{bbcode,description,imagehosting}`.
+- Paths `internal/pathing` with `layout` and checker-only `policy`; torrent clients `internal/torrentclient`; metainfo `internal/torrent/metainfo`; release policy `internal/releasepolicy`.
 - Wails `gui`, `internal/guiapp`; embedded web/API `internal/webserver`; API contracts `pkg/api`; frontend `gui/frontend`.
 
 ## Logging Levels

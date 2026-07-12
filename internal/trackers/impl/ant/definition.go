@@ -6,9 +6,12 @@ package ant
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/autobrr/upbrr/internal/trackers"
+	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -20,6 +23,36 @@ func New() *Definition {
 
 func (d *Definition) Name() string {
 	return "ANT"
+}
+
+func (d *Definition) Rules() *ruletypes.RuleSet {
+	return &ruletypes.RuleSet{RequireMovieOnly: true}
+}
+
+func (d *Definition) ArtifactPolicy() *trackers.ArtifactPolicy {
+	return &trackers.ArtifactPolicy{MaxPieceSizeMiB: 128, MaxTorrentBytes: 250 << 10}
+}
+
+func (d *Definition) BannedGroups() []string {
+	groups := slices.Collect(maps.Keys(antBannedReleaseGroups))
+	slices.Sort(groups)
+	return groups
+}
+
+func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
+	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeMovie, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB}}}}
+}
+
+func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
+	return &trackers.UploadArtifactPolicy{Source: "ANT"}
+}
+
+func (d *Definition) DupePolicy() *trackers.DupePolicy {
+	return &trackers.DupePolicy{DolbyVisionImpliesHDR: true}
+}
+
+func (d *Definition) AudioPolicy() *trackers.AudioPolicy {
+	return &trackers.AudioPolicy{AllowedLanguages: []string{"english"}, BlockEnglishOriginalWithForeign: true}
 }
 
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {
@@ -41,6 +74,7 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 	if err != nil {
 		assets = trackers.DescriptionAssets{}
 	}
+	assets.Description = trackers.StripDefaultDescriptionSignature(assets.Description)
 
 	description := buildDescription(trackers.UploadRequest{
 		Tracker:       req.Tracker,

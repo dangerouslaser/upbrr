@@ -15,7 +15,6 @@ import (
 
 	"github.com/autobrr/upbrr/internal/cookies"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -179,7 +178,7 @@ func buildDescription(meta api.PreparedMetadata, assets trackers.DescriptionAsse
 		parts = append(parts, shots)
 	}
 	parts = append(parts, "[right][url=https://github.com/autobrr/upbrr][size=1]upbrr[/size][/url][/right]")
-	return bbcode.FinalizeTrackerDescription("PTS", strings.TrimSpace(strings.Join(parts, "\n\n")))
+	return finalizeDescription(strings.TrimSpace(strings.Join(parts, "\n\n")))
 }
 
 func buildQuestionnaire(meta api.PreparedMetadata) *api.TrackerQuestionnaire {
@@ -238,7 +237,7 @@ func resolveType(meta api.PreparedMetadata) string {
 }
 
 func sanitizeDescription(input string) string {
-	return bbcode.FinalizeTrackerDescription("PTS", input)
+	return finalizeDescription(input)
 }
 
 func screenshotBlock(images []api.ScreenshotImage) string {

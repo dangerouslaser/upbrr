@@ -4,8 +4,6 @@
 package additional
 
 import (
-	"context"
-	"fmt"
 	"strings"
 
 	"github.com/autobrr/upbrr/pkg/api"
@@ -25,183 +23,12 @@ var resolutionOrder = map[string]int{
 	"8640p": 11,
 }
 
-func checkLUMEResolution(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	if isDiscType(meta.DiscType) {
-		return Pass()
-	}
-
-	resolution := resolveResolution(meta)
-	if resolution == "" {
-		return Fail("LUME requires a known resolution")
-	}
-	if resolutionOrder[resolution] < resolutionOrder["720p"] {
-		return Fail("LUME only allows SD releases when the content does not have a higher resolution release.")
-	}
-	return Pass()
-}
-
-func checkLUMERequirements(ctx context.Context, meta api.PreparedMetadata, logger api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	if !isDiscType(meta.DiscType) && !strings.EqualFold(strings.TrimSpace(meta.Container), "mkv") {
-		return Fail("LUME only allows MKV containers for non-disc uploads.")
-	}
-	return checkLUMEResolution(ctx, meta, logger)
-}
-
-func checkBHDRequirements(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	switch resolveType(meta) {
-	case "REMUX", "ENCODE", "WEBDL", "WEBRIP":
-		container := strings.ToLower(strings.TrimSpace(meta.Container))
-		if container != "" && container != "mkv" && container != "mp4" {
-			return Fail(fmt.Sprintf("Container %q is not allowed for %s. Only MKV and MP4 are permitted.", meta.Container, resolveType(meta)))
-		}
-	}
-	return Pass()
-}
-
-func checkBLUContainer(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	if isDiscType(meta.DiscType) {
-		return Pass()
-	}
-
-	container := strings.ToLower(strings.TrimSpace(meta.Container))
-	if container == "" {
-		return Pass()
-	}
-
-	allowed := []string{"mkv"}
-	typeValue := resolveType(meta)
-	if typeValue == "HDTV" {
-		allowed = append(allowed, "ts")
-	}
-	if (typeValue == "WEBDL" || typeValue == "HDTV") && isDolbyVisionOnly(meta) {
-		allowed = append(allowed, "mp4")
-	}
-	if containsAny([]string{container}, allowed) {
-		return Pass()
-	}
-	return Fail("BLU requires one of the following containers for this release: " + strings.ToUpper(strings.Join(allowed, ", ")))
-}
-
 func isDolbyVisionOnly(meta api.PreparedMetadata) bool {
 	if meta.WebDV {
 		return true
 	}
 	hdr := strings.ToUpper(strings.TrimSpace(meta.HDR))
 	return strings.Contains(hdr, "DV") && !strings.Contains(hdr, "HDR")
-}
-
-func checkOTWGenres(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	genres := collectGenres(meta)
-	if !containsAny(genres, []string{"animation", "family"}) {
-		return Fail("Genre does not match Animation or Family for OTW.")
-	}
-
-	if isAdultContent(meta) {
-		return Fail("Adult animation not allowed at OTW.")
-	}
-
-	if containsAny(genres, []string{"reality", "game show", "game-show", "reality tv", "reality television"}) {
-		return Fail("Reality / Game Show content not allowed at OTW.")
-	}
-
-	typeValue := resolveType(meta)
-	group := resolveGroup(meta)
-	if group != "" && typeValue != "WEBDL" && !isDiscType(meta.DiscType) {
-		restricted := map[string]bool{"CMRG": true, "EVO": true, "TERMINAL": true, "VISION": true}
-		if restricted[strings.ToUpper(group)] {
-			return Fail(fmt.Sprintf("Group %s is only allowed for raw type content at OTW", group))
-		}
-	}
-
-	return Pass()
-}
-
-func checkSHRIRegion(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	if !strings.EqualFold(strings.TrimSpace(meta.DiscType), "DVD") && !strings.EqualFold(strings.TrimSpace(meta.DiscType), "HDDVD") {
-		return Pass()
-	}
-	if strings.TrimSpace(meta.Region) == "" {
-		return Fail("Region required; skipping SHRI.")
-	}
-	return Pass()
-}
-
-func checkTTRSubtitleOnly(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	if !containsAny(normalizeStrings(meta.Release.Language), []string{"spanish", "es", "spa"}) {
-		return Fail("TTR requires at least one Spanish audio or subtitle track.")
-	}
-	return Pass()
-}
-
-func checkULCXRules(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) Result {
-	select {
-	case <-ctx.Done():
-		return Fail(fmt.Errorf("context canceled: %w", ctx.Err()).Error())
-	default:
-	}
-
-	keywords := collectKeywords(meta)
-	if containsAny(keywords, []string{"concert"}) {
-		return Fail("Concerts not allowed at ULCX.")
-	}
-
-	resolution := resolveResolution(meta)
-	if strings.EqualFold(strings.TrimSpace(meta.VideoCodec), "HEVC") && resolution != "2160p" && !isAnimation(meta) && !isAnime(meta) {
-		return Fail("This content might not fit HEVC rules for ULCX.")
-	}
-
-	typeValue := resolveType(meta)
-	if (typeValue == "ENCODE" || typeValue == "HDTV") && resolutionOrder[resolution] < resolutionOrder["720p"] {
-		return Fail("Encodes must be at least 720p resolution for ULCX.")
-	}
-
-	if typeValue == "DVDRIP" {
-		return Fail("DVDRIPs are not allowed for ULCX.")
-	}
-
-	return Pass()
 }
 
 func resolveResolution(meta api.PreparedMetadata) string {

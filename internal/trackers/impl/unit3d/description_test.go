@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/autobrr/upbrr/internal/config"
-	"github.com/autobrr/upbrr/internal/paths"
+	paths "github.com/autobrr/upbrr/internal/pathing/layout"
 	"github.com/autobrr/upbrr/internal/services/db"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -370,29 +370,6 @@ func TestBuildUnit3DDescriptionSkipsTonemapHeaderForNonHDR(t *testing.T) {
 	}
 }
 
-func TestBuildUnit3DDescriptionACMTransformsBaseDescription(t *testing.T) {
-	meta := api.PreparedMetadata{
-		Type:            "WEBDL",
-		ServiceLongName: "Netflix",
-	}
-	result, err := buildUnit3DDescription(context.Background(), "ACM", meta, config.Config{}, config.TrackerConfig{}, api.NopLogger{}, "[pre]x[/pre]\n[hide=test]y[/hide]\n[img]https://img.example/z.png[/img]", nil, nil)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(result, "[code]x[/code]") {
-		t.Fatalf("expected pre converted to code, got %q", result)
-	}
-	if !strings.Contains(result, "[spoiler=test]y[/spoiler]") {
-		t.Fatalf("expected hide converted to spoiler, got %q", result)
-	}
-	if !strings.Contains(result, "not transcoded, just remuxed from the direct Netflix stream") {
-		t.Fatalf("expected ACM web source header, got %q", result)
-	}
-	if !strings.Contains(result, "[img=300]https://img.example/z.png[/img]") {
-		t.Fatalf("expected img resize normalization, got %q", result)
-	}
-}
-
 func TestBuildUnit3DDescriptionFinalizesUnit3DBBCode(t *testing.T) {
 	meta := api.PreparedMetadata{}
 	kept := "[hide=Extras]notes[/hide]\n[user]name[/user]\n[comparison=Source, Encode]https://img.example/a.png https://img.example/b.png[/comparison]"
@@ -412,37 +389,6 @@ func TestBuildUnit3DDescriptionFinalizesUnit3DBBCode(t *testing.T) {
 	}
 	if !strings.Contains(result, "https://img.example/a.png https://img.example/b.png[/comparison]") {
 		t.Fatalf("expected comparison images preserved, got %q", result)
-	}
-}
-
-func TestBuildUnit3DDescriptionAddsSHRIIslandReleaseNotes(t *testing.T) {
-	meta := api.PreparedMetadata{
-		Release: api.ReleaseInfo{Group: "island"},
-	}
-
-	result, err := buildUnit3DDescription(context.Background(), "SHRI", meta, config.Config{}, config.TrackerConfig{}, api.NopLogger{}, "Base description", nil, nil)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(result, "Release Shareisland 🏴‍☠️") {
-		t.Fatalf("expected Shareisland notes, got %q", result)
-	}
-	if !strings.Contains(result, "Base description") {
-		t.Fatalf("expected base description to be preserved, got %q", result)
-	}
-}
-
-func TestBuildUnit3DDescriptionSkipsSHRIIslandReleaseNotesForOtherGroups(t *testing.T) {
-	meta := api.PreparedMetadata{
-		Release: api.ReleaseInfo{Group: "other"},
-	}
-
-	result, err := buildUnit3DDescription(context.Background(), "SHRI", meta, config.Config{}, config.TrackerConfig{}, api.NopLogger{}, "Base description", nil, nil)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if strings.Contains(result, "Release Shareisland") {
-		t.Fatalf("did not expect Shareisland notes, got %q", result)
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/anacrolix/torrent/metainfo"
 
+	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
@@ -24,9 +25,14 @@ type trackerTorrentPolicy struct {
 	maxTorrentBytes int64
 }
 
-func resolveTrackerPolicy(meta api.PreparedMetadata) *trackerTorrentPolicy {
-	if hasTracker(meta.Trackers, []string{"ANT"}) {
-		return antTorrentPolicy()
+func resolveTrackerPolicy(meta api.PreparedMetadata, registry *trackers.Registry) *trackerTorrentPolicy {
+	for _, name := range meta.Trackers {
+		artifact, ok := registry.LookupArtifactPolicy(name)
+		if !ok {
+			continue
+		}
+		maxPieceExp, _ := pieceExpForMiB(artifact.MaxPieceSizeMiB)
+		return &trackerTorrentPolicy{name: strings.ToUpper(strings.TrimSpace(name)), maxPieceExp: maxPieceExp, maxTorrentBytes: artifact.MaxTorrentBytes}
 	}
 	if hasTracker(meta.Trackers, []string{"PTP"}) {
 		return &trackerTorrentPolicy{
@@ -43,12 +49,6 @@ func resolveTrackerPolicy(meta api.PreparedMetadata) *trackerTorrentPolicy {
 				{maxSize: 14234 << 20, pieceExp: 23},
 				{maxSize: ^uint64(0), pieceExp: 24},
 			},
-		}
-	}
-	if hasTracker(meta.Trackers, []string{"HDB"}) {
-		return &trackerTorrentPolicy{
-			name:        "HDB",
-			maxPieceExp: 24,
 		}
 	}
 	return nil

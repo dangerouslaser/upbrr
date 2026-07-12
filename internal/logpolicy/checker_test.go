@@ -3321,7 +3321,7 @@ func safe(req *http.Request, apiKey string) {
 }
 `
 	fset, file := parsePolicyFixture(t, content)
-	violations := checkUnit3DQueryCredentialAuth(fset, "internal/trackerdata/unit3d.go", file, nil)
+	violations := checkUnit3DQueryCredentialAuth(fset, "internal/trackers/data/unit3d.go", file, nil)
 	if len(violations) != 1 {
 		t.Fatalf("expected 1 violation, got %d: %#v", len(violations), violations)
 	}

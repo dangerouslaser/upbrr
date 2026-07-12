@@ -7,7 +7,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -20,6 +22,35 @@ func New() *Definition {
 
 func (d *Definition) Name() string {
 	return "BHD"
+}
+
+func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
+	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeMovie, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDB}}}}
+}
+
+func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
+	return &trackers.UploadArtifactPolicy{Source: "BHD"}
+}
+
+func (d *Definition) AudioPolicy() *trackers.AudioPolicy {
+	return &trackers.AudioPolicy{BlockEnglishOriginalWithForeign: true}
+}
+
+func (d *Definition) DupePolicy() *trackers.DupePolicy {
+	return &trackers.DupePolicy{MatchAggregateSize: true, NormalizeDDPlusName: true, SDMatchesHD: true, CompareDVDResolution: true, AllowSizeVariance1080: true}
+}
+
+func (d *Definition) BannedGroups() []string {
+	return []string{
+		"Sicario", "TOMMY", "x0r", "nikt0", "FGT", "d3g", "MeGusta", "YIFY", "tigole", "TEKNO3D",
+		"C4K", "RARBG", "4K4U", "EASports", "ReaLHD", "Telly", "AOC", "WKS", "SasukeducK", "CRUCiBLE",
+		"iFT", "ProRes", "MezRips", "Flights", "BiTOR", "iVy", "QxR", "SyncUP", "OFT", "TGS",
+	}
+}
+
+func (d *Definition) DataLookupConfigured(cfg config.Config) bool {
+	entry, _ := bhdConfig(cfg)
+	return len(strings.TrimSpace(entry.APIKey)) >= minDataTokenLength && len(strings.TrimSpace(entry.BhdRSSKey)) >= minDataTokenLength
 }
 
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {

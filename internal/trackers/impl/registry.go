@@ -5,7 +5,9 @@ package impl
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/autobrr/upbrr/internal/config"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/ant"
 	"github.com/autobrr/upbrr/internal/trackers/impl/ar"
@@ -35,11 +37,65 @@ import (
 	"github.com/autobrr/upbrr/internal/trackers/impl/tl"
 	"github.com/autobrr/upbrr/internal/trackers/impl/tvc"
 	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/a4k"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/acm"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/aither"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/blu"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/cbr"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/dp"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/emuw"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/friki"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/hhd"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/ihd"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/itt"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/lcd"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/ldu"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/lst"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/lt"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/lume"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/mns"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/oe"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/otw"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/pt"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/ptt"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/r4e"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/ras"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/rf"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/rhd"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/sam"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/shri"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/sp"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/stc"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/tik"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/tlz"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/tos"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/ttr"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/ulcx"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/utp"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/yus"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/sites/znth"
+	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 )
+
+func withRules(profile unit3d.Profile, rules *ruletypes.RuleSet) unit3d.Profile {
+	profile.Rules = rules
+	return profile
+}
+
+func withBannedGroups(profile unit3d.Profile, groups []string) unit3d.Profile {
+	profile.BannedGroups = append([]string(nil), groups...)
+	return profile
+}
 
 func NewRegistry() (*trackers.Registry, error) {
 	registry := trackers.NewRegistry()
-	if err := unit3d.Register(registry, unit3d.DefaultTrackers()); err != nil {
+	profiles := []unit3d.Profile{
+		withRules(withBannedGroups(a4k.Profile(), a4k.BannedGroups()), a4k.Rules()), acm.Profile(), withRules(aither.Profile(), aither.Rules()), withRules(withBannedGroups(blu.Profile(), blu.BannedGroups()), blu.Rules()), withBannedGroups(cbr.Profile(), cbr.BannedGroups()), withRules(withBannedGroups(dp.Profile(), dp.BannedGroups()), dp.Rules()), emuw.Profile(), friki.Profile(), withRules(withBannedGroups(hhd.Profile(), hhd.BannedGroups()), hhd.Rules()), ihd.Profile(), itt.Profile(), lcd.Profile(), ldu.Profile(), withBannedGroups(lt.Profile(), lt.BannedGroups()),
+		withRules(lume.Profile(), lume.Rules()), withRules(lst.Profile(), lst.Rules()), withRules(mns.Profile(), mns.Rules()), pt.Profile(), withBannedGroups(ptt.Profile(), ptt.BannedGroups()), r4e.Profile(), withRules(withBannedGroups(ras.Profile(), ras.BannedGroups()), ras.Rules()), withRules(rf.Profile(), rf.Rules()), withRules(withBannedGroups(rhd.Profile(), rhd.BannedGroups()), rhd.Rules()), sam.Profile(),
+		withRules(withBannedGroups(oe.Profile(), oe.BannedGroups()), oe.Rules()), withRules(withBannedGroups(otw.Profile(), otw.BannedGroups()), otw.Rules()), withRules(shri.Profile(), shri.Rules()), withRules(sp.Profile(), sp.Rules()), withRules(stc.Profile(), stc.Rules()), withRules(tik.Profile(), tik.Rules()), tlz.Profile(), withRules(withBannedGroups(tos.Profile(), tos.BannedGroups()), tos.Rules()), withRules(ttr.Profile(), ttr.Rules()), withRules(withBannedGroups(ulcx.Profile(), ulcx.BannedGroups()), ulcx.Rules()), withRules(znth.Profile(), znth.Rules()),
+		utp.Profile(), withBannedGroups(yus.Profile(), yus.BannedGroups()),
+	}
+	if err := unit3d.RegisterProfiles(registry, profiles); err != nil {
 		return nil, fmt.Errorf("trackers: %w", err)
 	}
 	if err := registry.Register(hdb.New()); err != nil {
@@ -123,6 +179,32 @@ func NewRegistry() (*trackers.Registry, error) {
 	for _, name := range []string{"AZ", "CZ", "PHD"} {
 		if err := registry.Register(azfamily.New(name)); err != nil {
 			return nil, fmt.Errorf("trackers: %w", err)
+		}
+	}
+	registry.SetPriorityOrder([]string{"aither", "ulcx", "lst", "blu", "oe", "btn", "bhd", "hdb", "ant", "rf", "otw", "yus", "dp", "sp", "ptp"})
+	return registry, nil
+}
+
+// NewRegistryWithConfig composes built-in definitions and configured custom
+// Unit3D trackers. Runtime config URLs remain authoritative in the Unit3D client.
+func NewRegistryWithConfig(cfg config.Config) (*trackers.Registry, error) {
+	registry, err := NewRegistry()
+	if err != nil {
+		return nil, err
+	}
+	for name := range cfg.Trackers.Trackers {
+		normalized := strings.ToUpper(strings.TrimSpace(name))
+		if normalized == "" {
+			continue
+		}
+		if _, exists := registry.LookupDescriptor(normalized); exists {
+			continue
+		}
+		if !unit3d.IsConfiguredTrackerWithRegistry(cfg, normalized, registry) {
+			continue
+		}
+		if err := registry.Register(unit3d.New(normalized)); err != nil {
+			return nil, fmt.Errorf("trackers: register custom unit3d %s: %w", normalized, err)
 		}
 	}
 	return registry, nil

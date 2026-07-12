@@ -20,7 +20,6 @@ import (
 	"github.com/autobrr/upbrr/internal/cookies"
 	"github.com/autobrr/upbrr/internal/httpclient"
 	"github.com/autobrr/upbrr/internal/metadata/metautil"
-	"github.com/autobrr/upbrr/internal/services/bbcode"
 	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/internal/trackers/impl/commonhttp"
 	"github.com/autobrr/upbrr/pkg/api"
@@ -219,7 +218,7 @@ func resolveCookies(ctx context.Context, logger api.Logger, cfg config.TrackerCo
 
 func buildDescription(assets trackers.DescriptionAssets) string {
 	if strings.TrimSpace(assets.Description) != "" {
-		return bbcode.FinalizeTrackerDescription("FF", strings.TrimSpace(assets.Description))
+		return finalizeDescription(strings.TrimSpace(assets.Description))
 	}
 	return ""
 }

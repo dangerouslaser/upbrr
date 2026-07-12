@@ -6,11 +6,21 @@ package metadata
 import (
 	"testing"
 
+	"github.com/autobrr/upbrr/internal/trackers"
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
+func sourceLookupRegistry(t *testing.T) *trackers.Registry {
+	t.Helper()
+	registry := trackers.NewRegistry()
+	if err := registry.RegisterDescriptor(trackers.Descriptor{Name: "AITHER", Kind: trackers.KindUnit3D, BaseURL: "https://aither.cc", Definition: aitherRuleDefinition{}}); err != nil {
+		t.Fatalf("register source tracker: %v", err)
+	}
+	return registry
+}
+
 func TestResolveSourceLookupURLTracker(t *testing.T) {
-	result, err := resolveSourceLookupURL("https://aither.cc/torrents/12345")
+	result, err := resolveSourceLookupURLWithRegistry("https://aither.cc/torrents/12345", sourceLookupRegistry(t))
 	if err != nil {
 		t.Fatalf("resolve tracker url: %v", err)
 	}
@@ -79,7 +89,7 @@ func TestApplySourceLookupOverrideTracker(t *testing.T) {
 		Trackers:        []string{"ANT", "AITHER"},
 	}
 
-	applySourceLookupOverride(&meta)
+	applySourceLookupOverrideWithRegistry(&meta, sourceLookupRegistry(t))
 
 	if !meta.SourceLookupActive {
 		t.Fatalf("expected source lookup to be active")

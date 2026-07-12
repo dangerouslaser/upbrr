@@ -10,7 +10,20 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "OE", BaseURL: "https://onlyencodes.cc", Site: unit3d.SiteProfile{BuildName: buildName, ResolveTypeID: typeID}, DupePolicy: &trackers.DupePolicy{AllowSizeVariance1080: true}, ImageHost: &trackers.ImageHostPolicy{AllowedHosts: []string{"imgbox", "imgbb", "onlyimage", "ptscreens", "passtheimage"}}}
+	return unit3d.Profile{
+		Name:    "OE",
+		BaseURL: "https://onlyencodes.cc",
+		Site: unit3d.SiteProfile{
+			BuildName:     buildName,
+			ResolveTypeID: typeID,
+		},
+		DupePolicy: &trackers.DupePolicy{
+			AllowSizeVariance1080: true,
+		},
+		ImageHost: &trackers.ImageHostPolicy{
+			AllowedHosts: []string{"imgbox", "imgbb", "onlyimage", "ptscreens", "passtheimage"},
+		},
+	}
 }
 func buildName(meta api.PreparedMetadata, _ config.TrackerConfig) string {
 	name := strings.TrimSpace(meta.ReleaseName)

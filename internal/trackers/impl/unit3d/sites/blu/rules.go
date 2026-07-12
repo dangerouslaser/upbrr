@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/additional"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d"
 	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -19,7 +19,7 @@ func checkContainer(ctx context.Context, meta api.PreparedMetadata, _ api.Logger
 	if err := ctx.Err(); err != nil {
 		return ruletypes.Fail(fmt.Errorf("context canceled: %w", err).Error())
 	}
-	if additional.DiscType(meta.DiscType) {
+	if unit3d.IsDiscType(meta.DiscType) {
 		return ruletypes.Pass()
 	}
 	container := strings.ToLower(strings.TrimSpace(meta.Container))
@@ -27,14 +27,14 @@ func checkContainer(ctx context.Context, meta api.PreparedMetadata, _ api.Logger
 		return ruletypes.Pass()
 	}
 	allowed := []string{"mkv"}
-	typeValue := additional.Type(meta)
+	typeValue := unit3d.RuleType(meta)
 	if typeValue == "HDTV" {
 		allowed = append(allowed, "ts")
 	}
-	if (typeValue == "WEBDL" || typeValue == "HDTV") && additional.DolbyVisionOnly(meta) {
+	if (typeValue == "WEBDL" || typeValue == "HDTV") && unit3d.DolbyVisionOnly(meta) {
 		allowed = append(allowed, "mp4")
 	}
-	if additional.Contains([]string{container}, allowed) {
+	if unit3d.ContainsRuleValue([]string{container}, allowed) {
 		return ruletypes.Pass()
 	}
 	return ruletypes.Fail("BLU requires one of the following containers for this release: " + strings.ToUpper(strings.Join(allowed, ", ")))

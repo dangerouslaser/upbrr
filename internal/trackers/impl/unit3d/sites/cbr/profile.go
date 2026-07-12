@@ -13,7 +13,14 @@ import (
 
 // Profile returns CBR's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "CBR", BaseURL: "https://capybarabr.com", Site: unit3d.SiteProfile{BuildName: buildName, ResolveCategoryID: categoryID}}
+	return unit3d.Profile{
+		Name:    "CBR",
+		BaseURL: "https://capybarabr.com",
+		Site: unit3d.SiteProfile{
+			BuildName:         buildName,
+			ResolveCategoryID: categoryID,
+		},
+	}
 }
 func buildName(meta api.PreparedMetadata, cfg config.TrackerConfig) string {
 	return unit3d.FormatLocalizedName(meta, cfg.TagForCustomRelease)

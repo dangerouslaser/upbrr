@@ -10,7 +10,22 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "RF", BaseURL: "https://reelflix.cc", Site: unit3d.SiteProfile{BuildName: buildName, ResolveTypeID: typeID, ResolveResolutionID: resolutionID}, DupePolicy: &trackers.DupePolicy{RequireReleaseGroup: true}, ImageHost: &trackers.ImageHostPolicy{ConditionalHost: "reelflix", EnableWhenConfigured: true}}
+	return unit3d.Profile{
+		Name:    "RF",
+		BaseURL: "https://reelflix.cc",
+		Site: unit3d.SiteProfile{
+			BuildName:           buildName,
+			ResolveTypeID:       typeID,
+			ResolveResolutionID: resolutionID,
+		},
+		DupePolicy: &trackers.DupePolicy{
+			RequireReleaseGroup: true,
+		},
+		ImageHost: &trackers.ImageHostPolicy{
+			ConditionalHost:      "reelflix",
+			EnableWhenConfigured: true,
+		},
+	}
 }
 func buildName(meta api.PreparedMetadata, _ config.TrackerConfig) string {
 	return addNoGroup(meta, "NoGroup")

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/additional"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d"
 	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -21,15 +21,15 @@ func checkRules(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) ru
 	if err := ctx.Err(); err != nil {
 		return ruletypes.Fail(fmt.Errorf("context canceled: %w", err).Error())
 	}
-	if additional.Contains(additional.Keywords(meta), []string{"concert"}) {
+	if unit3d.ContainsRuleValue(unit3d.RuleKeywords(meta), []string{"concert"}) {
 		return ruletypes.Fail("Concerts not allowed at ULCX.")
 	}
-	resolution := additional.Resolution(meta)
-	if strings.EqualFold(strings.TrimSpace(meta.VideoCodec), "HEVC") && resolution != "2160p" && !additional.Animation(meta) && !additional.Anime(meta) {
+	resolution := unit3d.Resolution(meta)
+	if strings.EqualFold(strings.TrimSpace(meta.VideoCodec), "HEVC") && resolution != "2160p" && !unit3d.Animation(meta) && !unit3d.Anime(meta) {
 		return ruletypes.Fail("This content might not fit HEVC rules for ULCX.")
 	}
-	typeValue := additional.Type(meta)
-	if (typeValue == "ENCODE" || typeValue == "HDTV") && additional.ResolutionBelow(resolution, "720p") {
+	typeValue := unit3d.RuleType(meta)
+	if (typeValue == "ENCODE" || typeValue == "HDTV") && unit3d.ResolutionBelow(resolution, "720p") {
 		return ruletypes.Fail("Encodes must be at least 720p resolution for ULCX.")
 	}
 	if typeValue == "DVDRIP" {

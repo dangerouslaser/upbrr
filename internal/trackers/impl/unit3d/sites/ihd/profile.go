@@ -12,9 +12,14 @@ import (
 
 // Profile returns IHD's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "IHD", BaseURL: "https://infinityhd.net", Site: unit3d.SiteProfile{
-		ResolveResolutionID: resolutionID, ResolveCategoryID: categoryID,
-	}}
+	return unit3d.Profile{
+		Name:    "IHD",
+		BaseURL: "https://infinityhd.net",
+		Site: unit3d.SiteProfile{
+			ResolveResolutionID: resolutionID,
+			ResolveCategoryID:   categoryID,
+		},
+	}
 }
 
 func categoryID(meta api.PreparedMetadata) string {

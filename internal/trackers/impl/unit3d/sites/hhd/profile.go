@@ -7,5 +7,8 @@ import "github.com/autobrr/upbrr/internal/trackers/impl/unit3d"
 
 // Profile returns HHD's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "HHD", BaseURL: "https://homiehelpdesk.net"}
+	return unit3d.Profile{
+		Name:    "HHD",
+		BaseURL: "https://homiehelpdesk.net",
+	}
 }

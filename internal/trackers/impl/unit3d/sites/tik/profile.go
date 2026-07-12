@@ -12,7 +12,14 @@ import (
 
 // Profile returns TIK's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "TIK", BaseURL: "https://cinematik.net", Site: unit3d.SiteProfile{ResolveTypeID: typeID, ResolveCategoryID: categoryID}}
+	return unit3d.Profile{
+		Name:    "TIK",
+		BaseURL: "https://cinematik.net",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID:     typeID,
+			ResolveCategoryID: categoryID,
+		},
+	}
 }
 
 func typeID(meta api.PreparedMetadata) string {

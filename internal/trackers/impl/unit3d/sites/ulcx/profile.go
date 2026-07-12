@@ -14,7 +14,16 @@ import (
 
 // Profile returns ULCX's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "ULCX", BaseURL: "https://upload.cx", Site: unit3d.SiteProfile{BuildName: buildName}, DupePolicy: &trackers.DupePolicy{AllowSizeVariance1080: true}}
+	return unit3d.Profile{
+		Name:    "ULCX",
+		BaseURL: "https://upload.cx",
+		Site: unit3d.SiteProfile{
+			BuildName: buildName,
+		},
+		DupePolicy: &trackers.DupePolicy{
+			AllowSizeVariance1080: true,
+		},
+	}
 }
 func buildName(meta api.PreparedMetadata, _ config.TrackerConfig) string {
 	name := strings.TrimSpace(meta.ReleaseName)

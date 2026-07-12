@@ -11,7 +11,13 @@ import (
 
 // Profile returns SAM's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "SAM", BaseURL: "https://samaritano.cc", Site: unit3d.SiteProfile{BuildName: buildName}}
+	return unit3d.Profile{
+		Name:    "SAM",
+		BaseURL: "https://samaritano.cc",
+		Site: unit3d.SiteProfile{
+			BuildName: buildName,
+		},
+	}
 }
 func buildName(meta api.PreparedMetadata, cfg config.TrackerConfig) string {
 	return unit3d.FormatLocalizedName(meta, cfg.TagForCustomRelease)

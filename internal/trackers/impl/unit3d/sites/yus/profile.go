@@ -6,7 +6,13 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "YUS", BaseURL: "https://yu-scene.net", Site: unit3d.SiteProfile{ResolveTypeID: typeID}}
+	return unit3d.Profile{
+		Name:    "YUS",
+		BaseURL: "https://yu-scene.net",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID: typeID,
+		},
+	}
 }
 func typeID(meta api.PreparedMetadata) string {
 	return map[string]string{"DISC": "17", "REMUX": "2", "WEBDL": "4", "WEBRIP": "5", "HDTV": "6", "ENCODE": "3"}[unit3d.InferType(meta)]

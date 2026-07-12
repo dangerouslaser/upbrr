@@ -13,7 +13,17 @@ import (
 
 // Profile returns TOS's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "TOS", BaseURL: "https://theoldschool.cc", UploadArtifact: &trackers.UploadArtifactPolicy{Source: "TheOldSchool"}, Site: unit3d.SiteProfile{ResolveTypeID: typeID, ResolveCategoryID: categoryID}}
+	return unit3d.Profile{
+		Name:    "TOS",
+		BaseURL: "https://theoldschool.cc",
+		UploadArtifact: &trackers.UploadArtifactPolicy{
+			Source: "TheOldSchool",
+		},
+		Site: unit3d.SiteProfile{
+			ResolveTypeID:     typeID,
+			ResolveCategoryID: categoryID,
+		},
+	}
 }
 
 func categoryID(meta api.PreparedMetadata) string {

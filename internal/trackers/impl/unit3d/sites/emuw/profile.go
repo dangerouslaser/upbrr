@@ -6,7 +6,14 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "EMUW", BaseURL: "https://emuwarez.com", Site: unit3d.SiteProfile{ResolveTypeID: typeID, ResolveResolutionID: resolutionID}}
+	return unit3d.Profile{
+		Name:    "EMUW",
+		BaseURL: "https://emuwarez.com",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID:       typeID,
+			ResolveResolutionID: resolutionID,
+		},
+	}
 }
 
 func typeID(meta api.PreparedMetadata) string {

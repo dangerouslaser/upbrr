@@ -9,7 +9,7 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
-func TestFormatLocalizedName(t *testing.T) {
+func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 	tests := []struct {
 		name      string
 		meta      api.PreparedMetadata

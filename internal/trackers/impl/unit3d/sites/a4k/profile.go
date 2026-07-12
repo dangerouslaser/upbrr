@@ -7,7 +7,17 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "A4K", BaseURL: "https://aura4k.net", Site: unit3d.SiteProfile{ResolveTypeID: typeID, ResolveResolutionID: resolutionID}, ImageHost: &trackers.ImageHostPolicy{AllowedHosts: []string{"onlyimage", "imgbox", "ptscreens", "imgbb", "imgur", "postimg"}}}
+	return unit3d.Profile{
+		Name:    "A4K",
+		BaseURL: "https://aura4k.net",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID:       typeID,
+			ResolveResolutionID: resolutionID,
+		},
+		ImageHost: &trackers.ImageHostPolicy{
+			AllowedHosts: []string{"onlyimage", "imgbox", "ptscreens", "imgbb", "imgur", "postimg"},
+		},
+	}
 }
 
 func typeID(meta api.PreparedMetadata) string {

@@ -158,11 +158,22 @@ var (
 
 // Profile returns ACM's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "ACM", BaseURL: "https://eiga.moi", DescriptionGroup: "acm", UploadArtifact: &trackers.UploadArtifactPolicy{Source: "AsianCinema"}, Site: unit3d.SiteProfile{
-		BuildName: buildName, BuildDescription: buildACMDescription, ResolveKeywords: resolveACMKeywords,
-		ResolveTypeID: resolveUnit3DACMTypeID, ResolveResolutionID: resolveUnit3DACMResolutionID,
-		ApplyAdditionalPayload: additionalPayload,
-	}}
+	return unit3d.Profile{
+		Name:             "ACM",
+		BaseURL:          "https://eiga.moi",
+		DescriptionGroup: "acm",
+		UploadArtifact: &trackers.UploadArtifactPolicy{
+			Source: "AsianCinema",
+		},
+		Site: unit3d.SiteProfile{
+			BuildName:              buildName,
+			BuildDescription:       buildACMDescription,
+			ResolveKeywords:        resolveACMKeywords,
+			ResolveTypeID:          resolveUnit3DACMTypeID,
+			ResolveResolutionID:    resolveUnit3DACMResolutionID,
+			ApplyAdditionalPayload: additionalPayload,
+		},
+	}
 }
 
 func buildName(meta api.PreparedMetadata, _ config.TrackerConfig) string { return buildACMName(meta) }

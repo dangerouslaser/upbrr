@@ -13,7 +13,15 @@ import (
 
 // Profile returns SHRI's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "SHRI", BaseURL: "https://shareisland.org", Site: unit3d.SiteProfile{ResolveTypeID: typeID, ApplyAdditionalPayload: additionalPayload, FinalizeDescription: finalizeDescription}}
+	return unit3d.Profile{
+		Name:    "SHRI",
+		BaseURL: "https://shareisland.org",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID:          typeID,
+			ApplyAdditionalPayload: additionalPayload,
+			FinalizeDescription:    finalizeDescription,
+		},
+	}
 }
 
 func typeID(meta api.PreparedMetadata) string {

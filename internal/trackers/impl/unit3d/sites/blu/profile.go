@@ -12,9 +12,15 @@ import (
 
 // Profile returns BLU's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "BLU", BaseURL: "https://blutopia.cc", Site: unit3d.SiteProfile{
-		ResolveTypeID: typeID, ResolveResolutionID: resolutionID, ResolveCategoryID: categoryID,
-	}}
+	return unit3d.Profile{
+		Name:    "BLU",
+		BaseURL: "https://blutopia.cc",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID:       typeID,
+			ResolveResolutionID: resolutionID,
+			ResolveCategoryID:   categoryID,
+		},
+	}
 }
 
 func categoryID(meta api.PreparedMetadata) string {

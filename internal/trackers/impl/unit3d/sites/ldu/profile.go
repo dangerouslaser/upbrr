@@ -13,7 +13,14 @@ import (
 
 // Profile returns LDU's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "LDU", BaseURL: "https://theldu.to", Site: unit3d.SiteProfile{BuildName: buildName, ResolveCategoryID: categoryID}}
+	return unit3d.Profile{
+		Name:    "LDU",
+		BaseURL: "https://theldu.to",
+		Site: unit3d.SiteProfile{
+			BuildName:         buildName,
+			ResolveCategoryID: categoryID,
+		},
+	}
 }
 
 func buildName(meta api.PreparedMetadata, _ config.TrackerConfig) string {

@@ -27,7 +27,14 @@ var (
 
 // Profile returns RHD's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "RHD", BaseURL: "https://rocket-hd.cc", Site: unit3d.SiteProfile{BuildName: buildName, ResolveResolutionID: resolutionID}}
+	return unit3d.Profile{
+		Name:    "RHD",
+		BaseURL: "https://rocket-hd.cc",
+		Site: unit3d.SiteProfile{
+			BuildName:           buildName,
+			ResolveResolutionID: resolutionID,
+		},
+	}
 }
 
 func tokenRegex(tokens ...string) *regexp.Regexp {

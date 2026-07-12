@@ -8,7 +8,13 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "TLZ", BaseURL: "https://tlzdigital.com", Site: unit3d.SiteProfile{ResolveTypeID: typeID}}
+	return unit3d.Profile{
+		Name:    "TLZ",
+		BaseURL: "https://tlzdigital.com",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID: typeID,
+		},
+	}
 }
 
 func typeID(meta api.PreparedMetadata) string {

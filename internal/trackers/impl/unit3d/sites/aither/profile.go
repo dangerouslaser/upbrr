@@ -15,7 +15,27 @@ import (
 
 // Profile returns AITHER's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "AITHER", BaseURL: "https://aither.cc", Site: unit3d.SiteProfile{BuildName: buildName, ApplyAdditionalPayload: additionalPayload}, DupePolicy: &trackers.DupePolicy{TrackTrumpableID: true, MatchDVDReleaseGroup: true, SDMatchesHD: true, AllowSizeVariance1080: true}, BannedPolicy: &trackers.BannedGroupPolicy{EndpointPath: "/api/blacklists/releasegroups", RequireAPIKey: true}, ClaimPolicy: &trackers.ClaimPolicy{APIBacked: true}}
+	return unit3d.Profile{
+		Name:    "AITHER",
+		BaseURL: "https://aither.cc",
+		Site: unit3d.SiteProfile{
+			BuildName:              buildName,
+			ApplyAdditionalPayload: additionalPayload,
+		},
+		DupePolicy: &trackers.DupePolicy{
+			TrackTrumpableID:      true,
+			MatchDVDReleaseGroup:  true,
+			SDMatchesHD:           true,
+			AllowSizeVariance1080: true,
+		},
+		BannedPolicy: &trackers.BannedGroupPolicy{
+			EndpointPath:  "/api/blacklists/releasegroups",
+			RequireAPIKey: true,
+		},
+		ClaimPolicy: &trackers.ClaimPolicy{
+			APIBacked: true,
+		},
+	}
 }
 
 func additionalPayload(req trackers.UploadRequest, data map[string]string) {

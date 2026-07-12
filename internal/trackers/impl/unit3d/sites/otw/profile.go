@@ -9,7 +9,16 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "OTW", BaseURL: "https://oldtoons.world", Site: unit3d.SiteProfile{ResolveTypeID: typeID}, DupePolicy: &trackers.DupePolicy{RejectEpisodeResolutionMismatch: true}}
+	return unit3d.Profile{
+		Name:    "OTW",
+		BaseURL: "https://oldtoons.world",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID: typeID,
+		},
+		DupePolicy: &trackers.DupePolicy{
+			RejectEpisodeResolutionMismatch: true,
+		},
+	}
 }
 
 func typeID(meta api.PreparedMetadata) string {

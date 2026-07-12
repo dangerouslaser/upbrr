@@ -6,4 +6,9 @@ package sp
 import "github.com/autobrr/upbrr/internal/trackers/impl/unit3d"
 
 // Profile returns SP's Unit3D site manifest.
-func Profile() unit3d.Profile { return unit3d.Profile{Name: "SP", BaseURL: "https://seedpool.org"} }
+func Profile() unit3d.Profile {
+	return unit3d.Profile{
+		Name:    "SP",
+		BaseURL: "https://seedpool.org",
+	}
+}

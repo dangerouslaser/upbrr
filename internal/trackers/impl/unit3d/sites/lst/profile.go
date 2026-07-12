@@ -12,7 +12,25 @@ import (
 
 // Profile returns LST's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "LST", BaseURL: "https://lst.gg", Site: unit3d.SiteProfile{ApplyAdditionalPayload: additionalPayload}, DupePolicy: &trackers.DupePolicy{TrackTrumpableID: true, MatchDVDReleaseGroup: true}, BannedPolicy: &trackers.BannedGroupPolicy{EndpointPath: "/api/bannedReleaseGroups", RequireAPIKey: true}, ImageHost: &trackers.ImageHostPolicy{ConditionalHost: "lostimg", EnableWithLostimg: true}}
+	return unit3d.Profile{
+		Name:    "LST",
+		BaseURL: "https://lst.gg",
+		Site: unit3d.SiteProfile{
+			ApplyAdditionalPayload: additionalPayload,
+		},
+		DupePolicy: &trackers.DupePolicy{
+			TrackTrumpableID:     true,
+			MatchDVDReleaseGroup: true,
+		},
+		BannedPolicy: &trackers.BannedGroupPolicy{
+			EndpointPath:  "/api/bannedReleaseGroups",
+			RequireAPIKey: true,
+		},
+		ImageHost: &trackers.ImageHostPolicy{
+			ConditionalHost:   "lostimg",
+			EnableWithLostimg: true,
+		},
+	}
 }
 
 func additionalPayload(req trackers.UploadRequest, data map[string]string) {

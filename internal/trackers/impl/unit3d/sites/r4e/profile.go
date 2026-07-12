@@ -8,7 +8,13 @@ import (
 )
 
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "R4E", BaseURL: "https://racing4everyone.eu", Site: unit3d.SiteProfile{ResolveCategoryID: categoryID}}
+	return unit3d.Profile{
+		Name:    "R4E",
+		BaseURL: "https://racing4everyone.eu",
+		Site: unit3d.SiteProfile{
+			ResolveCategoryID: categoryID,
+		},
+	}
 }
 func categoryID(meta api.PreparedMetadata) string {
 	genreIDs := ""

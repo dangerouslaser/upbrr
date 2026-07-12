@@ -13,9 +13,15 @@ import (
 
 // Profile returns PT's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "PT", BaseURL: "https://portugas.org", Site: unit3d.SiteProfile{
-		ResolveTypeID: typeID, ResolveResolutionID: resolutionID, ApplyAdditionalPayload: additionalPayload,
-	}}
+	return unit3d.Profile{
+		Name:    "PT",
+		BaseURL: "https://portugas.org",
+		Site: unit3d.SiteProfile{
+			ResolveTypeID:          typeID,
+			ResolveResolutionID:    resolutionID,
+			ApplyAdditionalPayload: additionalPayload,
+		},
+	}
 }
 
 func additionalPayload(req trackers.UploadRequest, data map[string]string) {

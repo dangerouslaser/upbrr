@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d/additional"
+	"github.com/autobrr/upbrr/internal/trackers/impl/unit3d"
 	"github.com/autobrr/upbrr/internal/trackers/ruletypes"
 	"github.com/autobrr/upbrr/pkg/api"
 )
@@ -21,17 +21,17 @@ func checkRequirements(ctx context.Context, meta api.PreparedMetadata, _ api.Log
 	if err := ctx.Err(); err != nil {
 		return ruletypes.Fail(fmt.Errorf("context canceled: %w", err).Error())
 	}
-	if !additional.DiscType(meta.DiscType) && !strings.EqualFold(strings.TrimSpace(meta.Container), "mkv") {
+	if !unit3d.IsDiscType(meta.DiscType) && !strings.EqualFold(strings.TrimSpace(meta.Container), "mkv") {
 		return ruletypes.Fail("LUME only allows MKV containers for non-disc uploads.")
 	}
-	if additional.DiscType(meta.DiscType) {
+	if unit3d.IsDiscType(meta.DiscType) {
 		return ruletypes.Pass()
 	}
-	resolution := additional.Resolution(meta)
+	resolution := unit3d.Resolution(meta)
 	if resolution == "" {
 		return ruletypes.Fail("LUME requires a known resolution")
 	}
-	if additional.ResolutionBelow(resolution, "720p") {
+	if unit3d.ResolutionBelow(resolution, "720p") {
 		return ruletypes.Fail("LUME only allows SD releases when the content does not have a higher resolution release.")
 	}
 	return ruletypes.Pass()

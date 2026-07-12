@@ -10,5 +10,11 @@ import (
 
 // Profile returns LUME's Unit3D site manifest.
 func Profile() unit3d.Profile {
-	return unit3d.Profile{Name: "LUME", BaseURL: "https://luminarr.me", BannedPolicy: &trackers.BannedGroupPolicy{TRaSHGuideURL: "https://raw.githubusercontent.com/TRaSH-Guides/Guides/refs/heads/master/docs/json/radarr/cf/lq.json"}}
+	return unit3d.Profile{
+		Name:    "LUME",
+		BaseURL: "https://luminarr.me",
+		BannedPolicy: &trackers.BannedGroupPolicy{
+			TRaSHGuideURL: "https://raw.githubusercontent.com/TRaSH-Guides/Guides/refs/heads/master/docs/json/radarr/cf/lq.json",
+		},
+	}
 }

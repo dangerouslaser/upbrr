@@ -47,7 +47,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	}
 	entries := make([]api.DupeEntry, 0)
 	for page := 0; page <= 10; page++ {
-		params := url.Values{"search": {fmt.Sprintf("tt%07d", meta.ExternalIDs.IMDBID)}, "blah": {"2"}, "incldead": {"1"}}
+		params := url.Values{
+			"search":   {fmt.Sprintf("tt%07d", meta.ExternalIDs.IMDBID)},
+			"blah":     {"2"},
+			"incldead": {"1"},
+		}
 		if page > 0 {
 			params.Set("page", strconv.Itoa(page))
 		}

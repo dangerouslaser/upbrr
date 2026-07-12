@@ -55,7 +55,13 @@ type dvdMenuCaptureJob struct {
 // StartDVDMenuCapture starts a session-owned background DVD menu capture job
 // using cached prepared metadata. The returned job continues after the request
 // context ends and emits dvdmenu:job:<jobID> only to the owning session.
-func (b *Backend) StartDVDMenuCapture(ctx context.Context, sessionID string, path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides) (string, error) {
+func (b *Backend) StartDVDMenuCapture(
+	ctx context.Context,
+	sessionID string,
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+) (string, error) {
 	rt, err := b.requireRuntime()
 	if err != nil {
 		return "", err
@@ -168,7 +174,11 @@ func (b *Backend) CancelDVDMenuCapture(sessionID string, jobID string) error {
 
 // ListDVDMenuScreenshots returns persisted manual and automatic menu images for
 // one host filesystem source path. The call requires prepared GUI metadata.
-func (b *Backend) ListDVDMenuScreenshots(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides) ([]api.ScreenshotImage, error) {
+func (b *Backend) ListDVDMenuScreenshots(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+) ([]api.ScreenshotImage, error) {
 	rt, err := b.requireRuntime()
 	if err != nil {
 		return nil, err

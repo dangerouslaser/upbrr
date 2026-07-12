@@ -54,5 +54,12 @@ func typeID(meta api.PreparedMetadata) string {
 	if strings.EqualFold(strings.TrimSpace(meta.Is3D), "3D") {
 		return "8"
 	}
-	return map[string]string{"DISC": "1", "REMUX": "2", "ENCODE": "3", "WEBDL": "4", "WEBRIP": "5", "HDTV": "6"}[unit3d.InferType(meta)]
+	return map[string]string{
+		"DISC":   "1",
+		"REMUX":  "2",
+		"ENCODE": "3",
+		"WEBDL":  "4",
+		"WEBRIP": "5",
+		"HDTV":   "6",
+	}[unit3d.InferType(meta)]
 }

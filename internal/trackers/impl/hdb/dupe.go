@@ -29,7 +29,12 @@ func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client,
 	if logger == nil {
 		logger = api.NopLogger{}
 	}
-	return &dupeSearcher{cfg: cfg, http: httpClient, logger: logger, endpoint: "https://hdbits.org/api/torrents"}
+	return &dupeSearcher{
+		cfg:      cfg,
+		http:     httpClient,
+		logger:   logger,
+		endpoint: "https://hdbits.org/api/torrents",
+	}
 }
 
 func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -40,7 +45,13 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	if username == "" || passkey == "" {
 		return nil, hdbSkip("missing username/passkey for tracker"), nil
 	}
-	payload := map[string]any{"username": username, "passkey": passkey, "category": hdbCategoryID(meta), "codec": hdbCodecID(meta), "medium": hdbMediumID(meta)}
+	payload := map[string]any{
+		"username": username,
+		"passkey":  passkey,
+		"category": hdbCategoryID(meta),
+		"codec":    hdbCodecID(meta),
+		"medium":   hdbMediumID(meta),
+	}
 	searchMethod := "id"
 	if meta.ExternalIDs.IMDBID != 0 {
 		payload["imdb"] = map[string]any{"id": fmt.Sprintf("%07d", meta.ExternalIDs.IMDBID)}
@@ -100,7 +111,13 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 			continue
 		}
 		id, filename := hdbString(item["id"]), hdbString(item["filename"])
-		entry := api.DupeEntry{Name: hdbString(item["name"]), ID: id, Link: "https://hdbits.org/details.php?id=" + id, Download: "https://hdbits.org/download.php/" + url.QueryEscape(filename) + "?id=" + id + "&passkey=" + passkey, FileCount: hdbInt(item["numfiles"])}
+		entry := api.DupeEntry{
+			Name:      hdbString(item["name"]),
+			ID:        id,
+			Link:      "https://hdbits.org/details.php?id=" + id,
+			Download:  "https://hdbits.org/download.php/" + url.QueryEscape(filename) + "?id=" + id + "&passkey=" + passkey,
+			FileCount: hdbInt(item["numfiles"]),
+		}
 		if size := hdbInt(item["size"]); size > 0 {
 			entry.SizeKnown, entry.SizeBytes = true, int64(size)
 		}

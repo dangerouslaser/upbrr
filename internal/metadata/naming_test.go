@@ -198,7 +198,11 @@ func TestReleaseNameRequestFromMetaOmitsSeriesTitleEpisodeTitle(t *testing.T) {
 
 func TestReleaseNameRequestFromMetaTVPackOmitsSeasonTitle(t *testing.T) {
 	meta := api.PreparedMetadata{
-		ExternalIDs: api.ExternalIDs{Category: "TV", TMDBID: 1, TVDBID: 2},
+		ExternalIDs: api.ExternalIDs{
+			Category: "TV",
+			TMDBID:   1,
+			TVDBID:   2,
+		},
 		Release: api.ReleaseInfo{
 			Title:      "Example Spy Show",
 			Resolution: "2160p",
@@ -350,11 +354,26 @@ func TestBuildReleaseNameTVSeriesAliasFallsBackEncode(t *testing.T) {
 
 func TestResolveReleaseNameTitleTVDBEnglishWinsForTV(t *testing.T) {
 	meta := api.PreparedMetadata{
-		ExternalIDs: api.ExternalIDs{Category: "TV", TMDBID: 1, TVDBID: 2},
-		Release:     api.ReleaseInfo{Title: "Release Name", Year: 2001},
+		ExternalIDs: api.ExternalIDs{
+			Category: "TV",
+			TMDBID:   1,
+			TVDBID:   2,
+		},
+		Release: api.ReleaseInfo{Title: "Release Name", Year: 2001},
 		ExternalMetadata: api.ExternalMetadata{
-			TMDB: &api.TMDBMetadata{TMDBID: 1, Title: "TMDB Name", OriginalTitle: "TMDB Original", Year: 2010},
-			TVDB: &api.TVDBMetadata{TVDBID: 2, Name: "TVDB Native", NameEnglish: "TVDB English", Year: 2012, YearFromAlias: true},
+			TMDB: &api.TMDBMetadata{
+				TMDBID:        1,
+				Title:         "TMDB Name",
+				OriginalTitle: "TMDB Original",
+				Year:          2010,
+			},
+			TVDB: &api.TVDBMetadata{
+				TVDBID:        2,
+				Name:          "TVDB Native",
+				NameEnglish:   "TVDB English",
+				Year:          2012,
+				YearFromAlias: true,
+			},
 		},
 	}
 
@@ -372,11 +391,24 @@ func TestResolveReleaseNameTitleTVDBEnglishWinsForTV(t *testing.T) {
 
 func TestResolveReleaseNameTitleTVDBFallsBackToOriginalWhenEnglishMissing(t *testing.T) {
 	meta := api.PreparedMetadata{
-		ExternalIDs: api.ExternalIDs{Category: "TV", TMDBID: 1, TVDBID: 2},
-		Release:     api.ReleaseInfo{Title: "Release Name", Year: 2001},
+		ExternalIDs: api.ExternalIDs{
+			Category: "TV",
+			TMDBID:   1,
+			TVDBID:   2,
+		},
+		Release: api.ReleaseInfo{Title: "Release Name", Year: 2001},
 		ExternalMetadata: api.ExternalMetadata{
-			TMDB: &api.TMDBMetadata{TMDBID: 1, Title: "TMDB Name", OriginalTitle: "TMDB Original", Year: 2010},
-			TVDB: &api.TVDBMetadata{TVDBID: 2, Name: "TVDB Native", Year: 2012},
+			TMDB: &api.TMDBMetadata{
+				TMDBID:        1,
+				Title:         "TMDB Name",
+				OriginalTitle: "TMDB Original",
+				Year:          2010,
+			},
+			TVDB: &api.TVDBMetadata{
+				TVDBID: 2,
+				Name:   "TVDB Native",
+				Year:   2012,
+			},
 		},
 	}
 
@@ -403,7 +435,12 @@ func TestReleaseNameRequestFromMetaMovieUsesIMDbWithoutTMDB(t *testing.T) {
 		Tag:         "-GRP",
 		Release:     api.ReleaseInfo{Title: "Parsed Title", Resolution: "1080p"},
 		ExternalMetadata: api.ExternalMetadata{
-			IMDB: &api.IMDBMetadata{IMDBID: 1234567, Title: "IMDb Title", AKA: "Original Title", Year: 2026},
+			IMDB: &api.IMDBMetadata{
+				IMDBID: 1234567,
+				Title:  "IMDb Title",
+				AKA:    "Original Title",
+				Year:   2026,
+			},
 		},
 	}
 
@@ -425,8 +462,17 @@ func TestResolveReleaseNameTitleProviderAlternateRules(t *testing.T) {
 		wantAlt    string
 	}{
 		{name: "same as title", imdbAKA: "IMDb Title"},
-		{name: "normalizes prefix", imdbAKA: "AKA Original Title", wantAlt: "AKA Original Title"},
-		{name: "preserves parsed alternate", releaseAlt: "AKA Parsed Alternate", imdbAKA: "Original Title", wantAlt: "AKA Parsed Alternate"},
+		{
+			name:    "normalizes prefix",
+			imdbAKA: "AKA Original Title",
+			wantAlt: "AKA Original Title",
+		},
+		{
+			name:       "preserves parsed alternate",
+			releaseAlt: "AKA Parsed Alternate",
+			imdbAKA:    "Original Title",
+			wantAlt:    "AKA Parsed Alternate",
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -435,7 +481,11 @@ func TestResolveReleaseNameTitleProviderAlternateRules(t *testing.T) {
 				ExternalIDs: api.ExternalIDs{Category: "MOVIE", IMDBID: 1234567},
 				Release:     api.ReleaseInfo{Title: "Parsed Title", Alt: tc.releaseAlt},
 				ExternalMetadata: api.ExternalMetadata{
-					IMDB: &api.IMDBMetadata{IMDBID: 1234567, Title: "IMDb Title", AKA: tc.imdbAKA},
+					IMDB: &api.IMDBMetadata{
+						IMDBID: 1234567,
+						Title:  "IMDb Title",
+						AKA:    tc.imdbAKA,
+					},
 				},
 			}
 			_, got, _ := resolveReleaseNameTitle("MOVIE", meta)
@@ -448,11 +498,25 @@ func TestResolveReleaseNameTitleProviderAlternateRules(t *testing.T) {
 
 func TestResolveReleaseNameTitlePrefersTMDBForMovie(t *testing.T) {
 	meta := api.PreparedMetadata{
-		ExternalIDs: api.ExternalIDs{Category: "MOVIE", TMDBID: 1, IMDBID: 1234567},
-		Release:     api.ReleaseInfo{Title: "Parsed Title"},
+		ExternalIDs: api.ExternalIDs{
+			Category: "MOVIE",
+			TMDBID:   1,
+			IMDBID:   1234567,
+		},
+		Release: api.ReleaseInfo{Title: "Parsed Title"},
 		ExternalMetadata: api.ExternalMetadata{
-			TMDB: &api.TMDBMetadata{TMDBID: 1, Title: "TMDB Title", OriginalTitle: "TMDB Original", Year: 2025},
-			IMDB: &api.IMDBMetadata{IMDBID: 1234567, Title: "IMDb Title", AKA: "IMDb Original", Year: 2026},
+			TMDB: &api.TMDBMetadata{
+				TMDBID:        1,
+				Title:         "TMDB Title",
+				OriginalTitle: "TMDB Original",
+				Year:          2025,
+			},
+			IMDB: &api.IMDBMetadata{
+				IMDBID: 1234567,
+				Title:  "IMDb Title",
+				AKA:    "IMDb Original",
+				Year:   2026,
+			},
 		},
 	}
 	title, alt, year := resolveReleaseNameTitle("MOVIE", meta)
@@ -463,10 +527,19 @@ func TestResolveReleaseNameTitlePrefersTMDBForMovie(t *testing.T) {
 
 func TestResolveReleaseNameTitleTVFallsBackFromUnusableTVDBToIMDb(t *testing.T) {
 	meta := api.PreparedMetadata{
-		ExternalIDs: api.ExternalIDs{Category: "TV", IMDBID: 1234567, TVDBID: 2},
-		Release:     api.ReleaseInfo{Title: "Parsed Series"},
+		ExternalIDs: api.ExternalIDs{
+			Category: "TV",
+			IMDBID:   1234567,
+			TVDBID:   2,
+		},
+		Release: api.ReleaseInfo{Title: "Parsed Series"},
 		ExternalMetadata: api.ExternalMetadata{
-			IMDB: &api.IMDBMetadata{IMDBID: 1234567, Title: "IMDb Series", AKA: "Original Series", Year: 2026},
+			IMDB: &api.IMDBMetadata{
+				IMDBID: 1234567,
+				Title:  "IMDb Series",
+				AKA:    "Original Series",
+				Year:   2026,
+			},
 			TVDB: &api.TVDBMetadata{TVDBID: 3, NameEnglish: "Wrong Series"},
 		},
 	}
@@ -489,7 +562,12 @@ func TestReleaseNameRequestFromMetaTVUsesIMDbWithoutTVDBOrTMDB(t *testing.T) {
 		Tag:         "-GRP",
 		Release:     api.ReleaseInfo{Title: "Parsed Series", Resolution: "1080p"},
 		ExternalMetadata: api.ExternalMetadata{
-			IMDB: &api.IMDBMetadata{IMDBID: 1234567, Title: "IMDb Series", AKA: "Original Series", Year: 2026},
+			IMDB: &api.IMDBMetadata{
+				IMDBID: 1234567,
+				Title:  "IMDb Series",
+				AKA:    "Original Series",
+				Year:   2026,
+			},
 		},
 	}
 	req := releaseNameRequestFromMeta(meta, api.NopLogger{})
@@ -507,7 +585,11 @@ func TestResolveReleaseNameTitleIgnoresTVmazeOnlyMetadata(t *testing.T) {
 		ExternalIDs: api.ExternalIDs{Category: "TV", TVmazeID: 3},
 		Release:     api.ReleaseInfo{Title: "Parsed Series", Year: 2025},
 		ExternalMetadata: api.ExternalMetadata{
-			TVmaze: &api.TVmazeMetadata{TVmazeID: 3, Name: "TVmaze Series", Premiered: "2026-01-01"},
+			TVmaze: &api.TVmazeMetadata{
+				TVmazeID:  3,
+				Name:      "TVmaze Series",
+				Premiered: "2026-01-01",
+			},
 		},
 	}
 	title, alt, year := resolveReleaseNameTitle("TV", meta)
@@ -518,12 +600,21 @@ func TestResolveReleaseNameTitleIgnoresTVmazeOnlyMetadata(t *testing.T) {
 
 func TestResolveReleaseNameTitleIgnoresStaleProviderMetadata(t *testing.T) {
 	meta := api.PreparedMetadata{
-		SourcePath:  "current-source",
-		ExternalIDs: api.ExternalIDs{SourcePath: "current-source", Category: "MOVIE", IMDBID: 1234567},
-		Release:     api.ReleaseInfo{Title: "Parsed Title", Year: 2025},
+		SourcePath: "current-source",
+		ExternalIDs: api.ExternalIDs{
+			SourcePath: "current-source",
+			Category:   "MOVIE",
+			IMDBID:     1234567,
+		},
+		Release: api.ReleaseInfo{Title: "Parsed Title", Year: 2025},
 		ExternalMetadata: api.ExternalMetadata{
 			SourcePath: "stale-source",
-			IMDB:       &api.IMDBMetadata{IMDBID: 1234567, Title: "Stale IMDb Title", AKA: "Stale Original", Year: 2026},
+			IMDB: &api.IMDBMetadata{
+				IMDBID: 1234567,
+				Title:  "Stale IMDb Title",
+				AKA:    "Stale Original",
+				Year:   2026,
+			},
 		},
 	}
 	title, alt, year := resolveReleaseNameTitle("MOVIE", meta)
@@ -534,16 +625,29 @@ func TestResolveReleaseNameTitleIgnoresStaleProviderMetadata(t *testing.T) {
 
 func TestReleaseNameRequestFromMetaTVSearchYearComesFromTVDB(t *testing.T) {
 	meta := api.PreparedMetadata{
-		SourcePath:  `D:\Shows\Example.Show.S01E01.1080p.BluRay.x264`,
-		ExternalIDs: api.ExternalIDs{Category: "TV", TMDBID: 1, TVDBID: 2},
+		SourcePath: `D:\Shows\Example.Show.S01E01.1080p.BluRay.x264`,
+		ExternalIDs: api.ExternalIDs{
+			Category: "TV",
+			TMDBID:   1,
+			TVDBID:   2,
+		},
 		Type:        "ENCODE",
 		Source:      "BluRay",
 		Audio:       "AAC 2.0",
 		VideoEncode: "x264",
 		Release:     api.ReleaseInfo{Title: "Example Show", Resolution: "1080p"},
 		ExternalMetadata: api.ExternalMetadata{
-			TMDB: &api.TMDBMetadata{TMDBID: 1, Title: "TMDB Name", Year: 2010},
-			TVDB: &api.TVDBMetadata{TVDBID: 2, Name: "TVDB Name", Year: 2024, YearFromAlias: true},
+			TMDB: &api.TMDBMetadata{
+				TMDBID: 1,
+				Title:  "TMDB Name",
+				Year:   2010,
+			},
+			TVDB: &api.TVDBMetadata{
+				TVDBID:        2,
+				Name:          "TVDB Name",
+				Year:          2024,
+				YearFromAlias: true,
+			},
 		},
 	}
 
@@ -575,7 +679,12 @@ func TestReleaseNameRequestFromMetaTVStripsBracketedTVDBYear(t *testing.T) {
 			Resolution: "720p",
 		},
 		ExternalMetadata: api.ExternalMetadata{
-			TVDB: &api.TVDBMetadata{TVDBID: 2, NameEnglish: "Example Show (2024)", Year: 2024, YearFromAlias: true},
+			TVDB: &api.TVDBMetadata{
+				TVDBID:        2,
+				NameEnglish:   "Example Show (2024)",
+				Year:          2024,
+				YearFromAlias: true,
+			},
 		},
 		Tag: "-GRP",
 	}
@@ -604,7 +713,11 @@ func TestReleaseNameRequestFromMetaTVOmitsSearchYearWhenTVDBYearNotAliasDerived(
 		VideoEncode: "x264",
 		Release:     api.ReleaseInfo{Title: "Example Show", Resolution: "1080p"},
 		ExternalMetadata: api.ExternalMetadata{
-			TVDB: &api.TVDBMetadata{TVDBID: 2, Name: "TVDB Name", Year: 2024},
+			TVDB: &api.TVDBMetadata{
+				TVDBID: 2,
+				Name:   "TVDB Name",
+				Year:   2024,
+			},
 		},
 	}
 
@@ -622,7 +735,12 @@ func TestReleaseNameRequestFromMetaLogsTVDBYearSource(t *testing.T) {
 		Source:      "BluRay",
 		Release:     api.ReleaseInfo{Title: "Example Show", Resolution: "1080p"},
 		ExternalMetadata: api.ExternalMetadata{
-			TVDB: &api.TVDBMetadata{TVDBID: 2, Name: "TVDB Name", Year: 2024, YearSource: "first_aired"},
+			TVDB: &api.TVDBMetadata{
+				TVDBID:     2,
+				Name:       "TVDB Name",
+				Year:       2024,
+				YearSource: "first_aired",
+			},
 		},
 	}
 	logger := &captureLogger{}
@@ -696,7 +814,11 @@ func TestReleaseNameRequestFromMetaMovieKeepsParsedYearWhenTVDBMetadataPresent(t
 			Resolution: "720p",
 		},
 		ExternalMetadata: api.ExternalMetadata{
-			TMDB: &api.TMDBMetadata{TMDBID: 1, Title: "Example Movie", Year: 2026},
+			TMDB: &api.TMDBMetadata{
+				TMDBID: 1,
+				Title:  "Example Movie",
+				Year:   2026,
+			},
 			TVDB: &api.TVDBMetadata{},
 		},
 	}

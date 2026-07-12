@@ -112,13 +112,22 @@ func TestDefaultAdaptersExposeMTVPTPManual2FAChallenge(t *testing.T) {
 	}{
 		"MTV": {
 			cfg: func(serverURL string) config.TrackerConfig {
-				return config.TrackerConfig{URL: serverURL, Username: "user", Password: "pass"}
+				return config.TrackerConfig{
+					URL:      serverURL,
+					Username: "user",
+					Password: "pass",
+				}
 			},
 			server: newMTVManual2FAServer,
 		},
 		"BTN": {
 			cfg: func(serverURL string) config.TrackerConfig {
-				return config.TrackerConfig{URL: serverURL, APIKey: "api-token", Username: "user", Password: "pass"}
+				return config.TrackerConfig{
+					URL:      serverURL,
+					APIKey:   "api-token",
+					Username: "user",
+					Password: "pass",
+				}
 			},
 			server: newBTNManual2FAServer,
 		},
@@ -364,7 +373,11 @@ func TestValidateBTNMissingAPIAfterCookieRefreshUpdatesCookieCount(t *testing.T)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/login.php":
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte("ok"))
 		case "/upload.php":
 			if got := r.Header.Get("Cookie"); !strings.Contains(got, "session=new") {
@@ -385,7 +398,11 @@ func TestValidateBTNMissingAPIAfterCookieRefreshUpdatesCookieCount(t *testing.T)
 	status, err := newTestService(config.Config{
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{
-			"BTN": {URL: server.URL, Username: "user", Password: "pass"},
+			"BTN": {
+				URL:      server.URL,
+				Username: "user",
+				Password: "pass",
+			},
 		}},
 	}).Validate(ctx, "BTN")
 	select {
@@ -503,7 +520,11 @@ func TestValidateRTFRefreshesExpiredAPIKey(t *testing.T) {
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{
 			Trackers: map[string]config.TrackerConfig{
-				"RTF": {APIKey: "old-token", Username: "user", Password: "pass"},
+				"RTF": {
+					APIKey:   "old-token",
+					Username: "user",
+					Password: "pass",
+				},
 			},
 		},
 	}
@@ -615,7 +636,11 @@ func TestValidateARAutoLoginReplacesMissingOrExpiredCookies(t *testing.T) {
 					if r.FormValue("username") != "user" || r.FormValue("password") != "password" || r.FormValue("keeplogged") != "1" {
 						invalidLoginForm.Store(true)
 					}
-					http.SetCookie(w, &http.Cookie{Name: "session", Value: "refreshed", Path: "/"})
+					http.SetCookie(w, &http.Cookie{
+						Name:  "session",
+						Value: "refreshed",
+						Path:  "/",
+					})
 					http.Redirect(w, r, arIndexPath, http.StatusFound)
 				case arIndexPath:
 					indexCalls.Add(1)
@@ -634,7 +659,11 @@ func TestValidateARAutoLoginReplacesMissingOrExpiredCookies(t *testing.T) {
 			status, err := newTestService(config.Config{
 				MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 				Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{
-					"AR": {URL: server.URL, Username: "user", Password: "password"},
+					"AR": {
+						URL:      server.URL,
+						Username: "user",
+						Password: "password",
+					},
 				}},
 			}).Validate(ctx, "AR")
 			if err != nil {
@@ -684,7 +713,11 @@ func TestValidateARTransientFailurePreservesCookiesWithoutLogin(t *testing.T) {
 	status, err := newTestService(config.Config{
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{
-			"AR": {URL: server.URL, Username: "user", Password: "password"},
+			"AR": {
+				URL:      server.URL,
+				Username: "user",
+				Password: "password",
+			},
 		}},
 	}).Validate(ctx, "AR")
 	if err != nil {
@@ -725,7 +758,11 @@ func TestValidateHDBInvalidCookiesDeletesSession(t *testing.T) {
 	status, err := newTestService(config.Config{
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{
-			"HDB": {URL: server.URL, Username: "user", Passkey: "passkey"},
+			"HDB": {
+				URL:      server.URL,
+				Username: "user",
+				Passkey:  "passkey",
+			},
 		}},
 	}).Validate(ctx, "HDB")
 	if err != nil {
@@ -764,7 +801,11 @@ func TestValidateFFLoginPersistsCookies(t *testing.T) {
 				t.Error("unexpected FF login form")
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "valid", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "valid",
+				Path:  "/",
+			})
 			w.Header().Set("Location", "/index.php")
 			w.WriteHeader(http.StatusFound)
 		default:
@@ -777,7 +818,11 @@ func TestValidateFFLoginPersistsCookies(t *testing.T) {
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{
 			Trackers: map[string]config.TrackerConfig{
-				"FF": {URL: server.URL, Username: "user", Password: "pass"},
+				"FF": {
+					URL:      server.URL,
+					Username: "user",
+					Password: "pass",
+				},
 			},
 		},
 	}).Validate(ctx, "FF")
@@ -829,7 +874,11 @@ func TestValidateFFLoginDoesNotPersistUnverifiedCookies(t *testing.T) {
 				}
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "invalid", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "invalid",
+				Path:  "/",
+			})
 			w.Header().Set("Location", "/index.php")
 			w.WriteHeader(http.StatusFound)
 		default:
@@ -842,7 +891,11 @@ func TestValidateFFLoginDoesNotPersistUnverifiedCookies(t *testing.T) {
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{
 			Trackers: map[string]config.TrackerConfig{
-				"FF": {URL: server.URL, Username: "user", Password: "pass"},
+				"FF": {
+					URL:      server.URL,
+					Username: "user",
+					Password: "pass",
+				},
 			},
 		},
 	}).Validate(ctx, "FF")
@@ -886,7 +939,11 @@ func TestValidateFLLoginPersistsCookies(t *testing.T) {
 				t.Error("unexpected FL login form")
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "valid", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "valid",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte("Logout"))
 		case "/index.php":
 			if cookie, err := r.Cookie("session"); err == nil && cookie.Value == "valid" {
@@ -904,7 +961,11 @@ func TestValidateFLLoginPersistsCookies(t *testing.T) {
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{
 			Trackers: map[string]config.TrackerConfig{
-				"FL": {URL: server.URL, Username: "user", Password: "pass"},
+				"FL": {
+					URL:      server.URL,
+					Username: "user",
+					Password: "pass",
+				},
 			},
 		},
 	}).Validate(ctx, "FL")
@@ -933,7 +994,11 @@ func TestValidateFLLoginDoesNotPersistUnverifiedCookies(t *testing.T) {
 		case flLoginPagePath:
 			_, _ = w.Write([]byte(`<input name="validator" value="token">`))
 		case flLoginPath:
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "unverified", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "unverified",
+				Path:  "/",
+			})
 			http.Redirect(w, r, flIndexPath, http.StatusFound)
 		case flIndexPath:
 			_, _ = w.Write([]byte(`<input name="username">`))
@@ -946,7 +1011,11 @@ func TestValidateFLLoginDoesNotPersistUnverifiedCookies(t *testing.T) {
 	status, err := newTestService(config.Config{
 		MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 		Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{
-			"FL": {URL: server.URL, Username: "user", Password: "pass"},
+			"FL": {
+				URL:      server.URL,
+				Username: "user",
+				Password: "pass",
+			},
 		}},
 	}).Validate(ctx, "FL")
 	if err != nil {
@@ -967,7 +1036,11 @@ func TestValidateTHRChecksCredentialLogin(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/login.php":
-			http.SetCookie(w, &http.Cookie{Name: "bootstrap", Value: "ready", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "bootstrap",
+				Value: "ready",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`<input type="hidden" name="token" value="login-token">`))
 		case "/takelogin.php":
 			if err := r.ParseForm(); err != nil {
@@ -980,7 +1053,11 @@ func TestValidateTHRChecksCredentialLogin(t *testing.T) {
 			if cookie, err := r.Cookie("bootstrap"); err != nil || cookie.Value != "ready" {
 				handlerErr <- errors.New("THR login bootstrap cookie missing")
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "authenticated", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "authenticated",
+				Path:  "/",
+			})
 			http.Redirect(w, r, "/index.php", http.StatusFound)
 		case "/index.php":
 			if cookie, err := r.Cookie("session"); err != nil || cookie.Value != "authenticated" {
@@ -997,7 +1074,11 @@ func TestValidateTHRChecksCredentialLogin(t *testing.T) {
 	status, err := newTestService(config.Config{
 		Trackers: config.TrackersConfig{
 			Trackers: map[string]config.TrackerConfig{
-				"THR": {URL: server.URL, Username: "user", Password: "pass"},
+				"THR": {
+					URL:      server.URL,
+					Username: "user",
+					Password: "pass",
+				},
 			},
 		},
 	}).Validate(context.Background(), "THR")
@@ -1140,7 +1221,12 @@ func TestSubmit2FAFailureKeepsChallengeRetryVisible(t *testing.T) {
 			return Session{}, &Needs2FAError{TrackerID: "PTP"}
 		},
 		submit: func(context.Context, config.TrackerConfig, string, api.TrackerAuthLoginRequest) (Session, error) {
-			return Session{}, &ValidationError{TrackerID: "PTP", Transient: true, Submitted2FARejected: true, Err: errors.New("login failed")}
+			return Session{}, &ValidationError{
+				TrackerID:            "PTP",
+				Transient:            true,
+				Submitted2FARejected: true,
+				Err:                  errors.New("login failed"),
+			}
 		},
 	}
 	service := newTestService(cfg)
@@ -1290,7 +1376,12 @@ func TestSubmit2FAConfirmedInvalidFailureDoesNotExposeRetryChallenge(t *testing.
 				if login.Code != "000000" {
 					t.Fatalf("expected submitted code, got %q", login.Code)
 				}
-				return &ValidationError{TrackerID: "PTP", ConfirmedInvalid: true, Submitted2FARejected: true, Err: errors.New("login failed")}
+				return &ValidationError{
+					TrackerID:            "PTP",
+					ConfirmedInvalid:     true,
+					Submitted2FARejected: true,
+					Err:                  errors.New("login failed"),
+				}
 			},
 		},
 	}
@@ -1622,11 +1713,19 @@ func TestStatusPTPRequiresAnnounceURLForConfiguredLogin(t *testing.T) {
 			wantState: StateLoginRequired,
 		},
 		"blank announce": {
-			cfg:       config.TrackerConfig{Username: "user", Password: "pass", AnnounceURL: " \t\n "},
+			cfg: config.TrackerConfig{
+				Username:    "user",
+				Password:    "pass",
+				AnnounceURL: " \t\n ",
+			},
 			wantState: StateLoginRequired,
 		},
 		"complete login config": {
-			cfg:       config.TrackerConfig{Username: "user", Password: "pass", AnnounceURL: "https://please.passthepopcorn.me/passkey/announce"},
+			cfg: config.TrackerConfig{
+				Username:    "user",
+				Password:    "pass",
+				AnnounceURL: "https://please.passthepopcorn.me/passkey/announce",
+			},
 			wantState: StateConfigured,
 		},
 	}
@@ -1754,8 +1853,13 @@ func TestStatusStateMessageParityForAuthBlockers(t *testing.T) {
 			wantMessage: "auth material not configured",
 		},
 		"login required": {
-			dbPath:      newTrackerAuthTestDB(t),
-			spec:        trackerSpec{id: "PTP", cookies: true, login: true, needsCredentials: true},
+			dbPath: newTrackerAuthTestDB(t),
+			spec: trackerSpec{
+				id:               "PTP",
+				cookies:          true,
+				login:            true,
+				needsCredentials: true,
+			},
 			wantState:   StateLoginRequired,
 			wantMessage: "login credentials or imported cookies required",
 		},
@@ -1770,7 +1874,13 @@ func TestStatusStateMessageParityForAuthBlockers(t *testing.T) {
 			cfg: config.Config{
 				Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{"MTV": {APIKey: "api-key"}}},
 			},
-			spec:        trackerSpec{id: "MTV", cookies: true, login: true, apiKey: true, needsCredentials: true},
+			spec: trackerSpec{
+				id:               "MTV",
+				cookies:          true,
+				login:            true,
+				apiKey:           true,
+				needsCredentials: true,
+			},
 			wantState:   StateLoginRequired,
 			wantMessage: "API key covers Torznab/search; imported cookies or login credentials required for upload auth",
 		},
@@ -1779,7 +1889,13 @@ func TestStatusStateMessageParityForAuthBlockers(t *testing.T) {
 			cfg: config.Config{
 				Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{"BTN": {Username: "user", Password: "pass"}}},
 			},
-			spec:        trackerSpec{id: "BTN", cookies: true, login: true, apiKey: true, needsCredentials: true},
+			spec: trackerSpec{
+				id:               "BTN",
+				cookies:          true,
+				login:            true,
+				apiKey:           true,
+				needsCredentials: true,
+			},
 			wantState:   StateLoginRequired,
 			wantMessage: btnMissingAPIKeyMessage(),
 		},
@@ -2303,7 +2419,11 @@ func TestApplyEnsureErrorToStatusKeepsStateMessageParity(t *testing.T) {
 			wantMessage: "login credentials or imported cookies required",
 		},
 		"confirmed invalid": {
-			err:         &ValidationError{TrackerID: "PTP", ConfirmedInvalid: true, Err: errors.New("expired")},
+			err: &ValidationError{
+				TrackerID:        "PTP",
+				ConfirmedInvalid: true,
+				Err:              errors.New("expired"),
+			},
 			wantState:   StateLoginRequired,
 			wantMessage: "stored session expired or invalid; log in again or import fresh cookies",
 		},
@@ -2626,7 +2746,11 @@ func TestTrackerAuthLogsOperationResultsWithoutSecrets(t *testing.T) {
 		MainSettings: config.MainSettingsConfig{DBPath: newTrackerAuthTestDB(t)},
 		Trackers: config.TrackersConfig{
 			Trackers: map[string]config.TrackerConfig{
-				"MTV": {APIKey: "secret-api-key", Username: "secret-user", Password: "secret-password"},
+				"MTV": {
+					APIKey:   "secret-api-key",
+					Username: "secret-user",
+					Password: "secret-password",
+				},
 			},
 		},
 	}, logger)

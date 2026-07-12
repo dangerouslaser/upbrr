@@ -6,5 +6,8 @@ package bjs
 import "github.com/autobrr/upbrr/internal/trackers"
 
 func (Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
-	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB}}}}
+	return &trackers.TrackerMetadataPolicy{
+		RequireKnownCategory: true,
+		Requirements:         []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB}}},
+	}
 }

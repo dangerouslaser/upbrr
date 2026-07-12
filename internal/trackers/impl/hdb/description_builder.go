@@ -25,7 +25,9 @@ var (
 	hdbImgURLPattern   = regexp.MustCompile(`(?i)(https?://[^\s\]]+\.(?:png|jpg|jpeg|webp))`)
 	hdbURLImgPattern   = regexp.MustCompile(`(?is)\[url=(https?://[^\]]+)\]\s*\[img(?:[^\]]*)?\](https?://[^\[]+?)\[/img\]\s*\[/url\]`)
 	hdbImgBlockPattern = regexp.MustCompile(`(?is)\[img(?:[^\]]*)?\](https?://[^\[]+?)\[/img\]`)
-	hdbUARegex         = regexp.MustCompile(`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`)
+	hdbUARegex         = regexp.MustCompile(
+		`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`,
+	)
 	hdbEmptyWrapperTag = regexp.MustCompile(`(?is)\[(?:center|align=center)\]\s*\[/(?:center|align)\]`)
 )
 
@@ -33,7 +35,14 @@ var (
 // text and resolved image assets. Disc-menu images render in their own section
 // before normal screenshots; cancellation and disc-metadata read failures are
 // returned to the caller.
-func BuildDescription(ctx context.Context, meta api.PreparedMetadata, appConfig config.Config, keptDescription string, menuImages []api.ScreenshotImage, screenshots []api.ScreenshotImage) (string, error) {
+func BuildDescription(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	appConfig config.Config,
+	keptDescription string,
+	menuImages []api.ScreenshotImage,
+	screenshots []api.ScreenshotImage,
+) (string, error) {
 	select {
 	case <-ctx.Done():
 		return "", fmt.Errorf("context canceled: %w", ctx.Err())

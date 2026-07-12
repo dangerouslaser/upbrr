@@ -558,7 +558,11 @@ func (s *Server) handleBrowsePolicy(w http.ResponseWriter, r *http.Request, curr
 		return
 	}
 	if !req.AllowUnrestrictedBrowse && len(roots) == 0 {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "at least one browse root is required unless unrestricted browsing is explicitly allowed"})
+		writeJSON(
+			w,
+			http.StatusBadRequest,
+			map[string]string{"error": "at least one browse root is required unless unrestricted browsing is explicitly allowed"},
+		)
 		return
 	}
 

@@ -89,7 +89,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 		if parsed, parseErr := url.Parse(link); parseErr == nil {
 			id = strings.TrimSpace(parsed.Query().Get("id"))
 		}
-		entries = append(entries, api.DupeEntry{Name: name, ID: id, Link: link})
+		entries = append(entries, api.DupeEntry{
+			Name: name,
+			ID:   id,
+			Link: link,
+		})
 	})
 	return entries, nil, nil
 }

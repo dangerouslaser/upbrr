@@ -65,7 +65,11 @@ func TestRunInteractiveCLIPathHandlesScreenshotsBeforeReview(t *testing.T) {
 			SuggestedSelections: []api.ScreenshotSelection{{Index: 1, TimestampSeconds: 60}},
 		},
 		screenshotResult: api.ScreenshotResult{
-			Images: []api.ScreenshotImage{{Index: 1, TimestampSeconds: 60, Path: "screen1.png"}},
+			Images: []api.ScreenshotImage{{
+				Index:            1,
+				TimestampSeconds: 60,
+				Path:             "screen1.png",
+			}},
 		},
 		review: api.UploadReview{Trackers: []api.TrackerReview{{Tracker: "BLU"}}},
 	}
@@ -148,7 +152,11 @@ func TestRunInteractiveCLIPathExplicitDryRunCapturesDVDMenus(t *testing.T) {
 		},
 		review: api.UploadReview{Trackers: []api.TrackerReview{{Tracker: "BLU"}}},
 	}
-	err := runInteractiveCLIPath(context.Background(), coreSvc, cliOptions{Unattended: true, DryRun: true, GetDVDMenus: true}, map[string]bool{}, discRoot, config.Config{
+	err := runInteractiveCLIPath(context.Background(), coreSvc, cliOptions{
+		Unattended:  true,
+		DryRun:      true,
+		GetDVDMenus: true,
+	}, map[string]bool{}, discRoot, config.Config{
 		Trackers: config.TrackersConfig{DefaultTrackers: config.CSVList{"BLU"}},
 	})
 	if err != nil {
@@ -207,7 +215,11 @@ func TestRunInteractiveCLIPathDoubleDupeBeforeScreenshotAndReview(t *testing.T) 
 			SuggestedSelections: []api.ScreenshotSelection{{Index: 1, TimestampSeconds: 60}},
 		},
 		screenshotResult: api.ScreenshotResult{
-			Images: []api.ScreenshotImage{{Index: 1, TimestampSeconds: 60, Path: "screen1.png"}},
+			Images: []api.ScreenshotImage{{
+				Index:            1,
+				TimestampSeconds: 60,
+				Path:             "screen1.png",
+			}},
 		},
 		review: api.UploadReview{Trackers: []api.TrackerReview{{Tracker: "BLU"}}},
 	}
@@ -230,7 +242,11 @@ func TestRunInteractiveCLIPathDryRunSkipsScreenshotSideEffects(t *testing.T) {
 			SuggestedSelections: []api.ScreenshotSelection{{Index: 1, TimestampSeconds: 60}},
 		},
 		screenshotResult: api.ScreenshotResult{
-			Images: []api.ScreenshotImage{{Index: 1, TimestampSeconds: 60, Path: "screen1.png"}},
+			Images: []api.ScreenshotImage{{
+				Index:            1,
+				TimestampSeconds: 60,
+				Path:             "screen1.png",
+			}},
 		},
 		review: api.UploadReview{Trackers: []api.TrackerReview{{Tracker: "BLU"}}},
 	}
@@ -261,7 +277,11 @@ func TestRunInteractiveCLIPathDryRunPreservesExplicitNoSeed(t *testing.T) {
 	coreSvc := &cliCoreForTest{
 		review: api.UploadReview{Trackers: []api.TrackerReview{{Tracker: "BLU"}}},
 	}
-	err := runInteractiveCLIPath(context.Background(), coreSvc, cliOptions{Unattended: true, DryRun: true, NoSeed: true}, map[string]bool{}, "movie.mkv", config.Config{
+	err := runInteractiveCLIPath(context.Background(), coreSvc, cliOptions{
+		Unattended: true,
+		DryRun:     true,
+		NoSeed:     true,
+	}, map[string]bool{}, "movie.mkv", config.Config{
 		Trackers: config.TrackersConfig{DefaultTrackers: config.CSVList{"BLU"}},
 	})
 	if err != nil {
@@ -282,7 +302,11 @@ func TestRunInteractiveCLIPathDebugHandlesScreenshotsBeforeReview(t *testing.T) 
 			SuggestedSelections: []api.ScreenshotSelection{{Index: 1, TimestampSeconds: 60}},
 		},
 		screenshotResult: api.ScreenshotResult{
-			Images: []api.ScreenshotImage{{Index: 1, TimestampSeconds: 60, Path: "screen1.png"}},
+			Images: []api.ScreenshotImage{{
+				Index:            1,
+				TimestampSeconds: 60,
+				Path:             "screen1.png",
+			}},
 		},
 		review: api.UploadReview{Trackers: []api.TrackerReview{{Tracker: "BLU"}}},
 	}
@@ -320,8 +344,17 @@ func TestRunInteractiveCLIPathDebugProcessesNonRuleCheckedTrackers(t *testing.T)
 		}},
 		dupeSummary: api.DupeCheckSummary{
 			Results: []api.DupeCheckResult{
-				{Tracker: "AITHER", Status: "completed", HasDupes: true},
-				{Tracker: "BLU", Status: "skipped", Skipped: true, SkipRules: []string{"require_movie_only"}},
+				{
+					Tracker:  "AITHER",
+					Status:   "completed",
+					HasDupes: true,
+				},
+				{
+					Tracker:   "BLU",
+					Status:    "skipped",
+					Skipped:   true,
+					SkipRules: []string{"require_movie_only"},
+				},
 				{Tracker: "DP", Status: "completed"},
 			},
 		},
@@ -365,8 +398,17 @@ func TestRunInteractiveCLIPathDryRunProcessesNonRuleCheckedTrackers(t *testing.T
 		}},
 		dupeSummary: api.DupeCheckSummary{
 			Results: []api.DupeCheckResult{
-				{Tracker: "AITHER", Status: "completed", HasDupes: true},
-				{Tracker: "BLU", Status: "skipped", Skipped: true, SkipRules: []string{"require_movie_only"}},
+				{
+					Tracker:  "AITHER",
+					Status:   "completed",
+					HasDupes: true,
+				},
+				{
+					Tracker:   "BLU",
+					Status:    "skipped",
+					Skipped:   true,
+					SkipRules: []string{"require_movie_only"},
+				},
 				{Tracker: "DP", Status: "completed"},
 			},
 		},
@@ -731,9 +773,26 @@ func TestEnsureCLITrackerAuthBeforeDupeCheckLogsRuleFailureSkipOnlyForManagedAut
 
 	authSvc := &cliTrackerAuthForTest{
 		capabilities: []api.TrackerAuthCapability{
-			{TrackerID: "MTV", AuthKind: "api_key_cookies_login_manual_2fa", SupportsCookieFile: true, SupportsLogin: true, SupportsManual2FA: true, RequiresAPIKey: true},
-			{TrackerID: "NBL", AuthKind: "api_key", RequiresAPIKey: true},
-			{TrackerID: "PTP", AuthKind: "cookies_login_manual_2fa", SupportsCookieFile: true, SupportsLogin: true, SupportsManual2FA: true},
+			{
+				TrackerID:          "MTV",
+				AuthKind:           "api_key_cookies_login_manual_2fa",
+				SupportsCookieFile: true,
+				SupportsLogin:      true,
+				SupportsManual2FA:  true,
+				RequiresAPIKey:     true,
+			},
+			{
+				TrackerID:      "NBL",
+				AuthKind:       "api_key",
+				RequiresAPIKey: true,
+			},
+			{
+				TrackerID:          "PTP",
+				AuthKind:           "cookies_login_manual_2fa",
+				SupportsCookieFile: true,
+				SupportsLogin:      true,
+				SupportsManual2FA:  true,
+			},
 		},
 		validateStatus: map[string]api.TrackerAuthStatus{
 			"PTP": {TrackerID: "PTP", State: trackerauth.StateConfigured},
@@ -777,8 +836,21 @@ func TestEnsureCLITrackerAuthBeforeDupeCheckDryRunSkipsRuleFailedManagedAuth(t *
 
 	authSvc := &cliTrackerAuthForTest{
 		capabilities: []api.TrackerAuthCapability{
-			{TrackerID: "MTV", AuthKind: "api_key_cookies_login_manual_2fa", SupportsCookieFile: true, SupportsLogin: true, SupportsManual2FA: true, RequiresAPIKey: true},
-			{TrackerID: "PTP", AuthKind: "cookies_login_manual_2fa", SupportsCookieFile: true, SupportsLogin: true, SupportsManual2FA: true},
+			{
+				TrackerID:          "MTV",
+				AuthKind:           "api_key_cookies_login_manual_2fa",
+				SupportsCookieFile: true,
+				SupportsLogin:      true,
+				SupportsManual2FA:  true,
+				RequiresAPIKey:     true,
+			},
+			{
+				TrackerID:          "PTP",
+				AuthKind:           "cookies_login_manual_2fa",
+				SupportsCookieFile: true,
+				SupportsLogin:      true,
+				SupportsManual2FA:  true,
+			},
 		},
 	}
 	logger := &cliAuthRecordingLogger{}
@@ -815,8 +887,20 @@ func TestEnsureCLITrackerAuthBeforeDupeCheckHonorsPerTrackerRuleFailureOverride(
 
 	authSvc := &cliTrackerAuthForTest{
 		capabilities: []api.TrackerAuthCapability{
-			{TrackerID: "MTV", AuthKind: "api_key_cookies_login_manual_2fa", SupportsCookieFile: true, SupportsLogin: true, SupportsManual2FA: true},
-			{TrackerID: "PTP", AuthKind: "cookies_login_manual_2fa", SupportsCookieFile: true, SupportsLogin: true, SupportsManual2FA: true},
+			{
+				TrackerID:          "MTV",
+				AuthKind:           "api_key_cookies_login_manual_2fa",
+				SupportsCookieFile: true,
+				SupportsLogin:      true,
+				SupportsManual2FA:  true,
+			},
+			{
+				TrackerID:          "PTP",
+				AuthKind:           "cookies_login_manual_2fa",
+				SupportsCookieFile: true,
+				SupportsLogin:      true,
+				SupportsManual2FA:  true,
+			},
 		},
 	}
 	logger := &cliAuthRecordingLogger{}
@@ -894,7 +978,12 @@ func TestEnsureCLITrackerAuthBeforeDupeCheckLogsRedactedDecisions(t *testing.T) 
 			},
 		},
 		validateStatus: map[string]api.TrackerAuthStatus{
-			"PTP": {TrackerID: "PTP", State: trackerauth.StateConfigured, CookieCount: 2, EncryptedStorage: true},
+			"PTP": {
+				TrackerID:        "PTP",
+				State:            trackerauth.StateConfigured,
+				CookieCount:      2,
+				EncryptedStorage: true,
+			},
 			"HDB": {
 				TrackerID: "HDB",
 				State:     trackerauth.StateLoginRequired,
@@ -1198,9 +1287,18 @@ func TestPromptTrackerDupeReviewBuildsConfirmedTrackerList(t *testing.T) {
 	approved, ignoreDupes, ruleOverrides, err := promptTrackerDupeReview(
 		bufio.NewReader(strings.NewReader("y\nn\nn\n")),
 		api.DupeCheckSummary{Results: []api.DupeCheckResult{
-			{Tracker: "ANT", Status: "completed", HasDupes: true},
+			{
+				Tracker:  "ANT",
+				Status:   "completed",
+				HasDupes: true,
+			},
 			{Tracker: "BLU", Status: "completed"},
-			{Tracker: "NBL", Status: "skipped", Skipped: true, SkipReason: "rule check failed: category movie is not tv"},
+			{
+				Tracker:    "NBL",
+				Status:     "skipped",
+				Skipped:    true,
+				SkipReason: "rule check failed: category movie is not tv",
+			},
 		}},
 		api.Request{Options: api.UploadOptions{InteractionMode: api.InteractionModeInteractive}},
 		[]string{"ANT", "BLU", "NBL"},
@@ -1258,8 +1356,18 @@ func TestPromptTrackerDupeReviewAllowsRuleCheckOverrides(t *testing.T) {
 	approved, ignoreDupes, ruleOverrides, err := promptTrackerDupeReview(
 		bufio.NewReader(strings.NewReader("y\ny\ny\n")),
 		api.DupeCheckSummary{Results: []api.DupeCheckResult{
-			{Tracker: "NBL", Status: "skipped", Skipped: true, SkipReason: "rule check failed: category movie is not tv"},
-			{Tracker: "OTW", Status: "skipped", Skipped: true, Error: "rule failed: Genre does not match Animation or Family for OTW."},
+			{
+				Tracker:    "NBL",
+				Status:     "skipped",
+				Skipped:    true,
+				SkipReason: "rule check failed: category movie is not tv",
+			},
+			{
+				Tracker: "OTW",
+				Status:  "skipped",
+				Skipped: true,
+				Error:   "rule failed: Genre does not match Animation or Family for OTW.",
+			},
 			{Tracker: "ANT", Status: "completed"},
 		}},
 		api.Request{Options: api.UploadOptions{InteractionMode: api.InteractionModeInteractive}},
@@ -1418,8 +1526,18 @@ func TestPromptTrackerDupeReviewSkipsAllRuleBlockedTrackersUnattended(t *testing
 	}
 	summary := api.DupeCheckSummary{
 		Results: []api.DupeCheckResult{
-			{Tracker: "LST", Status: "skipped", Skipped: true, SkipReason: "rule check failed: missing MediaInfo encode settings"},
-			{Tracker: "RF", Status: "skipped", Skipped: true, SkipReason: "rule check failed: missing MediaInfo encode settings"},
+			{
+				Tracker:    "LST",
+				Status:     "skipped",
+				Skipped:    true,
+				SkipReason: "rule check failed: missing MediaInfo encode settings",
+			},
+			{
+				Tracker:    "RF",
+				Status:     "skipped",
+				Skipped:    true,
+				SkipReason: "rule check failed: missing MediaInfo encode settings",
+			},
 		},
 	}
 
@@ -1613,8 +1731,16 @@ func TestHandleBDMVPlaylistSelectionDoesNotPromptInUnattendedMode(t *testing.T) 
 	coreSvc := &cliCoreForTest{
 		playlistSelectionErr: internalerrors.ErrNotFound,
 		playlists: []api.PlaylistInfo{
-			{File: "00001.mpls", Duration: 7200, Score: 1},
-			{File: "00002.mpls", Duration: 7100, Score: 0.9},
+			{
+				File:     "00001.mpls",
+				Duration: 7200,
+				Score:    1,
+			},
+			{
+				File:     "00002.mpls",
+				Duration: 7100,
+				Score:    0.9,
+			},
 		},
 	}
 
@@ -1638,8 +1764,16 @@ func TestHandleBDMVPlaylistSelectionAllowsUnattendedUseLargestPlaylist(t *testin
 	coreSvc := &cliCoreForTest{
 		playlistSelectionErr: internalerrors.ErrNotFound,
 		playlists: []api.PlaylistInfo{
-			{File: "00001.mpls", Duration: 7200, Score: 1},
-			{File: "00002.mpls", Duration: 7100, Score: 0.9},
+			{
+				File:     "00001.mpls",
+				Duration: 7200,
+				Score:    1,
+			},
+			{
+				File:     "00002.mpls",
+				Duration: 7100,
+				Score:    0.9,
+			},
 		},
 	}
 
@@ -1666,7 +1800,11 @@ func TestHandleBDMVPlaylistSelectionReturnsSaveErrorInUnattendedUseLargestPlayli
 	coreSvc := &cliCoreForTest{
 		playlistSelectionErr: internalerrors.ErrNotFound,
 		playlists: []api.PlaylistInfo{
-			{File: "00001.mpls", Duration: 7200, Score: 1},
+			{
+				File:     "00001.mpls",
+				Duration: 7200,
+				Score:    1,
+			},
 		},
 		savePlaylistErr: saveErr,
 	}
@@ -1691,7 +1829,11 @@ func TestHandleBDMVPlaylistSelectionReturnsSaveErrorInUnattendedSinglePlaylist(t
 	coreSvc := &cliCoreForTest{
 		playlistSelectionErr: internalerrors.ErrNotFound,
 		playlists: []api.PlaylistInfo{
-			{File: "00001.mpls", Duration: 7200, Score: 1},
+			{
+				File:     "00001.mpls",
+				Duration: 7200,
+				Score:    1,
+			},
 		},
 		savePlaylistErr: saveErr,
 	}
@@ -1717,7 +1859,11 @@ func TestHandleBDMVPlaylistSelectionGivesEachDiscFreshDeadline(t *testing.T) {
 	coreSvc := &cliCoreForTest{
 		playlistSelectionErr: internalerrors.ErrNotFound,
 		playlists: []api.PlaylistInfo{
-			{File: "00001.mpls", Duration: 7200, Score: 1},
+			{
+				File:     "00001.mpls",
+				Duration: 7200,
+				Score:    1,
+			},
 		},
 	}
 
@@ -1793,8 +1939,16 @@ func TestHandleBDMVPlaylistSelectionReturnsOnPromptSaveCtxErr(t *testing.T) {
 			coreSvc := &cliCoreForTest{
 				playlistSelectionErr: internalerrors.ErrNotFound,
 				playlists: []api.PlaylistInfo{
-					{File: "00001.mpls", Duration: 7200, Score: 1},
-					{File: "00002.mpls", Duration: 7100, Score: 0.9},
+					{
+						File:     "00001.mpls",
+						Duration: 7200,
+						Score:    1,
+					},
+					{
+						File:     "00002.mpls",
+						Duration: 7100,
+						Score:    0.9,
+					},
 				},
 				savePlaylistErr: context.Canceled,
 			}

@@ -43,8 +43,16 @@ func (reviewTrackers) BuildPreparation(context.Context, api.PreparedMetadata, []
 
 func (reviewTrackers) BuildUploadDryRun(context.Context, api.PreparedMetadata, []string) ([]api.TrackerDryRunEntry, error) {
 	return []api.TrackerDryRunEntry{
-		{Tracker: "AITHER", Status: "ready", ReleaseName: "AITHER.NAME"},
-		{Tracker: "BLU", Status: "ready", ReleaseName: "BLU.NAME"},
+		{
+			Tracker:     "AITHER",
+			Status:      "ready",
+			ReleaseName: "AITHER.NAME",
+		},
+		{
+			Tracker:     "BLU",
+			Status:      "ready",
+			ReleaseName: "BLU.NAME",
+		},
 	}, nil
 }
 
@@ -85,7 +93,12 @@ type recordingReviewMetadata struct {
 }
 
 func (r *recordingReviewMetadata) Prepare(_ context.Context, req api.Request) (api.PreparedMetadata, error) {
-	return api.PreparedMetadata{SourcePath: req.Paths[0], Paths: req.Paths, Mode: req.Mode, Options: req.Options}, nil
+	return api.PreparedMetadata{
+		SourcePath: req.Paths[0],
+		Paths:      req.Paths,
+		Mode:       req.Mode,
+		Options:    req.Options,
+	}, nil
 }
 
 func (r *recordingReviewMetadata) RefreshPreparedMetadata(_ context.Context, meta api.PreparedMetadata) (api.PreparedMetadata, error) {
@@ -145,7 +158,12 @@ func TestBuildUploadReviewIncludesRuleFailuresDupesAndDryRun(t *testing.T) {
 			Metadata:   &stubMeta{},
 			Dupes: &reviewDupes{summary: api.DupeCheckSummary{
 				SourcePath: "/tmp/a",
-				Results:    []api.DupeCheckResult{{Tracker: "AITHER", HasDupes: true, Status: "completed", Notes: []string{"possible dupe"}}},
+				Results: []api.DupeCheckResult{{
+					Tracker:  "AITHER",
+					HasDupes: true,
+					Status:   "completed",
+					Notes:    []string{"possible dupe"},
+				}},
 			}},
 			Torrents: &stubTorrent{},
 			Trackers: reviewTrackers{},
@@ -398,8 +416,16 @@ func TestApplyDupeSummaryBlocksSkippedAndFailedTrackers(t *testing.T) {
 	meta := api.PreparedMetadata{}
 	applyDupeSummaryToPreparedMeta(&meta, api.DupeCheckSummary{
 		Results: []api.DupeCheckResult{
-			{Tracker: "BTN", Skipped: true, SkipReason: "BTN only supports TV dupe search"},
-			{Tracker: "RTF", Status: "failed", Error: "dupe search failed"},
+			{
+				Tracker:    "BTN",
+				Skipped:    true,
+				SkipReason: "BTN only supports TV dupe search",
+			},
+			{
+				Tracker: "RTF",
+				Status:  "failed",
+				Error:   "dupe search failed",
+			},
 			{Tracker: "OE", Status: "completed"},
 		},
 	})
@@ -615,8 +641,16 @@ func TestBuildUploadReviewDebugBuildsPayloadsForBlockedTrackers(t *testing.T) {
 
 	trackersSvc := &recordingReviewTrackers{
 		entries: []api.TrackerDryRunEntry{
-			{Tracker: "AITHER", Status: "ready", Payload: map[string]string{"name": "example"}},
-			{Tracker: "BLU", Status: "ready", Payload: map[string]string{"name": "example"}},
+			{
+				Tracker: "AITHER",
+				Status:  "ready",
+				Payload: map[string]string{"name": "example"},
+			},
+			{
+				Tracker: "BLU",
+				Status:  "ready",
+				Payload: map[string]string{"name": "example"},
+			},
 		},
 	}
 	coreSvc, err := New(api.CoreDependencies{
@@ -694,7 +728,12 @@ func TestBuildUploadReviewDebugReusesCachedDupeSummary(t *testing.T) {
 	cachedSummary := api.DupeCheckSummary{
 		SourcePath: "source.mkv",
 		Results: []api.DupeCheckResult{
-			{Tracker: "AITHER", HasDupes: true, Status: "completed", Notes: []string{"cached"}},
+			{
+				Tracker:  "AITHER",
+				HasDupes: true,
+				Status:   "completed",
+				Notes:    []string{"cached"},
+			},
 			{Tracker: "BLU", Status: "completed"},
 		},
 	}
@@ -702,8 +741,12 @@ func TestBuildUploadReviewDebugReusesCachedDupeSummary(t *testing.T) {
 		SourcePath: "source.mkv",
 		Mode:       api.ModeCLI,
 		Trackers:   []string{"AITHER", "BLU"},
-		Options:    api.UploadOptions{Debug: true, Screens: 1, InteractionMode: api.InteractionModeInteractive},
-		Tag:        "-GROUP",
+		Options: api.UploadOptions{
+			Debug:           true,
+			Screens:         1,
+			InteractionMode: api.InteractionModeInteractive,
+		},
+		Tag: "-GROUP",
 	}, cachedSummary)
 
 	review, err := coreSvc.BuildUploadReview(context.Background(), api.Request{
@@ -753,7 +796,12 @@ func TestBuildUploadReviewDryRunReusesCachedDupeSummary(t *testing.T) {
 	cachedSummary := api.DupeCheckSummary{
 		SourcePath: "source.mkv",
 		Results: []api.DupeCheckResult{
-			{Tracker: "AITHER", HasDupes: true, Status: "completed", Notes: []string{"cached"}},
+			{
+				Tracker:  "AITHER",
+				HasDupes: true,
+				Status:   "completed",
+				Notes:    []string{"cached"},
+			},
 			{Tracker: "BLU", Status: "completed"},
 		},
 	}
@@ -761,8 +809,12 @@ func TestBuildUploadReviewDryRunReusesCachedDupeSummary(t *testing.T) {
 		SourcePath: "source.mkv",
 		Mode:       api.ModeCLI,
 		Trackers:   []string{"AITHER", "BLU"},
-		Options:    api.UploadOptions{DryRun: true, Screens: 1, InteractionMode: api.InteractionModeInteractive},
-		Tag:        "-GROUP",
+		Options: api.UploadOptions{
+			DryRun:          true,
+			Screens:         1,
+			InteractionMode: api.InteractionModeInteractive,
+		},
+		Tag: "-GROUP",
 	}, cachedSummary)
 
 	review, err := coreSvc.BuildUploadReview(context.Background(), api.Request{
@@ -793,7 +845,11 @@ func TestBuildUploadReviewDebugRefreshesDupeSummaryWhenCacheRequestDiffers(t *te
 	dupes := &reviewDupes{summary: api.DupeCheckSummary{
 		SourcePath: "source.mkv",
 		Results: []api.DupeCheckResult{
-			{Tracker: "AITHER", Status: "completed", Notes: []string{"fresh"}},
+			{
+				Tracker: "AITHER",
+				Status:  "completed",
+				Notes:   []string{"fresh"},
+			},
 			{Tracker: "BLU", Status: "completed"},
 		},
 	}}
@@ -815,11 +871,20 @@ func TestBuildUploadReviewDebugRefreshesDupeSummaryWhenCacheRequestDiffers(t *te
 		SourcePath: "source.mkv",
 		Mode:       api.ModeGUI,
 		Trackers:   []string{"AITHER", "BLU"},
-		Options:    api.UploadOptions{Debug: true, Screens: 1, InteractionMode: api.InteractionModeInteractive},
+		Options: api.UploadOptions{
+			Debug:           true,
+			Screens:         1,
+			InteractionMode: api.InteractionModeInteractive,
+		},
 	}, api.DupeCheckSummary{
 		SourcePath: "source.mkv",
 		Results: []api.DupeCheckResult{
-			{Tracker: "AITHER", HasDupes: true, Status: "completed", Notes: []string{"stale"}},
+			{
+				Tracker:  "AITHER",
+				HasDupes: true,
+				Status:   "completed",
+				Notes:    []string{"stale"},
+			},
 			{Tracker: "BLU", Status: "completed"},
 		},
 	})
@@ -959,7 +1024,11 @@ func TestBuildUploadReviewDebugDoesNotAddDefaultsForExplicitTrackersOutsideGUI(t
 		SourcePath: "/tmp/a",
 		Mode:       api.ModeCLI,
 		Trackers:   []string{"AITHER"},
-		Options:    api.UploadOptions{Debug: true, Screens: 1, InteractionMode: api.InteractionModeInteractive},
+		Options: api.UploadOptions{
+			Debug:           true,
+			Screens:         1,
+			InteractionMode: api.InteractionModeInteractive,
+		},
 	}, api.DupeCheckSummary{
 		SourcePath: "/tmp/a",
 		Results:    []api.DupeCheckResult{{Tracker: "AITHER", Status: "completed"}},
@@ -1378,44 +1447,64 @@ func TestUploadReviewNeedsPTBRMetadataRequiresCompleteLocalizedFields(t *testing
 			want:      true,
 		},
 		{
-			name:      "complete movie entry skips",
-			localized: api.TMDBLocalizedData{Title: "Titulo", Overview: "Resumo", Genres: "Drama"},
-			trackers:  []string{"BJS"},
-			want:      false,
+			name: "complete movie entry skips",
+			localized: api.TMDBLocalizedData{
+				Title:    "Titulo",
+				Overview: "Resumo",
+				Genres:   "Drama",
+			},
+			trackers: []string{"BJS"},
+			want:     false,
 		},
 		{
-			name:      "complete tv series entry uses series overview",
-			localized: api.TMDBLocalizedData{Title: "Titulo", Overview: "Resumo serie", Genres: "Drama"},
-			category:  "TV",
-			trackers:  []string{"ASC"},
-			want:      false,
+			name: "complete tv series entry uses series overview",
+			localized: api.TMDBLocalizedData{
+				Title:    "Titulo",
+				Overview: "Resumo serie",
+				Genres:   "Drama",
+			},
+			category: "TV",
+			trackers: []string{"ASC"},
+			want:     false,
 		},
 		{
-			name:      "complete tv episode entry can use episode overview without episode title",
-			localized: api.TMDBLocalizedData{Title: "Titulo", EpisodeOverview: "Resumo episodio", Genres: "Drama"},
-			category:  "TV",
-			season:    1,
-			episode:   2,
-			trackers:  []string{"ASC"},
-			want:      false,
+			name: "complete tv episode entry can use episode overview without episode title",
+			localized: api.TMDBLocalizedData{
+				Title:           "Titulo",
+				EpisodeOverview: "Resumo episodio",
+				Genres:          "Drama",
+			},
+			category: "TV",
+			season:   1,
+			episode:  2,
+			trackers: []string{"ASC"},
+			want:     false,
 		},
 		{
-			name:      "tv episode entry with only series overview refreshes",
-			localized: api.TMDBLocalizedData{Title: "Titulo", Overview: "Resumo serie", Genres: "Drama"},
-			category:  "TV",
-			season:    1,
-			episode:   2,
-			trackers:  []string{"ASC"},
-			want:      true,
+			name: "tv episode entry with only series overview refreshes",
+			localized: api.TMDBLocalizedData{
+				Title:    "Titulo",
+				Overview: "Resumo serie",
+				Genres:   "Drama",
+			},
+			category: "TV",
+			season:   1,
+			episode:  2,
+			trackers: []string{"ASC"},
+			want:     true,
 		},
 		{
-			name:      "season pack entry with only series overview refreshes",
-			localized: api.TMDBLocalizedData{Title: "Titulo", Overview: "Resumo serie", Genres: "Drama"},
-			category:  "TV",
-			season:    1,
-			tvPack:    true,
-			trackers:  []string{"BT"},
-			want:      true,
+			name: "season pack entry with only series overview refreshes",
+			localized: api.TMDBLocalizedData{
+				Title:    "Titulo",
+				Overview: "Resumo serie",
+				Genres:   "Drama",
+			},
+			category: "TV",
+			season:   1,
+			tvPack:   true,
+			trackers: []string{"BT"},
+			want:     true,
 		},
 		{
 			name:      "tracker prefix does not refresh",
@@ -1511,7 +1600,11 @@ func TestBuildUploadReviewPartialGUIReviewPreservesOmittedCacheState(t *testing.
 	t.Parallel()
 
 	trackersSvc := &recordingReviewTrackers{
-		entries: []api.TrackerDryRunEntry{{Tracker: "AITHER", Status: "ready", ReleaseName: "AITHER.NAME"}},
+		entries: []api.TrackerDryRunEntry{{
+			Tracker:     "AITHER",
+			Status:      "ready",
+			ReleaseName: "AITHER.NAME",
+		}},
 	}
 	coreSvc, err := New(api.CoreDependencies{
 		Config: config.Config{MainSettings: config.MainSettingsConfig{TMDBAPI: "x"}, ScreenshotHandling: config.ScreenshotHandlingConfig{Screens: 1}},
@@ -1822,8 +1915,16 @@ func TestBuildUploadReviewCommitsReviewedTrackerUpdateFromMatchingRefreshedCache
 			"BLU": {{Rule: "old_blu", Reason: "keep"}},
 		},
 		CrossSeedTorrents: []api.UploadedTorrent{
-			{Tracker: "AITHER", TorrentID: "1", DownloadURL: "https://dupes/aither"},
-			{Tracker: "BLU", TorrentID: "2", DownloadURL: "https://dupes/blu"},
+			{
+				Tracker:     "AITHER",
+				TorrentID:   "1",
+				DownloadURL: "https://dupes/aither",
+			},
+			{
+				Tracker:     "BLU",
+				TorrentID:   "2",
+				DownloadURL: "https://dupes/blu",
+			},
 		},
 	}
 	coreSvc.storeRefreshedDupeCache("/tmp/a", "", initial)

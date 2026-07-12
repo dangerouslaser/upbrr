@@ -14,7 +14,13 @@ import (
 )
 
 func (Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "THR", DisplayName: "THR", AuthKind: "credential_login", SupportsLogin: true, SupportsAutoLogin: true}
+	return api.TrackerAuthCapability{
+		TrackerID:         "THR",
+		DisplayName:       "THR",
+		AuthKind:          "credential_login",
+		SupportsLogin:     true,
+		SupportsAutoLogin: true,
+	}
 }
 
 func (Definition) AuthSessionResolver() trackers.AuthSessionResolver {
@@ -27,9 +33,17 @@ func resolveAuthSession(ctx context.Context, cfg config.TrackerConfig, _ string,
 	}
 	if _, err := LoginSession(ctx, cfg); err != nil {
 		if errors.Is(err, ErrLoginFailed) {
-			return &trackers.AuthResolutionError{Reason: "login failed", ConfirmedInvalid: true, Err: err}
+			return &trackers.AuthResolutionError{
+				Reason:           "login failed",
+				ConfirmedInvalid: true,
+				Err:              err,
+			}
 		}
-		return &trackers.AuthResolutionError{Reason: "remote login unavailable", Transient: true, Err: err}
+		return &trackers.AuthResolutionError{
+			Reason:    "remote login unavailable",
+			Transient: true,
+			Err:       err,
+		}
 	}
 	return nil
 }

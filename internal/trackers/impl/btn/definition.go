@@ -25,7 +25,12 @@ func (d *Definition) Name() string {
 }
 
 func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
-	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeTV, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDB, trackers.MetadataFieldTVDB}}}}
+	return &trackers.TrackerMetadataPolicy{
+		RequireKnownCategory: true,
+		Requirements: []trackers.MetadataRequirement{
+			{Scope: trackers.MetadataScopeTV, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDB, trackers.MetadataFieldTVDB}},
+		},
+	}
 }
 
 func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {

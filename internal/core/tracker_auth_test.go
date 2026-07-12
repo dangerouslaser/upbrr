@@ -45,7 +45,11 @@ func TestCheckGUIDupesWithAuthSkipsBlockedTrackerAndContinuesReadyTrackers(t *te
 	t.Parallel()
 
 	auth := &trackerAuthPreflightTestService{
-		capabilities: []api.TrackerAuthCapability{{TrackerID: "PTP", SupportsLogin: true, SupportsManual2FA: true}},
+		capabilities: []api.TrackerAuthCapability{{
+			TrackerID:         "PTP",
+			SupportsLogin:     true,
+			SupportsManual2FA: true,
+		}},
 		statuses: []api.TrackerAuthStatus{{
 			TrackerID: "PTP",
 			State:     trackerauth.StateLoginRequired,

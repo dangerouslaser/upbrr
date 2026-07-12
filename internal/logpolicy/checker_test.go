@@ -3174,8 +3174,16 @@ func TestDiagnosticArtifactWritesRecognizeConvertedSanitizedBindings(t *testing.
 		writeExpr      string
 		wantViolations int
 	}{
-		{name: "slice conversion", writeExpr: "[]byte(payload)", wantViolations: 0},
-		{name: "ordinary call", writeExpr: "cloneBytes(payload)", wantViolations: 1},
+		{
+			name:           "slice conversion",
+			writeExpr:      "[]byte(payload)",
+			wantViolations: 0,
+		},
+		{
+			name:           "ordinary call",
+			writeExpr:      "cloneBytes(payload)",
+			wantViolations: 1,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

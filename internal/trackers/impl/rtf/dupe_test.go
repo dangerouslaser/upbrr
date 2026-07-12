@@ -163,7 +163,11 @@ func TestRTFHandlerRefreshesAndRetriesOn401(t *testing.T) {
 		config.Config{
 			Trackers: config.TrackersConfig{
 				Trackers: map[string]config.TrackerConfig{
-					"RTF": {APIKey: "old-key", Username: "user", Password: "pass"},
+					"RTF": {
+						APIKey:   "old-key",
+						Username: "user",
+						Password: "pass",
+					},
 				},
 			},
 		}, client, api.NopLogger{})

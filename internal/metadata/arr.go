@@ -92,7 +92,8 @@ func (s *Service) ApplyArrData(ctx context.Context, meta api.PreparedMetadata) (
 		}
 		return meta, nil
 	}
-	if result.TMDBID == 0 && result.IMDBID == 0 && result.TVDBID == 0 && result.TVmazeID == 0 && result.Year == 0 && len(result.Genres) == 0 && result.ReleaseGroup == "" {
+	if result.TMDBID == 0 && result.IMDBID == 0 && result.TVDBID == 0 && result.TVmazeID == 0 && result.Year == 0 && len(result.Genres) == 0 &&
+		result.ReleaseGroup == "" {
 		return meta, nil
 	}
 
@@ -176,7 +177,8 @@ func (c *httpArrLookupClient) Lookup(ctx context.Context, meta api.PreparedMetad
 			}
 			continue
 		}
-		if result.TMDBID != 0 || result.IMDBID != 0 || result.TVDBID != 0 || result.TVmazeID != 0 || result.Year != 0 || len(result.Genres) != 0 || result.ReleaseGroup != "" {
+		if result.TMDBID != 0 || result.IMDBID != 0 || result.TVDBID != 0 || result.TVmazeID != 0 || result.Year != 0 || len(result.Genres) != 0 ||
+			result.ReleaseGroup != "" {
 			return result, nil
 		}
 	}
@@ -186,7 +188,12 @@ func (c *httpArrLookupClient) Lookup(ctx context.Context, meta api.PreparedMetad
 	return ArrLookupResult{}, nil
 }
 
-func (c *httpArrLookupClient) lookupInstance(ctx context.Context, httpClient *http.Client, instance arrInstance, meta api.PreparedMetadata) (ArrLookupResult, error) {
+func (c *httpArrLookupClient) lookupInstance(
+	ctx context.Context,
+	httpClient *http.Client,
+	instance arrInstance,
+	meta api.PreparedMetadata,
+) (ArrLookupResult, error) {
 	switch c.service {
 	case "sonarr":
 		return lookupSonarr(ctx, httpClient, instance, meta)
@@ -412,19 +419,51 @@ func (r ArrLookupResult) hasIDs() bool {
 
 func sonarrInstances(cfg config.ArrIntegrationConfig) []arrInstance {
 	return collectArrInstances("sonarr", []arrInstance{
-		{name: "default", baseURL: cfg.SonarrURL, apiKey: cfg.SonarrAPIKey},
-		{name: "1", baseURL: cfg.SonarrURL1, apiKey: cfg.SonarrAPIKey1},
-		{name: "2", baseURL: cfg.SonarrURL2, apiKey: cfg.SonarrAPIKey2},
-		{name: "3", baseURL: cfg.SonarrURL3, apiKey: cfg.SonarrAPIKey3},
+		{
+			name:    "default",
+			baseURL: cfg.SonarrURL,
+			apiKey:  cfg.SonarrAPIKey,
+		},
+		{
+			name:    "1",
+			baseURL: cfg.SonarrURL1,
+			apiKey:  cfg.SonarrAPIKey1,
+		},
+		{
+			name:    "2",
+			baseURL: cfg.SonarrURL2,
+			apiKey:  cfg.SonarrAPIKey2,
+		},
+		{
+			name:    "3",
+			baseURL: cfg.SonarrURL3,
+			apiKey:  cfg.SonarrAPIKey3,
+		},
 	})
 }
 
 func radarrInstances(cfg config.ArrIntegrationConfig) []arrInstance {
 	return collectArrInstances("radarr", []arrInstance{
-		{name: "default", baseURL: cfg.RadarrURL, apiKey: cfg.RadarrAPIKey},
-		{name: "1", baseURL: cfg.RadarrURL1, apiKey: cfg.RadarrAPIKey1},
-		{name: "2", baseURL: cfg.RadarrURL2, apiKey: cfg.RadarrAPIKey2},
-		{name: "3", baseURL: cfg.RadarrURL3, apiKey: cfg.RadarrAPIKey3},
+		{
+			name:    "default",
+			baseURL: cfg.RadarrURL,
+			apiKey:  cfg.RadarrAPIKey,
+		},
+		{
+			name:    "1",
+			baseURL: cfg.RadarrURL1,
+			apiKey:  cfg.RadarrAPIKey1,
+		},
+		{
+			name:    "2",
+			baseURL: cfg.RadarrURL2,
+			apiKey:  cfg.RadarrAPIKey2,
+		},
+		{
+			name:    "3",
+			baseURL: cfg.RadarrURL3,
+			apiKey:  cfg.RadarrAPIKey3,
+		},
 	})
 }
 

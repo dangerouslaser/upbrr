@@ -68,7 +68,10 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	httpReq.Header.Set("Content-Type", contentType)
 	httpReq.Header.Set("User-Agent", "upbrr")
 	commonhttp.ApplyCookies(httpReq, cookies)
-	client := httpclient.CloneWithTimeout(&http.Client{CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}, httpclient.DefaultTimeout)
+	client := httpclient.CloneWithTimeout(
+		&http.Client{CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }},
+		httpclient.DefaultTimeout,
+	)
 	resp, err := client.Do(httpReq)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: FF upload request: %w", err)
@@ -90,7 +93,13 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 				return api.UploadSummary{}, fmt.Errorf("trackers: %w", err)
 			}
 		}
-		return api.UploadSummary{Uploaded: 1, UploadedTorrents: []api.UploadedTorrent{{Tracker: "FF", TorrentID: id, TorrentURL: tURL, DownloadURL: tURL, TorrentPath: artifactPath}}}, nil
+		return api.UploadSummary{Uploaded: 1, UploadedTorrents: []api.UploadedTorrent{{
+			Tracker:     "FF",
+			TorrentID:   id,
+			TorrentURL:  tURL,
+			DownloadURL: tURL,
+			TorrentPath: artifactPath,
+		}}}, nil
 	}
 	_, _ = commonhttp.WriteFailureArtifact(req.Meta, req.AppConfig.MainSettings.DBPath, "FF", "upload_failure", bodyBytes, ".html")
 	return api.UploadSummary{}, commonhttp.UploadHTTPError("FF", resp.StatusCode, bodyBytes)
@@ -116,7 +125,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Description:      state.description,
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
-		Files:            []api.TrackerDryRunFile{{Field: "file", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "file",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -188,7 +201,12 @@ func resolveCookies(ctx context.Context, logger api.Logger, cfg config.TrackerCo
 			return nil, errors.New("trackers: FF cookies not found")
 		}
 		// #nosec G124 -- Dry-run sentinel is an outbound tracker jar cookie, not a browser-set cookie.
-		return []*http.Cookie{{Name: "dryrun", Value: "1", Domain: ".funfile.org", Path: "/"}}, nil
+		return []*http.Cookie{{
+			Name:   "dryrun",
+			Value:  "1",
+			Domain: ".funfile.org",
+			Path:   "/",
+		}}, nil
 	}
 	if strings.TrimSpace(cfg.Username) == "" || strings.TrimSpace(cfg.Password) == "" {
 		return nil, errors.New("trackers: FF cookie invalid/missing and username/password not configured")
@@ -204,7 +222,10 @@ func resolveCookies(ctx context.Context, logger api.Logger, cfg config.TrackerCo
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", "upbrr")
-	client := httpclient.CloneWithTimeout(&http.Client{CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}, httpclient.DefaultTimeout)
+	client := httpclient.CloneWithTimeout(
+		&http.Client{CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }},
+		httpclient.DefaultTimeout,
+	)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("trackers: FF login request: %w", err)
@@ -235,14 +256,22 @@ func resolveExtraFiles(ctx context.Context, meta api.PreparedMetadata) []commonh
 			if err == nil {
 				defer resp.Body.Close()
 				if body, err := io.ReadAll(resp.Body); err == nil && len(body) > 0 {
-					files = append(files, commonhttp.FileField{FieldName: "poster", FileName: "poster.jpg", Content: body})
+					files = append(files, commonhttp.FileField{
+						FieldName: "poster",
+						FileName:  "poster.jpg",
+						Content:   body,
+					})
 				}
 			}
 		}
 	}
 	dir := filepath.Dir(metautil.FirstNonEmptyTrimmed(meta.MediaInfoTextPath, meta.SourcePath))
 	if payload, path, err := commonhttp.ReadFirstMatching(dir, "*.nfo"); err == nil {
-		files = append(files, commonhttp.FileField{FieldName: "nfo", FileName: filepath.Base(path), Content: payload})
+		files = append(files, commonhttp.FileField{
+			FieldName: "nfo",
+			FileName:  filepath.Base(path),
+			Content:   payload,
+		})
 	}
 	return files
 }

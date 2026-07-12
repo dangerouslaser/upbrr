@@ -32,7 +32,12 @@ func checkGenres(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) r
 	typeValue := unit3d.RuleType(meta)
 	group := unit3d.RuleGroup(meta)
 	if group != "" && typeValue != "WEBDL" && !unit3d.IsDiscType(meta.DiscType) {
-		restricted := map[string]bool{"CMRG": true, "EVO": true, "TERMINAL": true, "VISION": true}
+		restricted := map[string]bool{
+			"CMRG":     true,
+			"EVO":      true,
+			"TERMINAL": true,
+			"VISION":   true,
+		}
 		if restricted[strings.ToUpper(group)] {
 			return ruletypes.Fail(fmt.Sprintf("Group %s is only allowed for raw type content at OTW", group))
 		}

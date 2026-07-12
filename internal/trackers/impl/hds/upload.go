@@ -81,7 +81,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	if resp.Request != nil && resp.Request.URL != nil {
 		finalURL = resp.Request.URL.String()
 	}
-	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 400, commonhttp.DefaultResponsePreviewBytes)
+	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(
+		resp,
+		resp.StatusCode >= 200 && resp.StatusCode < 400,
+		commonhttp.DefaultResponsePreviewBytes,
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: HDS read upload response: %w", err)
 	}
@@ -136,7 +140,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Description:      state.description,
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
-		Files:            []api.TrackerDryRunFile{{Field: "torrent", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "torrent",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -170,7 +178,12 @@ func prepareUploadState(ctx context.Context, req trackers.UploadRequest) (upload
 		"youtube_video": resolveYouTube(req.Meta),
 		"anonymous":     boolString(req.TrackerConfig.Anon),
 	}
-	state := uploadState{torrentPath: torrentPath, description: description, releaseName: fields["filename"], fields: fields}
+	state := uploadState{
+		torrentPath: torrentPath,
+		description: description,
+		releaseName: fields["filename"],
+		fields:      fields,
+	}
 	if !supportsHDSResolution(req.Meta.Release.Resolution) {
 		state.blockedReason = "resolution must be at least 720p"
 	}
@@ -286,7 +299,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 
@@ -363,7 +379,11 @@ func resolveNFO(meta api.PreparedMetadata) (commonhttp.FileField, bool) {
 	if err != nil {
 		return commonhttp.FileField{}, false
 	}
-	return commonhttp.FileField{FieldName: "nfo", FileName: filepath.Base(path), Content: payload}, true
+	return commonhttp.FileField{
+		FieldName: "nfo",
+		FileName:  filepath.Base(path),
+		Content:   payload,
+	}, true
 }
 
 func categoryOf(meta api.PreparedMetadata) string {

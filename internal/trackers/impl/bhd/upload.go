@@ -128,8 +128,16 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         uploadEndpoint(strings.TrimSpace(req.TrackerConfig.APIKey)),
 		Payload:          cloneFields(state.fields),
 		Files: []api.TrackerDryRunFile{
-			{Field: "mediainfo", Path: resolveMediaPath(req.Meta, req.AppConfig.MainSettings.DBPath), Present: strings.TrimSpace(state.mediaDump) != ""},
-			{Field: "file", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""},
+			{
+				Field:   "mediainfo",
+				Path:    resolveMediaPath(req.Meta, req.AppConfig.MainSettings.DBPath),
+				Present: strings.TrimSpace(state.mediaDump) != "",
+			},
+			{
+				Field:   "file",
+				Path:    state.torrentPath,
+				Present: strings.TrimSpace(state.torrentPath) != "",
+			},
 		},
 	}, nil
 }
@@ -407,7 +415,12 @@ func writeFailureArtifact(req trackers.UploadRequest, payload []byte, name strin
 }
 
 func resolveUploadName(meta api.PreparedMetadata) string {
-	name := metautil.FirstNonEmptyTrimmed(strings.TrimSpace(meta.ReleaseName), strings.TrimSpace(meta.ReleaseNameNoTag), strings.TrimSpace(meta.Filename), pathutil.Base(meta.SourcePath))
+	name := metautil.FirstNonEmptyTrimmed(
+		strings.TrimSpace(meta.ReleaseName),
+		strings.TrimSpace(meta.ReleaseNameNoTag),
+		strings.TrimSpace(meta.Filename),
+		pathutil.Base(meta.SourcePath),
+	)
 	if IsDVDSource(meta.Source) {
 		audio := strings.Join(strings.Fields(strings.TrimSpace(meta.Audio)), " ")
 		if audio != "" && strings.TrimSpace(meta.VideoCodec) != "" {
@@ -544,9 +557,24 @@ func resolveLive(cfg config.TrackerConfig) string {
 
 func resolveRegion(region string) string {
 	allowed := map[string]struct{}{
-		"AUS": {}, "CAN": {}, "CEE": {}, "CHN": {}, "ESP": {}, "EUR": {}, "FRA": {}, "GBR": {},
-		"GER": {}, "HKG": {}, "ITA": {}, "JPN": {}, "KOR": {}, "NOR": {}, "NLD": {}, "RUS": {},
-		"TWN": {}, "USA": {},
+		"AUS": {},
+		"CAN": {},
+		"CEE": {},
+		"CHN": {},
+		"ESP": {},
+		"EUR": {},
+		"FRA": {},
+		"GBR": {},
+		"GER": {},
+		"HKG": {},
+		"ITA": {},
+		"JPN": {},
+		"KOR": {},
+		"NOR": {},
+		"NLD": {},
+		"RUS": {},
+		"TWN": {},
+		"USA": {},
 	}
 	upper := strings.ToUpper(strings.TrimSpace(region))
 	if _, ok := allowed[upper]; ok {

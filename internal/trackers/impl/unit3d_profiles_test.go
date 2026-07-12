@@ -75,18 +75,82 @@ func TestExplicitUnit3DProfilesPreserveResolvers(t *testing.T) {
 		meta    api.PreparedMetadata
 		want    string
 	}{
-		{name: "A4K rejects WEBRIP", profile: a4k.Profile(), meta: api.PreparedMetadata{Type: "WEBRIP"}, want: ""},
-		{name: "ITT DLMux", profile: itt.Profile(), meta: api.PreparedMetadata{ReleaseName: "Example.Release.2026.1080p.DLMux-GRP", Type: "WEBDL"}, want: "27"},
-		{name: "OE HEVC", profile: oe.Profile(), meta: api.PreparedMetadata{Type: "WEBRIP", VideoCodec: "HEVC"}, want: "10"},
-		{name: "OTW DVD", profile: otw.Profile(), meta: api.PreparedMetadata{DiscType: "DVD", Type: "REMUX"}, want: "7"},
-		{name: "STC pack", profile: stc.Profile(), meta: api.PreparedMetadata{Type: "WEBDL", TVPack: true, Release: api.ReleaseInfo{Resolution: "1080p"}}, want: "13"},
-		{name: "TLZ pack", profile: tlz.Profile(), meta: api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "TV"}, TVPack: true}, want: "4"},
-		{name: "ZNTH DVDRIP", profile: znth.Profile(), meta: api.PreparedMetadata{Type: "DVDRIP"}, want: "11"},
-		{name: "RF encode", profile: rf.Profile(), meta: api.PreparedMetadata{Type: "ENCODE"}, want: "41"},
-		{name: "YUS disc", profile: yus.Profile(), meta: api.PreparedMetadata{Type: "DISC"}, want: "17"},
-		{name: "BLU encode", profile: blu.Profile(), meta: api.PreparedMetadata{Type: "ENCODE"}, want: "12"},
-		{name: "PT WEBRIP", profile: pt.Profile(), meta: api.PreparedMetadata{Type: "WEBRIP"}, want: "39"},
-		{name: "SHRI remux", profile: shri.Profile(), meta: api.PreparedMetadata{Type: "REMUX"}, want: "7"},
+		{
+			name:    "A4K rejects WEBRIP",
+			profile: a4k.Profile(),
+			meta:    api.PreparedMetadata{Type: "WEBRIP"},
+			want:    "",
+		},
+		{
+			name:    "ITT DLMux",
+			profile: itt.Profile(),
+			meta:    api.PreparedMetadata{ReleaseName: "Example.Release.2026.1080p.DLMux-GRP", Type: "WEBDL"},
+			want:    "27",
+		},
+		{
+			name:    "OE HEVC",
+			profile: oe.Profile(),
+			meta:    api.PreparedMetadata{Type: "WEBRIP", VideoCodec: "HEVC"},
+			want:    "10",
+		},
+		{
+			name:    "OTW DVD",
+			profile: otw.Profile(),
+			meta:    api.PreparedMetadata{DiscType: "DVD", Type: "REMUX"},
+			want:    "7",
+		},
+		{
+			name:    "STC pack",
+			profile: stc.Profile(),
+			meta: api.PreparedMetadata{
+				Type:    "WEBDL",
+				TVPack:  true,
+				Release: api.ReleaseInfo{Resolution: "1080p"},
+			},
+			want: "13",
+		},
+		{
+			name:    "TLZ pack",
+			profile: tlz.Profile(),
+			meta:    api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "TV"}, TVPack: true},
+			want:    "4",
+		},
+		{
+			name:    "ZNTH DVDRIP",
+			profile: znth.Profile(),
+			meta:    api.PreparedMetadata{Type: "DVDRIP"},
+			want:    "11",
+		},
+		{
+			name:    "RF encode",
+			profile: rf.Profile(),
+			meta:    api.PreparedMetadata{Type: "ENCODE"},
+			want:    "41",
+		},
+		{
+			name:    "YUS disc",
+			profile: yus.Profile(),
+			meta:    api.PreparedMetadata{Type: "DISC"},
+			want:    "17",
+		},
+		{
+			name:    "BLU encode",
+			profile: blu.Profile(),
+			meta:    api.PreparedMetadata{Type: "ENCODE"},
+			want:    "12",
+		},
+		{
+			name:    "PT WEBRIP",
+			profile: pt.Profile(),
+			meta:    api.PreparedMetadata{Type: "WEBRIP"},
+			want:    "39",
+		},
+		{
+			name:    "SHRI remux",
+			profile: shri.Profile(),
+			meta:    api.PreparedMetadata{Type: "REMUX"},
+			want:    "7",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -107,13 +171,21 @@ func TestExplicitUnit3DProfilesPreserveResolvers(t *testing.T) {
 	if got := ihd.Profile().Site.ResolveCategoryID(api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "MOVIE"}, Anime: true}); got != "4" {
 		t.Fatalf("IHD category ID = %q, want 4", got)
 	}
-	if got := tos.Profile().Site.ResolveCategoryID(api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "TV"}, TVPack: true, Tag: "-vostfr"}); got != "9" {
+	if got := tos.Profile().Site.ResolveCategoryID(api.PreparedMetadata{
+		ExternalIDs: api.ExternalIDs{Category: "TV"},
+		TVPack:      true,
+		Tag:         "-vostfr",
+	}); got != "9" {
 		t.Fatalf("TOS category ID = %q, want 9", got)
 	}
 	if got := ldu.Profile().Site.ResolveCategoryID(api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "TV"}, Anime: true}); got != "9" {
 		t.Fatalf("LDU anime category ID = %q, want 9", got)
 	}
-	if got := ldu.Profile().Site.ResolveCategoryID(api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "MOVIE"}, AudioLanguages: []string{"Portuguese"}, SubtitleLanguages: []string{"Portuguese"}}); got != "22" {
+	if got := ldu.Profile().Site.ResolveCategoryID(api.PreparedMetadata{
+		ExternalIDs:       api.ExternalIDs{Category: "MOVIE"},
+		AudioLanguages:    []string{"Portuguese"},
+		SubtitleLanguages: []string{"Portuguese"},
+	}); got != "22" {
 		t.Fatalf("LDU non-English category ID = %q, want 22", got)
 	}
 	data := map[string]string{}
@@ -140,7 +212,14 @@ func TestExplicitUnit3DProfilesPreserveResolvers(t *testing.T) {
 	if aitherData["hdr10p"] != "1" || aitherData["dv"] != "1" {
 		t.Fatalf("AITHER HDR payload = %#v", aitherData)
 	}
-	aitherMeta := api.PreparedMetadata{ReleaseName: "Example.Release.2020.DVD.DVDRIP.AAC.XVID-GRP", Release: api.ReleaseInfo{Year: 2020, Resolution: "480p"}, Type: "DVDRIP", Source: "DVD", Audio: "AAC 2.0", VideoEncode: "XVID"}
+	aitherMeta := api.PreparedMetadata{
+		ReleaseName: "Example.Release.2020.DVD.DVDRIP.AAC.XVID-GRP",
+		Release:     api.ReleaseInfo{Year: 2020, Resolution: "480p"},
+		Type:        "DVDRIP",
+		Source:      "DVD",
+		Audio:       "AAC 2.0",
+		VideoEncode: "XVID",
+	}
 	if got := aither.Profile().Site.BuildName(aitherMeta, config.TrackerConfig{}); got == "" || got == aitherMeta.ReleaseName {
 		t.Fatalf("AITHER name = %q", got)
 	}

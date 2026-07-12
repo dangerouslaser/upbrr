@@ -24,7 +24,11 @@ type dupeSearcher struct {
 }
 
 func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, endpoint: "https://anthelion.me/api.php"}
+	return &dupeSearcher{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: "https://anthelion.me/api.php",
+	}
 }
 
 func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -79,7 +83,13 @@ func antDupeEntries(payload map[string]any, resolution string) []api.DupeEntry {
 		if fileCount == 0 {
 			fileCount = len(files)
 		}
-		entry := api.DupeEntry{Name: antString(item["fileName"]), Files: files, FileCount: fileCount, Link: antString(item["guid"]), Download: strings.ReplaceAll(antString(item["link"]), "&amp;", "&")}
+		entry := api.DupeEntry{
+			Name:      antString(item["fileName"]),
+			Files:     files,
+			FileCount: fileCount,
+			Link:      antString(item["guid"]),
+			Download:  strings.ReplaceAll(antString(item["link"]), "&amp;", "&"),
+		}
 		if entry.Name == "" && len(files) > 0 {
 			entry.Name = files[0]
 		}

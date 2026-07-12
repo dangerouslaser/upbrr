@@ -34,7 +34,10 @@ func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
 func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
 	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{
 		{Scope: trackers.MetadataScopeMovie, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDBIDOnly, trackers.MetadataFieldIMDBIDOnly}},
-		{Scope: trackers.MetadataScopeTV, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDBIDOnly, trackers.MetadataFieldIMDBIDOnly, trackers.MetadataFieldTVDBIDOnly}},
+		{
+			Scope: trackers.MetadataScopeTV,
+			AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDBIDOnly, trackers.MetadataFieldIMDBIDOnly, trackers.MetadataFieldTVDBIDOnly},
+		},
 	}}
 }
 
@@ -43,7 +46,37 @@ func (d *Definition) BannedGroups() []string {
 		return nil
 	}
 	return []string{
-		"RARBG", "STUTTERSHIT", "LiGaS", "DDR", "Zeus", "TBS", "SWTYBLZ", "EASports", "C4K", "d3g", "MeGusta", "YTS", "YIFY", "Tigole", "x0r", "nikt0", "NhaNc3", "PRoDJi", "RDN", "SANTi", "FaNGDiNG0", "FRDS", "HD2DVD", "HDTime", "iPlanet", "KiNGDOM", "Leffe", "4K4U", "Xiaomi", "VisionXpert", "WKS",
+		"RARBG",
+		"STUTTERSHIT",
+		"LiGaS",
+		"DDR",
+		"Zeus",
+		"TBS",
+		"SWTYBLZ",
+		"EASports",
+		"C4K",
+		"d3g",
+		"MeGusta",
+		"YTS",
+		"YIFY",
+		"Tigole",
+		"x0r",
+		"nikt0",
+		"NhaNc3",
+		"PRoDJi",
+		"RDN",
+		"SANTi",
+		"FaNGDiNG0",
+		"FRDS",
+		"HD2DVD",
+		"HDTime",
+		"iPlanet",
+		"KiNGDOM",
+		"Leffe",
+		"4K4U",
+		"Xiaomi",
+		"VisionXpert",
+		"WKS",
 	}
 }
 

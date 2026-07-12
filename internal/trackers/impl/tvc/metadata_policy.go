@@ -6,5 +6,10 @@ package tvc
 import "github.com/autobrr/upbrr/internal/trackers"
 
 func (definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
-	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB, trackers.MetadataFieldIMDB}}}}
+	return &trackers.TrackerMetadataPolicy{
+		RequireKnownCategory: true,
+		Requirements: []trackers.MetadataRequirement{
+			{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB, trackers.MetadataFieldIMDB}},
+		},
+	}
 }

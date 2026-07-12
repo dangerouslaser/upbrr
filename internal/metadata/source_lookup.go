@@ -125,7 +125,11 @@ func resolveSourceLookupURLWithRegistry(raw string, registry *trackers.Registry)
 	}
 
 	if tracker, trackerID, ok := extractUnit3DTrackerID(host, parsed.Path, registry); ok {
-		return sourceLookupResolution{Tracker: tracker, TrackerID: trackerID, Mode: "tracker"}, nil
+		return sourceLookupResolution{
+			Tracker:   tracker,
+			TrackerID: trackerID,
+			Mode:      "tracker",
+		}, nil
 	}
 
 	path := parsed.EscapedPath()

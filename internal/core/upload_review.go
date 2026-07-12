@@ -73,7 +73,17 @@ func (c *Core) BuildUploadReview(ctx context.Context, req api.Request) (api.Uplo
 	singleReq.Options = options
 	singleReq.ExternalIDOverrides = mergeExternalIDOverrides(req.ExternalIDOverrides, resolveExternalIDSelection(req.ExternalIDSelections, uniquePaths[0]))
 
-	signature := overrideSignature(singleReq.ExternalIDOverrides, singleReq.ReleaseNameOverrides, singleReq.MetadataOverrides, singleReq.TrackerConfigOverrides, singleReq.TrackerSiteOverrides, singleReq.ClientOverrides, singleReq.TorrentOverrides, singleReq.ImageHostOverrides, singleReq.ScreenshotOverrides)
+	signature := overrideSignature(
+		singleReq.ExternalIDOverrides,
+		singleReq.ReleaseNameOverrides,
+		singleReq.MetadataOverrides,
+		singleReq.TrackerConfigOverrides,
+		singleReq.TrackerSiteOverrides,
+		singleReq.ClientOverrides,
+		singleReq.TorrentOverrides,
+		singleReq.ImageHostOverrides,
+		singleReq.ScreenshotOverrides,
+	)
 	var (
 		baseMeta                api.PreparedMetadata
 		baseMetaOK              bool
@@ -299,7 +309,8 @@ func hasLocalizedPTBR(meta api.PreparedMetadata) bool {
 
 // hasKnownTMDBID reports whether metadata has a source-current TMDB ID available for refresh.
 func hasKnownTMDBID(meta api.PreparedMetadata) bool {
-	if meta.StoredDataFresh && strings.EqualFold(strings.TrimSpace(meta.ExternalIDs.SourcePath), strings.TrimSpace(meta.SourcePath)) && meta.ExternalIDs.TMDBID != 0 {
+	if meta.StoredDataFresh && strings.EqualFold(strings.TrimSpace(meta.ExternalIDs.SourcePath), strings.TrimSpace(meta.SourcePath)) &&
+		meta.ExternalIDs.TMDBID != 0 {
 		return true
 	}
 	if meta.StoredDataFresh &&
@@ -370,15 +381,34 @@ func formatBlockedReasons(reasons []api.TrackerBlockReason) string {
 	return strings.Join(labels, ", ")
 }
 
-func applyRequestToPreparedMeta(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger, registries ...*trackerspkg.Registry) api.PreparedMetadata {
+func applyRequestToPreparedMeta(
+	meta api.PreparedMetadata,
+	req api.Request,
+	cfg config.Config,
+	logger api.Logger,
+	registries ...*trackerspkg.Registry,
+) api.PreparedMetadata {
 	return applyRequestToPreparedMetaWithDerivedFields(meta, req, cfg, logger, true, registries...)
 }
 
-func applyRequestToPreparedMetaBeforeRefresh(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger, registries ...*trackerspkg.Registry) api.PreparedMetadata {
+func applyRequestToPreparedMetaBeforeRefresh(
+	meta api.PreparedMetadata,
+	req api.Request,
+	cfg config.Config,
+	logger api.Logger,
+	registries ...*trackerspkg.Registry,
+) api.PreparedMetadata {
 	return applyRequestToPreparedMetaWithDerivedFields(meta, req, cfg, logger, false, registries...)
 }
 
-func applyRequestToPreparedMetaWithDerivedFields(meta api.PreparedMetadata, req api.Request, cfg config.Config, logger api.Logger, rebuildDerivedFields bool, registries ...*trackerspkg.Registry) api.PreparedMetadata {
+func applyRequestToPreparedMetaWithDerivedFields(
+	meta api.PreparedMetadata,
+	req api.Request,
+	cfg config.Config,
+	logger api.Logger,
+	rebuildDerivedFields bool,
+	registries ...*trackerspkg.Registry,
+) api.PreparedMetadata {
 	meta = deepCopyPreparedMetadata(meta)
 	existingTrackerIDs := cloneStringMap(meta.TrackerIDs)
 	existingTrackersRemove, existingMatchedTrackers := duplicateTrackerStateForRequest(meta, req)
@@ -866,7 +896,11 @@ func removeTrackerDupeBlockReason(blocked map[string][]api.TrackerBlockReason) m
 	return filtered
 }
 
-func removeTrackerBlockReasonForTrackers(blocked map[string][]api.TrackerBlockReason, reason api.TrackerBlockReason, trackers []string) map[string][]api.TrackerBlockReason {
+func removeTrackerBlockReasonForTrackers(
+	blocked map[string][]api.TrackerBlockReason,
+	reason api.TrackerBlockReason,
+	trackers []string,
+) map[string][]api.TrackerBlockReason {
 	if len(blocked) == 0 || len(trackers) == 0 {
 		return blocked
 	}

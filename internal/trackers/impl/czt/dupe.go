@@ -37,7 +37,12 @@ type cztHandler struct {
 }
 
 func (definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, logger api.Logger) trackers.DupeSearcher {
-	return cztHandler{cfg: cfg, http: httpClient, logger: logger, baseURL: cztDefaultBaseURL}
+	return cztHandler{
+		cfg:     cfg,
+		http:    httpClient,
+		logger:  logger,
+		baseURL: cztDefaultBaseURL,
+	}
 }
 
 // Search queries CZTeam by the most specific prepared release name available.

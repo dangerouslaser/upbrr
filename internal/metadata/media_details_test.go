@@ -68,8 +68,17 @@ func TestEditionFromMetaMultiPlaylistAggregatesIMDbMatches(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"120": {DisplayName: "2h", Seconds: 7200, Minutes: 120},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"Extended"}},
+					"120": {
+						DisplayName: "2h",
+						Seconds:     7200,
+						Minutes:     120,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"Extended"},
+					},
 				},
 			},
 		},
@@ -94,7 +103,12 @@ func TestEditionFromMetaMultiPlaylistDeduplicatesMatches(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"120": {DisplayName: "2h", Seconds: 7200, Minutes: 120, Attributes: []string{"Director's Cut"}},
+					"120": {
+						DisplayName: "2h",
+						Seconds:     7200,
+						Minutes:     120,
+						Attributes:  []string{"Director's Cut"},
+					},
 				},
 			},
 		},
@@ -116,8 +130,18 @@ func TestEditionFromMetaMultiPlaylistTieBreaksEqualRuntimeMatches(t *testing.T) 
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"124": {DisplayName: "2h 4m 50s", Seconds: 7490, Minutes: 124, Attributes: []string{"extended cut"}},
-					"125": {DisplayName: "2h 5m 10s", Seconds: 7510, Minutes: 125, Attributes: []string{"director's cut"}},
+					"124": {
+						DisplayName: "2h 4m 50s",
+						Seconds:     7490,
+						Minutes:     124,
+						Attributes:  []string{"extended cut"},
+					},
+					"125": {
+						DisplayName: "2h 5m 10s",
+						Seconds:     7510,
+						Minutes:     125,
+						Attributes:  []string{"director's cut"},
+					},
 				},
 			},
 		},
@@ -142,7 +166,12 @@ func TestEditionFromMetaMultiPlaylistFallsBackWhenNoIMDbMatch(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"90": {DisplayName: "1h 30m", Seconds: 5400, Minutes: 90, Attributes: []string{"Extended"}},
+					"90": {
+						DisplayName: "1h 30m",
+						Seconds:     5400,
+						Minutes:     90,
+						Attributes:  []string{"Extended"},
+					},
 				},
 			},
 		},
@@ -160,8 +189,17 @@ func TestEditionFromMetaMatchesIMDbRuntimeForSingleFile(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"100": {DisplayName: "1h 40m", Seconds: 6000, Minutes: 100},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"extended edition"}},
+					"100": {
+						DisplayName: "1h 40m",
+						Seconds:     6000,
+						Minutes:     100,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"extended edition"},
+					},
 				},
 			},
 		},
@@ -183,8 +221,16 @@ func TestEditionFromMetaIgnoresIMDbRuntimeTheatricalOnlyForSingleFile(t *testing
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"100": {DisplayName: "1h 40m", Seconds: 6000, Minutes: 100},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125},
+					"100": {
+						DisplayName: "1h 40m",
+						Seconds:     6000,
+						Minutes:     100,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+					},
 				},
 			},
 		},
@@ -203,8 +249,18 @@ func TestEditionFromMetaChoosesClosestIMDbRuntimeForSingleFile(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"124": {DisplayName: "2h 4m", Seconds: 7440, Minutes: 124, Attributes: []string{"director's cut"}},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"extended cut"}},
+					"124": {
+						DisplayName: "2h 4m",
+						Seconds:     7440,
+						Minutes:     124,
+						Attributes:  []string{"director's cut"},
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"extended cut"},
+					},
 				},
 			},
 		},
@@ -223,8 +279,17 @@ func TestEditionFromMetaSuppressesEditionWhenCloserIMDbRuntimeIsTheatrical(t *te
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"124": {DisplayName: "2h 4m", Seconds: 7440, Minutes: 124, Attributes: []string{"director's cut"}},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125},
+					"124": {
+						DisplayName: "2h 4m",
+						Seconds:     7440,
+						Minutes:     124,
+						Attributes:  []string{"director's cut"},
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+					},
 				},
 			},
 		},
@@ -246,8 +311,17 @@ func TestEditionFromMetaSkipsIMDbRuntimeWhenManualEditionOverridePresent(t *test
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"100": {DisplayName: "1h 40m", Seconds: 6000, Minutes: 100},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"extended"}},
+					"100": {
+						DisplayName: "1h 40m",
+						Seconds:     6000,
+						Minutes:     100,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"extended"},
+					},
 				},
 			},
 		},
@@ -270,8 +344,17 @@ func TestEditionFromMetaSkipsIMDbRuntimeWhenNoEditionOverridePresent(t *testing.
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"100": {DisplayName: "1h 40m", Seconds: 6000, Minutes: 100},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"extended"}},
+					"100": {
+						DisplayName: "1h 40m",
+						Seconds:     6000,
+						Minutes:     100,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"extended"},
+					},
 				},
 			},
 		},
@@ -292,8 +375,17 @@ func TestEditionFromMetaSkipsIMDbRuntimeWhenAnimeOverridePresent(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"100": {DisplayName: "1h 40m", Seconds: 6000, Minutes: 100},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"extended"}},
+					"100": {
+						DisplayName: "1h 40m",
+						Seconds:     6000,
+						Minutes:     100,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"extended"},
+					},
 				},
 			},
 		},
@@ -448,8 +540,17 @@ func TestEditionFromMetaMatchesIMDbRuntimeFromDurationString(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"100": {DisplayName: "1h 40m", Seconds: 6000, Minutes: 100},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"extended"}},
+					"100": {
+						DisplayName: "1h 40m",
+						Seconds:     6000,
+						Minutes:     100,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"extended"},
+					},
 				},
 			},
 		},
@@ -468,8 +569,17 @@ func TestEditionFromMetaPreservesIMDbEditionAttributeText(t *testing.T) {
 		ExternalMetadata: api.ExternalMetadata{
 			IMDB: &api.IMDBMetadata{
 				EditionDetails: map[string]api.IMDBEditionDetail{
-					"100": {DisplayName: "1h 40m", Seconds: 6000, Minutes: 100},
-					"125": {DisplayName: "2h 5m", Seconds: 7500, Minutes: 125, Attributes: []string{"IMAX", "remastered version"}},
+					"100": {
+						DisplayName: "1h 40m",
+						Seconds:     6000,
+						Minutes:     100,
+					},
+					"125": {
+						DisplayName: "2h 5m",
+						Seconds:     7500,
+						Minutes:     125,
+						Attributes:  []string{"IMAX", "remastered version"},
+					},
 				},
 			},
 		},

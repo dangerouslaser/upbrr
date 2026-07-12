@@ -9,5 +9,11 @@ func Rules() *ruletypes.RuleSet {
 	return &ruletypes.RuleSet{RequireUniqueID: true, Language: englishNonDisc()}
 }
 func englishNonDisc() *ruletypes.LanguageRule {
-	return &ruletypes.LanguageRule{Languages: []string{"english", "en", "eng"}, RequireAudio: true, RequireSubs: true, AllowOriginal: true, ApplyIfNonDisc: true}
+	return &ruletypes.LanguageRule{
+		Languages:      []string{"english", "en", "eng"},
+		RequireAudio:   true,
+		RequireSubs:    true,
+		AllowOriginal:  true,
+		ApplyIfNonDisc: true,
+	}
 }

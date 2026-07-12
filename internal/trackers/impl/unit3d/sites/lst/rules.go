@@ -6,5 +6,11 @@ package lst
 import "github.com/autobrr/upbrr/internal/trackers/ruletypes"
 
 func Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{RequireValidMISetting: true, Language: &ruletypes.LanguageRule{Languages: []string{"english", "en", "eng"}, RequireAudio: true, RequireSubs: true, AllowOriginal: true, ApplyIfNonDisc: true}}
+	return &ruletypes.RuleSet{RequireValidMISetting: true, Language: &ruletypes.LanguageRule{
+		Languages:      []string{"english", "en", "eng"},
+		RequireAudio:   true,
+		RequireSubs:    true,
+		AllowOriginal:  true,
+		ApplyIfNonDisc: true,
+	}}
 }

@@ -27,7 +27,11 @@ type dupeSearcher struct {
 }
 
 func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, logger api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, logger: logger}
+	return &dupeSearcher{
+		cfg:    cfg,
+		http:   httpClient,
+		logger: logger,
+	}
 }
 
 func (h dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, tracker string) ([]api.DupeEntry, []string, error) {
@@ -112,7 +116,13 @@ func (h dupeSearcher) lookupMediaCode(ctx context.Context, site azDupeSiteDef, c
 	return "", nil
 }
 
-func (h dupeSearcher) fetchTorrentList(ctx context.Context, site azDupeSiteDef, cookies []*http.Cookie, pageURL string, meta api.PreparedMetadata) ([]api.DupeEntry, []string, error) {
+func (h dupeSearcher) fetchTorrentList(
+	ctx context.Context,
+	site azDupeSiteDef,
+	cookies []*http.Cookie,
+	pageURL string,
+	meta api.PreparedMetadata,
+) ([]api.DupeEntry, []string, error) {
 	results := make([]api.DupeEntry, 0)
 	visited := make(map[string]struct{})
 	ripType := azDupeRipType(meta)

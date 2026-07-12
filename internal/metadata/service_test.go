@@ -449,7 +449,11 @@ func TestApplySceneDetectionAppliesServiceFromNFO(t *testing.T) {
 	t.Parallel()
 
 	service := NewService(&stubRepo{},
-		WithSceneDetector(staticSceneDetector{result: SceneResult{IsScene: true, Service: "iT", ServiceLongName: "iTunes"}}),
+		WithSceneDetector(staticSceneDetector{result: SceneResult{
+			IsScene:         true,
+			Service:         "iT",
+			ServiceLongName: "iTunes",
+		}}),
 	)
 
 	meta, err := service.applySceneDetection(context.Background(), api.PreparedMetadata{})

@@ -25,7 +25,15 @@ func Profile() unit3d.Profile {
 }
 
 func typeID(meta api.PreparedMetadata) string {
-	return map[string]string{"DISC": "26", "REMUX": "7", "WEBDL": "27", "WEBRIP": "15", "HDTV": "33", "ENCODE": "15", "DVDRIP": "15"}[unit3d.InferType(meta)]
+	return map[string]string{
+		"DISC":   "26",
+		"REMUX":  "7",
+		"WEBDL":  "27",
+		"WEBRIP": "15",
+		"HDTV":   "33",
+		"ENCODE": "15",
+		"DVDRIP": "15",
+	}[unit3d.InferType(meta)]
 }
 
 func additionalPayload(req trackers.UploadRequest, data map[string]string) {

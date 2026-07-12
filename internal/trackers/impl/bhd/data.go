@@ -27,7 +27,11 @@ type dataLookup struct {
 }
 
 func (d *Definition) NewDataLookup(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DataLookup {
-	return &dataLookup{cfg: cfg, http: httpClient, baseURL: "https://beyond-hd.me/api/torrents"}
+	return &dataLookup{
+		cfg:     cfg,
+		http:    httpClient,
+		baseURL: "https://beyond-hd.me/api/torrents",
+	}
 }
 
 func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest) (datatypes.Result, error) {

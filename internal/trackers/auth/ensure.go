@@ -64,12 +64,24 @@ func (s *Service) EnsureSession(ctx context.Context, req EnsureRequest) (Session
 	capability := adapter.Capability()
 	if !capability.SupportsLogin {
 		if confirmedInvalid {
-			return Session{}, &AuthRequiredError{TrackerID: trackerID, Reason: "stored session expired", Err: err}
+			return Session{}, &AuthRequiredError{
+				TrackerID: trackerID,
+				Reason:    "stored session expired",
+				Err:       err,
+			}
 		}
-		return Session{}, &UnsupportedAuthError{TrackerID: trackerID, Reason: "credential login unsupported", Err: err}
+		return Session{}, &UnsupportedAuthError{
+			TrackerID: trackerID,
+			Reason:    "credential login unsupported",
+			Err:       err,
+		}
 	}
 	if !hasLoginCredentials(req.Config) {
-		return Session{}, &AuthRequiredError{TrackerID: trackerID, Reason: "username/password missing", Err: err}
+		return Session{}, &AuthRequiredError{
+			TrackerID: trackerID,
+			Reason:    "username/password missing",
+			Err:       err,
+		}
 	}
 
 	session, loginErr := adapter.Login(ctx, req.Config, req.DBPath, req.Login)

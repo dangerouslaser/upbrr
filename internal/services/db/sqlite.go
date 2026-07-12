@@ -113,7 +113,11 @@ func OpenWithLoggerContext(ctx context.Context, path string, logger Logger) (*SQ
 		}
 	}
 
-	return &SQLiteRepository{db: db, logger: logger, path: repositoryDBPath(path, resolved)}, nil
+	return &SQLiteRepository{
+		db:     db,
+		logger: logger,
+		path:   repositoryDBPath(path, resolved),
+	}, nil
 }
 
 // DBPath returns the resolved on-disk database path when the repository was
@@ -1174,7 +1178,11 @@ func (r *SQLiteRepository) GetDescriptionOverride(ctx context.Context, path stri
 		return DescriptionOverride{}, fmt.Errorf("db get description override: %w", err)
 	}
 
-	override := DescriptionOverride{SourcePath: trimmed, GroupKey: normalizeDescriptionOverrideGroupKey(storedGroupKey), Description: description}
+	override := DescriptionOverride{
+		SourcePath:  trimmed,
+		GroupKey:    normalizeDescriptionOverrideGroupKey(storedGroupKey),
+		Description: description,
+	}
 	if updatedAt != "" {
 		if parsed, err := time.Parse(time.RFC3339Nano, updatedAt); err == nil {
 			override.UpdatedAt = parsed
@@ -1267,7 +1275,13 @@ func (r *SQLiteRepository) DeleteDescriptionOverride(ctx context.Context, path s
 		return internalerrors.ErrInvalidInput
 	}
 	trimmedGroup := normalizeDescriptionOverrideGroupKey(groupKey)
-	if _, err := r.execWrite(ctx, "delete description override", `DELETE FROM description_overrides WHERE source_path = ? AND group_key = ?`, trimmed, trimmedGroup); err != nil {
+	if _, err := r.execWrite(
+		ctx,
+		"delete description override",
+		`DELETE FROM description_overrides WHERE source_path = ? AND group_key = ?`,
+		trimmed,
+		trimmedGroup,
+	); err != nil {
 		return fmt.Errorf("db delete description override: %w", err)
 	}
 	return nil
@@ -2138,7 +2152,8 @@ func (r *SQLiteRepository) ReplaceNormalFinalSelections(ctx context.Context, pat
 		return internalerrors.ErrInvalidInput
 	}
 	for _, selection := range selections {
-		if strings.TrimSpace(selection.SourcePath) != trimmed || strings.TrimSpace(selection.ImagePath) == "" || api.IsDiscMenuSelectionSource(strings.TrimSpace(selection.Source)) {
+		if strings.TrimSpace(selection.SourcePath) != trimmed || strings.TrimSpace(selection.ImagePath) == "" ||
+			api.IsDiscMenuSelectionSource(strings.TrimSpace(selection.Source)) {
 			return internalerrors.ErrInvalidInput
 		}
 	}
@@ -2161,7 +2176,12 @@ func (r *SQLiteRepository) ReplaceNormalFinalSelections(ctx context.Context, pat
 
 // AppendManualMenuScreenshots atomically upserts manual menu screenshot records
 // and appends their selections after existing manual-menu order values.
-func (r *SQLiteRepository) AppendManualMenuScreenshots(ctx context.Context, path string, screenshots []Screenshot, selections []ScreenshotFinalSelection) error {
+func (r *SQLiteRepository) AppendManualMenuScreenshots(
+	ctx context.Context,
+	path string,
+	screenshots []Screenshot,
+	selections []ScreenshotFinalSelection,
+) error {
 	if r == nil || r.db == nil {
 		return errors.New("db: repository not initialized")
 	}
@@ -2194,7 +2214,12 @@ func (r *SQLiteRepository) AppendManualMenuScreenshots(ctx context.Context, path
 // ReplaceDVDMenuScreenshots atomically replaces automatic DVD-menu records and
 // selections while preserving manual menus and normal screenshots. It returns
 // replaced local image paths for caller-owned filesystem cleanup.
-func (r *SQLiteRepository) ReplaceDVDMenuScreenshots(ctx context.Context, path string, screenshots []Screenshot, selections []ScreenshotFinalSelection) ([]string, error) {
+func (r *SQLiteRepository) ReplaceDVDMenuScreenshots(
+	ctx context.Context,
+	path string,
+	screenshots []Screenshot,
+	selections []ScreenshotFinalSelection,
+) ([]string, error) {
 	if r == nil || r.db == nil {
 		return nil, errors.New("db: repository not initialized")
 	}
@@ -2341,16 +2366,19 @@ func (r *SQLiteRepository) RestoreDiscMenuScreenshot(ctx context.Context, path s
 	selection := deleted.Selection
 	selection.SourcePath = strings.TrimSpace(selection.SourcePath)
 	selection.ImagePath = strings.TrimSpace(selection.ImagePath)
-	if trimmedPath == "" || selection.SourcePath != trimmedPath || selection.ImagePath == "" || !api.IsDiscMenuSelectionSource(strings.TrimSpace(selection.Source)) {
+	if trimmedPath == "" || selection.SourcePath != trimmedPath || selection.ImagePath == "" ||
+		!api.IsDiscMenuSelectionSource(strings.TrimSpace(selection.Source)) {
 		return internalerrors.ErrInvalidInput
 	}
 	if deleted.Screenshot != nil {
-		if strings.TrimSpace(deleted.Screenshot.SourcePath) != trimmedPath || strings.TrimSpace(deleted.Screenshot.ImagePath) != selection.ImagePath || deleted.Screenshot.Purpose != api.ScreenshotPurposeMenu {
+		if strings.TrimSpace(deleted.Screenshot.SourcePath) != trimmedPath || strings.TrimSpace(deleted.Screenshot.ImagePath) != selection.ImagePath ||
+			deleted.Screenshot.Purpose != api.ScreenshotPurposeMenu {
 			return internalerrors.ErrInvalidInput
 		}
 	}
 	for _, uploaded := range deleted.UploadedImages {
-		if strings.TrimSpace(uploaded.SourcePath) != trimmedPath || strings.TrimSpace(uploaded.ImagePath) != selection.ImagePath || strings.TrimSpace(uploaded.Host) == "" {
+		if strings.TrimSpace(uploaded.SourcePath) != trimmedPath || strings.TrimSpace(uploaded.ImagePath) != selection.ImagePath ||
+			strings.TrimSpace(uploaded.Host) == "" {
 			return internalerrors.ErrInvalidInput
 		}
 	}
@@ -2606,7 +2634,8 @@ func validMenuScreenshotBatch(path string, screenshots []Screenshot, selections 
 	}
 	paths := make(map[string]struct{}, len(screenshots))
 	for _, screenshot := range screenshots {
-		if strings.TrimSpace(screenshot.SourcePath) != path || strings.TrimSpace(screenshot.ImagePath) == "" || screenshot.Purpose != api.ScreenshotPurposeMenu {
+		if strings.TrimSpace(screenshot.SourcePath) != path || strings.TrimSpace(screenshot.ImagePath) == "" ||
+			screenshot.Purpose != api.ScreenshotPurposeMenu {
 			return false
 		}
 		imagePath := strings.TrimSpace(screenshot.ImagePath)

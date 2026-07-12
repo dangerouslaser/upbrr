@@ -30,10 +30,18 @@ func TestDefinitionBuildUploadDryRunBlockedWithoutCookies(t *testing.T) {
 		Meta: api.PreparedMetadata{
 			SourcePath:  filepath.Join(tmp, "movie.mkv"),
 			TorrentPath: torrentPath,
-			Release:     api.ReleaseInfo{Title: "Movie", Year: 2024, Resolution: "1080p"},
+			Release: api.ReleaseInfo{
+				Title:      "Movie",
+				Year:       2024,
+				Resolution: "1080p",
+			},
 			ExternalIDs: api.ExternalIDs{Category: "MOVIE", IMDBID: 1234567},
 			ExternalMetadata: api.ExternalMetadata{
-				TMDB: &api.TMDBMetadata{Poster: "https://img/poster.jpg", Overview: "Overview", Genres: "Drama"},
+				TMDB: &api.TMDBMetadata{
+					Poster:   "https://img/poster.jpg",
+					Overview: "Overview",
+					Genres:   "Drama",
+				},
 				IMDB: &api.IMDBMetadata{IMDbIDText: "tt1234567"},
 			},
 		},
@@ -72,7 +80,11 @@ func TestDefinitionBuildUploadDryRunQuestionnaireForMissingMetadata(t *testing.T
 		Meta: api.PreparedMetadata{
 			SourcePath:  filepath.Join(tmp, "movie.mkv"),
 			TorrentPath: torrentPath,
-			Release:     api.ReleaseInfo{Title: "Movie", Year: 2024, Resolution: "1080p"},
+			Release: api.ReleaseInfo{
+				Title:      "Movie",
+				Year:       2024,
+				Resolution: "1080p",
+			},
 			ExternalIDs: api.ExternalIDs{Category: "MOVIE", IMDBID: 1234567},
 			ExternalMetadata: api.ExternalMetadata{
 				TMDB: &api.TMDBMetadata{Poster: "https://img/poster.jpg"},

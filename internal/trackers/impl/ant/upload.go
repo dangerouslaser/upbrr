@@ -33,17 +33,87 @@ import (
 const antUploadURL = "https://anthelion.me/api.php"
 
 var antTorrentIDPattern = regexp.MustCompile(`id=(\d+)`)
-var antDefaultSignaturePattern = regexp.MustCompile(`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`)
+
+var antDefaultSignaturePattern = regexp.MustCompile(
+	`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`,
+)
 var antEmptyURLPattern = regexp.MustCompile(`(?is)\[url=[^\]]*]\s*\[/url\]`)
 
 var antBannedReleaseGroups = map[string]struct{}{
-	"3LTON": {}, "4yEo": {}, "ADE": {}, "AFG": {}, "AniHLS": {}, "AnimeRG": {}, "AniURL": {}, "AROMA": {}, "aXXo": {}, "Brrip": {},
-	"CHD": {}, "CM8": {}, "CrEwSaDe": {}, "d3g": {}, "DDR": {}, "DNL": {}, "DeadFish": {}, "ELiTE": {}, "eSc": {}, "EVO": {}, "FaNGDiNG0": {},
-	"FGT": {}, "FRDS": {}, "FUM": {}, "HAiKU": {}, "HD2DVD": {}, "HDS": {}, "HDTime": {}, "Hi10": {}, "ION10": {},
-	"iPlanet": {}, "JIVE": {}, "KiNGDOM": {}, "Leffe": {}, "LiGaS": {}, "LOAD": {}, "MeGusta": {}, "MkvCage": {}, "mHD": {}, "mSD": {},
-	"NhaNc3": {}, "nHD": {}, "NOIVTC": {}, "nSD": {}, "Oj": {}, "Ozlem": {}, "PiRaTeS": {}, "PRoDJi": {}, "RAPiDCOWS": {}, "RARBG": {},
-	"RetroPeeps": {}, "RDN": {}, "REsuRRecTioN": {}, "RMTeam": {}, "SANTi": {}, "SicFoI": {}, "SPASM": {}, "SM737": {}, "SPDVD": {}, "STUTTERSHIT": {}, "TBS": {},
-	"Telly": {}, "TM": {}, "UPiNSMOKE": {}, "URANiME": {}, "WAF": {}, "xRed": {}, "XS": {}, "YIFY": {}, "YTS": {}, "Zeus": {}, "ZKBL": {}, "ZmN": {}, "ZMNT": {},
+	"3LTON":        {},
+	"4yEo":         {},
+	"ADE":          {},
+	"AFG":          {},
+	"AniHLS":       {},
+	"AnimeRG":      {},
+	"AniURL":       {},
+	"AROMA":        {},
+	"aXXo":         {},
+	"Brrip":        {},
+	"CHD":          {},
+	"CM8":          {},
+	"CrEwSaDe":     {},
+	"d3g":          {},
+	"DDR":          {},
+	"DNL":          {},
+	"DeadFish":     {},
+	"ELiTE":        {},
+	"eSc":          {},
+	"EVO":          {},
+	"FaNGDiNG0":    {},
+	"FGT":          {},
+	"FRDS":         {},
+	"FUM":          {},
+	"HAiKU":        {},
+	"HD2DVD":       {},
+	"HDS":          {},
+	"HDTime":       {},
+	"Hi10":         {},
+	"ION10":        {},
+	"iPlanet":      {},
+	"JIVE":         {},
+	"KiNGDOM":      {},
+	"Leffe":        {},
+	"LiGaS":        {},
+	"LOAD":         {},
+	"MeGusta":      {},
+	"MkvCage":      {},
+	"mHD":          {},
+	"mSD":          {},
+	"NhaNc3":       {},
+	"nHD":          {},
+	"NOIVTC":       {},
+	"nSD":          {},
+	"Oj":           {},
+	"Ozlem":        {},
+	"PiRaTeS":      {},
+	"PRoDJi":       {},
+	"RAPiDCOWS":    {},
+	"RARBG":        {},
+	"RetroPeeps":   {},
+	"RDN":          {},
+	"REsuRRecTioN": {},
+	"RMTeam":       {},
+	"SANTi":        {},
+	"SicFoI":       {},
+	"SPASM":        {},
+	"SM737":        {},
+	"SPDVD":        {},
+	"STUTTERSHIT":  {},
+	"TBS":          {},
+	"Telly":        {},
+	"TM":           {},
+	"UPiNSMOKE":    {},
+	"URANiME":      {},
+	"WAF":          {},
+	"xRed":         {},
+	"XS":           {},
+	"YIFY":         {},
+	"YTS":          {},
+	"Zeus":         {},
+	"ZKBL":         {},
+	"ZmN":          {},
+	"ZMNT":         {},
 }
 
 type uploadState struct {
@@ -286,7 +356,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && unit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		unit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 
@@ -380,7 +453,15 @@ func buildQuestionnaire(meta api.PreparedMetadata, state uploadState) *api.Track
 		})
 	}
 	if strings.TrimSpace(state.tags) == "" {
-		fields = append(fields, api.TrackerQuestionnaireField{Key: "tags", Label: "Tags", Kind: "text", Value: strings.TrimSpace(current["tags"]), Placeholder: "action, drama", Help: "Comma-separated ANT tags", Required: true})
+		fields = append(fields, api.TrackerQuestionnaireField{
+			Key:         "tags",
+			Label:       "Tags",
+			Kind:        "text",
+			Value:       strings.TrimSpace(current["tags"]),
+			Placeholder: "action, drama",
+			Help:        "Comma-separated ANT tags",
+			Required:    true,
+		})
 	}
 	if state.adultContent {
 		fields = append(fields, api.TrackerQuestionnaireField{
@@ -559,7 +640,26 @@ func resolveTags(meta api.PreparedMetadata, answers map[string]string) (string, 
 		}
 		return "", true
 	}
-	allowed := map[string]struct{}{"action": {}, "adventure": {}, "animation": {}, "comedy": {}, "crime": {}, "documentary": {}, "drama": {}, "family": {}, "fantasy": {}, "history": {}, "horror": {}, "music": {}, "mystery": {}, "romance": {}, "sci.fi": {}, "thriller": {}, "war": {}, "western": {}}
+	allowed := map[string]struct{}{
+		"action":      {},
+		"adventure":   {},
+		"animation":   {},
+		"comedy":      {},
+		"crime":       {},
+		"documentary": {},
+		"drama":       {},
+		"family":      {},
+		"fantasy":     {},
+		"history":     {},
+		"horror":      {},
+		"music":       {},
+		"mystery":     {},
+		"romance":     {},
+		"sci.fi":      {},
+		"thriller":    {},
+		"war":         {},
+		"western":     {},
+	}
 	filtered := make([]string, 0, len(values))
 	for _, value := range values {
 		if _, ok := allowed[value]; ok {

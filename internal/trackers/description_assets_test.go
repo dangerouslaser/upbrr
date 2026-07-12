@@ -86,7 +86,11 @@ func (s *stubRepo) GetDescriptionOverride(_ context.Context, _ string, groupKey 
 	if expectedGroupKey == "" && strings.TrimSpace(groupKey) != "" {
 		return api.DescriptionOverride{}, internalerrors.ErrNotFound
 	}
-	return api.DescriptionOverride{SourcePath: "/tmp/source", GroupKey: s.overrideGroupKey, Description: s.descriptionOverride}, nil
+	return api.DescriptionOverride{
+		SourcePath:  "/tmp/source",
+		GroupKey:    s.overrideGroupKey,
+		Description: s.descriptionOverride,
+	}, nil
 }
 func (s *stubRepo) ListDescriptionOverridesByPath(context.Context, string) ([]api.DescriptionOverride, error) {
 	s.mu.Lock()
@@ -95,7 +99,11 @@ func (s *stubRepo) ListDescriptionOverridesByPath(context.Context, string) ([]ap
 	if s.descriptionOverride == "" {
 		return nil, internalerrors.ErrNotFound
 	}
-	return []api.DescriptionOverride{{SourcePath: "/tmp/source", GroupKey: s.overrideGroupKey, Description: s.descriptionOverride}}, nil
+	return []api.DescriptionOverride{{
+		SourcePath:  "/tmp/source",
+		GroupKey:    s.overrideGroupKey,
+		Description: s.descriptionOverride,
+	}}, nil
 }
 func (s *stubRepo) SaveDescriptionOverride(context.Context, api.DescriptionOverride) error {
 	return nil
@@ -334,9 +342,24 @@ func TestApplyResolvedDescriptionScreenshotsKeepsMenuImagesSeparate(t *testing.T
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/screen1.png", Order: 0, Source: string(api.ScreenshotPurposeFinal)},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/menu1.png", Order: 1, Source: api.ScreenshotSelectionSourceDVDMenu},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/screen2.png", Order: 2, Source: string(api.ScreenshotPurposeFinal)},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/screen1.png",
+				Order:      0,
+				Source:     string(api.ScreenshotPurposeFinal),
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/menu1.png",
+				Order:      1,
+				Source:     api.ScreenshotSelectionSourceDVDMenu,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/screen2.png",
+				Order:      2,
+				Source:     string(api.ScreenshotPurposeFinal),
+			},
 		},
 	}
 	assets := DescriptionAssets{}
@@ -372,9 +395,24 @@ func TestDescriptionAssetsPreserveMenuClassificationAcrossRehost(t *testing.T) {
 		filepath.Join(root, "normal-screen.png"),
 	}
 	repo := &stubRepo{selections: []api.ScreenshotFinalSelection{
-		{SourcePath: sourcePath, ImagePath: paths[0], Order: 0, Source: api.ScreenshotSelectionSourceDVDMenu},
-		{SourcePath: sourcePath, ImagePath: paths[1], Order: 1, Source: api.ScreenshotSelectionSourceMenu},
-		{SourcePath: sourcePath, ImagePath: paths[2], Order: 2, Source: string(api.ScreenshotPurposeFinal)},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  paths[0],
+			Order:      0,
+			Source:     api.ScreenshotSelectionSourceDVDMenu,
+		},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  paths[1],
+			Order:      1,
+			Source:     api.ScreenshotSelectionSourceMenu,
+		},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  paths[2],
+			Order:      2,
+			Source:     string(api.ScreenshotPurposeFinal),
+		},
 	}}
 	images := &stubImageService{repo: repo}
 	meta := api.PreparedMetadata{SourcePath: sourcePath}
@@ -428,9 +466,24 @@ func TestPartialMenuRemovalUpdatesResolvedAndRenderedDescription(t *testing.T) {
 	autoSecond := filepath.Join(root, "auto-menu-02.png")
 	normal := filepath.Join(root, "normal-screen-01.png")
 	selections := []api.ScreenshotFinalSelection{
-		{SourcePath: sourcePath, ImagePath: autoFirst, Order: 0, Source: api.ScreenshotSelectionSourceDVDMenu},
-		{SourcePath: sourcePath, ImagePath: autoSecond, Order: 1, Source: api.ScreenshotSelectionSourceDVDMenu},
-		{SourcePath: sourcePath, ImagePath: normal, Order: 2, Source: string(api.ScreenshotPurposeFinal)},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  autoFirst,
+			Order:      0,
+			Source:     api.ScreenshotSelectionSourceDVDMenu,
+		},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  autoSecond,
+			Order:      1,
+			Source:     api.ScreenshotSelectionSourceDVDMenu,
+		},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  normal,
+			Order:      2,
+			Source:     string(api.ScreenshotPurposeFinal),
+		},
 	}
 	if err := repo.SaveFinalSelections(context.Background(), sourcePath, selections); err != nil {
 		t.Fatalf("save selections: %v", err)
@@ -550,8 +603,18 @@ func TestResolveDescriptionAssetsAppendsMenuSelectionToStoredSlots(t *testing.T)
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/screen1.png", Order: 0, Source: string(api.ScreenshotPurposeFinal)},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/menu1.png", Order: 1, Source: screenshotPurposeMenu},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/screen1.png",
+				Order:      0,
+				Source:     string(api.ScreenshotPurposeFinal),
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/menu1.png",
+				Order:      1,
+				Source:     screenshotPurposeMenu,
+			},
 		},
 		screenshotSlots: []api.ScreenshotSlot{
 			{
@@ -564,8 +627,20 @@ func TestResolveDescriptionAssetsAppendsMenuSelectionToStoredSlots(t *testing.T)
 			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/screen1.png", Host: "imgbb", UsageScope: globalImageUsageScope, ImgURL: "https://img.example/screen1.png"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/menu1.png", Host: "imgbb", UsageScope: globalImageUsageScope, ImgURL: "https://img.example/menu1.png"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/screen1.png",
+				Host:       "imgbb",
+				UsageScope: globalImageUsageScope,
+				ImgURL:     "https://img.example/screen1.png",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/menu1.png",
+				Host:       "imgbb",
+				UsageScope: globalImageUsageScope,
+				ImgURL:     "https://img.example/menu1.png",
+			},
 		},
 	}
 
@@ -1001,13 +1076,36 @@ func TestResolveDescriptionAssetsStripsEmbeddedNFOBlocksFromOverride(t *testing.
 func TestResolveDescriptionAssetsSelectsMostCommonHost(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", ImgURL: "https://imgbb.com/a.png"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", ImgURL: "https://imgbb.com/b.png"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "pixhost", ImgURL: "https://pixhost.to/a.png"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb.com/a.png",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb.com/b.png",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "pixhost",
+				ImgURL:     "https://pixhost.to/a.png",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -1308,14 +1406,54 @@ func TestResolveDescriptionAssetsFallbackOtherTrackerImages(t *testing.T) {
 func TestResolveDescriptionAssetsIgnoresTrackerScopedUploadsForOtherTrackers(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/a.png", RawURL: "https://hdb/a.png", WebURL: "https://hdb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/b.png", RawURL: "https://hdb/b.png", WebURL: "https://hdb/b"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/a.png",
+				RawURL:     "https://hdb/a.png",
+				WebURL:     "https://hdb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/b.png",
+				RawURL:     "https://hdb/b.png",
+				WebURL:     "https://hdb/b",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -1337,14 +1475,54 @@ func TestResolveDescriptionAssetsIgnoresTrackerScopedUploadsForOtherTrackers(t *
 func TestResolveDescriptionAssetsPrefersTrackerScopedUploadsForMatchingTracker(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/a.png", RawURL: "https://hdb/a.png", WebURL: "https://hdb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/b.png", RawURL: "https://hdb/b.png", WebURL: "https://hdb/b"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/a.png",
+				RawURL:     "https://hdb/a.png",
+				WebURL:     "https://hdb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/b.png",
+				RawURL:     "https://hdb/b.png",
+				WebURL:     "https://hdb/b",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -1385,11 +1563,26 @@ func TestResolveDescriptionAssetsDegradesGracefullyOnScreenshotReadFailure(t *te
 func TestResolveDescriptionAssetsDegradesGracefullyOnSelectedUploadMismatch(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", ImgURL: "https://imgbb.com/a.png", RawURL: "https://imgbb.com/a.png", WebURL: "https://imgbb.com/a"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb.com/a.png",
+				RawURL:     "https://imgbb.com/a.png",
+				WebURL:     "https://imgbb.com/a",
+			},
 		},
 		trackerRecords: []api.TrackerMetadata{{
 			Tracker:   "AITHER",
@@ -1448,8 +1641,16 @@ func TestResolveDescriptionAssetsLimitsDescriptionSlotsToSelectedImages(t *testi
 `),
 		overrideGroupKey: "unit3d",
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/first-local.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/second-local.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/first-local.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/second-local.png",
+				Order:      1,
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -1490,9 +1691,21 @@ https://lostimg.cc/extra.png
 		slots[idx].ImagePath = fmt.Sprintf("/tmp/comparison-%d.png", idx)
 	}
 	rewritten := rewriteDescriptionSlotURLs(description, slots, []api.ScreenshotImage{
-		{Path: "/tmp/comparison-0.png", Host: "pixhost", RawURL: "https://pixhost.to/show/source.png"},
-		{Path: "/tmp/comparison-1.png", Host: "pixhost", RawURL: "https://pixhost.to/show/encode.png"},
-		{Path: "/tmp/comparison-2.png", Host: "pixhost", RawURL: "https://pixhost.to/show/extra.png"},
+		{
+			Path:   "/tmp/comparison-0.png",
+			Host:   "pixhost",
+			RawURL: "https://pixhost.to/show/source.png",
+		},
+		{
+			Path:   "/tmp/comparison-1.png",
+			Host:   "pixhost",
+			RawURL: "https://pixhost.to/show/encode.png",
+		},
+		{
+			Path:   "/tmp/comparison-2.png",
+			Host:   "pixhost",
+			RawURL: "https://pixhost.to/show/extra.png",
+		},
 	}, false)
 
 	if strings.Contains(rewritten, "lostimg.cc") {
@@ -1608,8 +1821,24 @@ func TestApplyUploadedVariantsToSlotsUsesOrderedFallbackForURLOnlySlots(t *testi
 		},
 	}
 	uploads := []api.UploadedImageLink{
-		{SourcePath: "/tmp/source", ImagePath: "/tmp/first-local.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/first.jpg", RawURL: "https://img.hdbits.org/first.jpg", WebURL: "https://img.hdbits.org/first"},
-		{SourcePath: "/tmp/source", ImagePath: "/tmp/second-local.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/second.jpg", RawURL: "https://img.hdbits.org/second.jpg", WebURL: "https://img.hdbits.org/second"},
+		{
+			SourcePath: "/tmp/source",
+			ImagePath:  "/tmp/first-local.png",
+			Host:       "hdb",
+			UsageScope: "tracker:HDB",
+			ImgURL:     "https://t.hdbits.org/first.jpg",
+			RawURL:     "https://img.hdbits.org/first.jpg",
+			WebURL:     "https://img.hdbits.org/first",
+		},
+		{
+			SourcePath: "/tmp/source",
+			ImagePath:  "/tmp/second-local.png",
+			Host:       "hdb",
+			UsageScope: "tracker:HDB",
+			ImgURL:     "https://t.hdbits.org/second.jpg",
+			RawURL:     "https://img.hdbits.org/second.jpg",
+			WebURL:     "https://img.hdbits.org/second",
+		},
 	}
 
 	summary := ApplyUploadedVariantsToSlots(slots, uploads)
@@ -1648,8 +1877,24 @@ func TestApplyUploadedVariantsToSlotsPrefersDirectPathMatches(t *testing.T) {
 		},
 	}
 	uploads := []api.UploadedImageLink{
-		{SourcePath: "/tmp/source", ImagePath: "/tmp/first-local.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/first.jpg", RawURL: "https://img.hdbits.org/first.jpg", WebURL: "https://img.hdbits.org/first"},
-		{SourcePath: "/tmp/source", ImagePath: "/tmp/second-local.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/second.jpg", RawURL: "https://img.hdbits.org/second.jpg", WebURL: "https://img.hdbits.org/second"},
+		{
+			SourcePath: "/tmp/source",
+			ImagePath:  "/tmp/first-local.png",
+			Host:       "hdb",
+			UsageScope: "tracker:HDB",
+			ImgURL:     "https://t.hdbits.org/first.jpg",
+			RawURL:     "https://img.hdbits.org/first.jpg",
+			WebURL:     "https://img.hdbits.org/first",
+		},
+		{
+			SourcePath: "/tmp/source",
+			ImagePath:  "/tmp/second-local.png",
+			Host:       "hdb",
+			UsageScope: "tracker:HDB",
+			ImgURL:     "https://t.hdbits.org/second.jpg",
+			RawURL:     "https://img.hdbits.org/second.jpg",
+			WebURL:     "https://img.hdbits.org/second",
+		},
 	}
 
 	summary := ApplyUploadedVariantsToSlots(slots, uploads)
@@ -1682,7 +1927,15 @@ func TestApplyUploadedVariantsToSlotsAppliesDuplicatePathToAllSlots(t *testing.T
 		},
 	}
 	uploads := []api.UploadedImageLink{
-		{SourcePath: "/tmp/source", ImagePath: "/tmp/encode.png", Host: "pixhost", UsageScope: "global", RawURL: "https://pixhost/encode.png", ImgURL: "https://pixhost/encode.png", WebURL: "https://pixhost/view"},
+		{
+			SourcePath: "/tmp/source",
+			ImagePath:  "/tmp/encode.png",
+			Host:       "pixhost",
+			UsageScope: "global",
+			RawURL:     "https://pixhost/encode.png",
+			ImgURL:     "https://pixhost/encode.png",
+			WebURL:     "https://pixhost/view",
+		},
 	}
 
 	summary := ApplyUploadedVariantsToSlots(slots, uploads)
@@ -1725,8 +1978,24 @@ func TestApplyUploadedVariantsToSlotsSkipsNonRenderableSlotsDuringFallback(t *te
 		},
 	}
 	uploads := []api.UploadedImageLink{
-		{SourcePath: "/tmp/source", ImagePath: "/tmp/first-local.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/first.jpg", RawURL: "https://img.hdbits.org/first.jpg", WebURL: "https://img.hdbits.org/first"},
-		{SourcePath: "/tmp/source", ImagePath: "/tmp/second-local.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/second.jpg", RawURL: "https://img.hdbits.org/second.jpg", WebURL: "https://img.hdbits.org/second"},
+		{
+			SourcePath: "/tmp/source",
+			ImagePath:  "/tmp/first-local.png",
+			Host:       "hdb",
+			UsageScope: "tracker:HDB",
+			ImgURL:     "https://t.hdbits.org/first.jpg",
+			RawURL:     "https://img.hdbits.org/first.jpg",
+			WebURL:     "https://img.hdbits.org/first",
+		},
+		{
+			SourcePath: "/tmp/source",
+			ImagePath:  "/tmp/second-local.png",
+			Host:       "hdb",
+			UsageScope: "tracker:HDB",
+			ImgURL:     "https://t.hdbits.org/second.jpg",
+			RawURL:     "https://img.hdbits.org/second.jpg",
+			WebURL:     "https://img.hdbits.org/second",
+		},
 	}
 
 	summary := ApplyUploadedVariantsToSlots(slots, uploads)
@@ -1756,14 +2025,50 @@ func TestResolveTrackerScreenshotsReturnsNilWhenHostsAreInvalid(t *testing.T) {
 func TestEnsureDescriptionImageHostReusesAllowedHost(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "pixhost", ImgURL: "https://pixhost/a.png", RawURL: "https://pixhost/a.png", WebURL: "https://pixhost/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "pixhost", ImgURL: "https://pixhost/b.png", RawURL: "https://pixhost/b.png", WebURL: "https://pixhost/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "pixhost",
+				ImgURL:     "https://pixhost/a.png",
+				RawURL:     "https://pixhost/a.png",
+				WebURL:     "https://pixhost/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "pixhost",
+				ImgURL:     "https://pixhost/b.png",
+				RawURL:     "https://pixhost/b.png",
+				WebURL:     "https://pixhost/b",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -1810,8 +2115,24 @@ func TestEnsureDescriptionImageHostReusesUploadedRecordsBeforeUploading(t *testi
 	}
 	repo := &stubRepo{
 		uploads: []api.UploadedImageLink{
-			{SourcePath: sourcePath, ImagePath: firstPath, Host: "pixhost", UsageScope: "global", ImgURL: "https://pixhost/1.png", RawURL: "https://pixhost/raw1.png", WebURL: "https://pixhost/view1"},
-			{SourcePath: sourcePath, ImagePath: secondPath, Host: "pixhost", UsageScope: "global", ImgURL: "https://pixhost/2.png", RawURL: "https://pixhost/raw2.png", WebURL: "https://pixhost/view2"},
+			{
+				SourcePath: sourcePath,
+				ImagePath:  firstPath,
+				Host:       "pixhost",
+				UsageScope: "global",
+				ImgURL:     "https://pixhost/1.png",
+				RawURL:     "https://pixhost/raw1.png",
+				WebURL:     "https://pixhost/view1",
+			},
+			{
+				SourcePath: sourcePath,
+				ImagePath:  secondPath,
+				Host:       "pixhost",
+				UsageScope: "global",
+				ImgURL:     "https://pixhost/2.png",
+				RawURL:     "https://pixhost/raw2.png",
+				WebURL:     "https://pixhost/view2",
+			},
 		},
 	}
 	images := &stubImageService{}
@@ -1843,12 +2164,34 @@ func TestEnsureDescriptionImageHostReusesUploadedRecordsBeforeUploading(t *testi
 func TestEnsureDescriptionImageHostReuploadsForRequiredTracker(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -1876,11 +2219,26 @@ func TestEnsureDescriptionImageHostReuploadsForRequiredTracker(t *testing.T) {
 func TestEnsureDescriptionImageHostReuploadsWhenAllowedHostCoverageIsPartial(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "pixhost", ImgURL: "https://pixhost/a.png", RawURL: "https://pixhost/a.png", WebURL: "https://pixhost/a"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "pixhost",
+				ImgURL:     "https://pixhost/a.png",
+				RawURL:     "https://pixhost/a.png",
+				WebURL:     "https://pixhost/a",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -2071,8 +2429,16 @@ func TestEnsureDescriptionImageHostRehostsComparisonAndKeepsMatchedDescriptionIm
 func TestEnsureDescriptionImageHostFallsBackAfterConfiguredHostFailure(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -2110,8 +2476,16 @@ func TestEnsureDescriptionImageHostFallsBackAfterConfiguredHostFailure(t *testin
 func TestEnsureDescriptionImageHostFallsBackFromConfiguredHostForUnrestrictedTracker(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -2152,8 +2526,16 @@ func TestEnsureDescriptionImageHostFallsBackFromConfiguredHostForUnrestrictedTra
 func TestEnsureDescriptionImageHostUploadsPreferredHostForUnrestrictedTracker(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -2196,8 +2578,16 @@ func TestEnsureDescriptionImageHostUploadsPreferredHostForUnrestrictedTracker(t 
 func TestEnsureDescriptionImageHostBlocksWhenAllUploadHostsFail(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -2238,14 +2628,50 @@ func TestEnsureDescriptionImageHostUsesPreferredOverrideWhenAllowed(t *testing.T
 	preferredHost := "imgbb"
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "pixhost", ImgURL: "https://pixhost/a.png", RawURL: "https://pixhost/a.png", WebURL: "https://pixhost/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "pixhost", ImgURL: "https://pixhost/b.png", RawURL: "https://pixhost/b.png", WebURL: "https://pixhost/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "pixhost",
+				ImgURL:     "https://pixhost/a.png",
+				RawURL:     "https://pixhost/a.png",
+				WebURL:     "https://pixhost/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "pixhost",
+				ImgURL:     "https://pixhost/b.png",
+				RawURL:     "https://pixhost/b.png",
+				WebURL:     "https://pixhost/b",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{
@@ -2267,14 +2693,54 @@ func TestEnsureDescriptionImageHostUsesPreferredOverrideWhenAllowed(t *testing.T
 func TestEnsureDescriptionImageHostReusesGlobalUploadsInsteadOfOtherTrackerScope(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/a.png", RawURL: "https://hdb/a.png", WebURL: "https://hdb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/b.png", RawURL: "https://hdb/b.png", WebURL: "https://hdb/b"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/a.png",
+				RawURL:     "https://hdb/a.png",
+				WebURL:     "https://hdb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/b.png",
+				RawURL:     "https://hdb/b.png",
+				WebURL:     "https://hdb/b",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -2297,12 +2763,34 @@ func TestEnsureDescriptionImageHostSkipsAutomaticUploadWhenDisabled(t *testing.T
 	skipUpload := true
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{
@@ -2333,11 +2821,26 @@ func TestEnsureDescriptionImageHostSkipsAutomaticUploadWhenDisabled(t *testing.T
 func TestEnsureDescriptionImageHostWarnsOnPartialAllowedHostCoverageWithoutUploader(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "pixhost", ImgURL: "https://pixhost/a.png", RawURL: "https://pixhost/a.png", WebURL: "https://pixhost/a"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "pixhost",
+				ImgURL:     "https://pixhost/a.png",
+				RawURL:     "https://pixhost/a.png",
+				WebURL:     "https://pixhost/a",
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
@@ -2357,15 +2860,30 @@ func TestEnsureDescriptionImageHostWarnsOnPartialAllowedHostCoverageWithoutUploa
 func TestEnsureDescriptionImageHostRollsBackUploadedImagesOnSelectionError(t *testing.T) {
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	meta := api.PreparedMetadata{SourcePath: "/tmp/source"}
 	images := &stubImageService{
 		uploads: map[string][]api.UploadedImageLink{
 			"pixhost": {
-				{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "pixhost", ImgURL: "https://pixhost/a.png", RawURL: "https://pixhost/a.png", WebURL: "https://pixhost/a"},
+				{
+					SourcePath: "/tmp/source",
+					ImagePath:  "/tmp/a.png",
+					Host:       "pixhost",
+					ImgURL:     "https://pixhost/a.png",
+					RawURL:     "https://pixhost/a.png",
+					WebURL:     "https://pixhost/a",
+				},
 			},
 		},
 	}

@@ -84,7 +84,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	if resp.Request != nil && resp.Request.URL != nil {
 		finalURL = resp.Request.URL.String()
 	}
-	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 400, commonhttp.DefaultResponsePreviewBytes)
+	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(
+		resp,
+		resp.StatusCode >= 200 && resp.StatusCode < 400,
+		commonhttp.DefaultResponsePreviewBytes,
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: IS read upload response: %w", err)
 	}
@@ -154,7 +158,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Description:      state.description,
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
-		Files:            []api.TrackerDryRunFile{{Field: "torrentfile", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "torrentfile",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -186,7 +194,12 @@ func prepareUploadState(ctx context.Context, req trackers.UploadRequest) (upload
 	if strings.EqualFold(categoryOf(req.Meta), "MOVIE") {
 		fields["t_link"] = resolveIMDbURL(req.Meta)
 	}
-	state := uploadState{torrentPath: torrentPath, description: description, releaseName: fields["subject"], fields: fields}
+	state := uploadState{
+		torrentPath: torrentPath,
+		description: description,
+		releaseName: fields["subject"],
+		fields:      fields,
+	}
 	if strings.TrimSpace(fields["t_image_url"]) == "" {
 		state.blockedReason = "missing poster URL"
 	}
@@ -418,7 +431,11 @@ func resolveNFO(meta api.PreparedMetadata) (commonhttp.FileField, bool) {
 	if err != nil {
 		return commonhttp.FileField{}, false
 	}
-	return commonhttp.FileField{FieldName: "nfofile", FileName: filepath.Base(path), Content: payload}, true
+	return commonhttp.FileField{
+		FieldName: "nfofile",
+		FileName:  filepath.Base(path),
+		Content:   payload,
+	}, true
 }
 
 func isSD(meta api.PreparedMetadata) bool {

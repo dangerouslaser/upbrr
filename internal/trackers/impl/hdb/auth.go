@@ -21,21 +21,35 @@ import (
 const hdbAuthResponseMaxBytes = 1 << 20
 
 func (d *Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "HDB", DisplayName: "HDB", AuthKind: "passkey_cookies", SupportsCookieFile: true, RequiresPasskey: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          "HDB",
+		DisplayName:        "HDB",
+		AuthKind:           "passkey_cookies",
+		SupportsCookieFile: true,
+		RequiresPasskey:    true,
+	}
 }
 
 func (d *Definition) AuthSessionResolver() trackers.AuthSessionResolver { return resolveAuthSession }
 
 func resolveAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath string, _ api.TrackerAuthLoginRequest) error {
 	if strings.TrimSpace(cfg.Username) == "" || strings.TrimSpace(cfg.Passkey) == "" {
-		return &trackers.AuthResolutionError{Reason: "username/passkey missing", AuthRequired: true, Err: errors.New("trackers: HDB missing username/passkey")}
+		return &trackers.AuthResolutionError{
+			Reason:       "username/passkey missing",
+			AuthRequired: true,
+			Err:          errors.New("trackers: HDB missing username/passkey"),
+		}
 	}
 	values, err := cookies.LoadTrackerHTTPCookies(ctx, dbPath, "HDB", "hdbits.org")
 	if err != nil || len(values) == 0 {
 		if err == nil {
 			err = cookies.ErrTrackerCookiesNotFound
 		}
-		return &trackers.AuthResolutionError{Reason: "cookies missing", AuthRequired: true, Err: fmt.Errorf("trackers: HDB cookies unavailable: %w", err)}
+		return &trackers.AuthResolutionError{
+			Reason:       "cookies missing",
+			AuthRequired: true,
+			Err:          fmt.Errorf("trackers: HDB cookies unavailable: %w", err),
+		}
 	}
 	baseURL := strings.TrimRight(strings.TrimSpace(cfg.URL), "/")
 	if baseURL == "" {
@@ -54,26 +68,52 @@ func resolveAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath st
 	client := &http.Client{Timeout: 30 * time.Second, CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}
 	resp, err := client.Do(req)
 	if err != nil {
-		return &trackers.AuthResolutionError{Reason: "remote validation unavailable", Transient: true, Err: fmt.Errorf("trackers: HDB session validation request: %w", err)}
+		return &trackers.AuthResolutionError{
+			Reason:    "remote validation unavailable",
+			Transient: true,
+			Err:       fmt.Errorf("trackers: HDB session validation request: %w", err),
+		}
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(io.LimitReader(resp.Body, hdbAuthResponseMaxBytes+1))
 	if err != nil {
-		return &trackers.AuthResolutionError{Reason: "remote validation unavailable", Transient: true, Err: fmt.Errorf("trackers: HDB read validation response: %w", err)}
+		return &trackers.AuthResolutionError{
+			Reason:    "remote validation unavailable",
+			Transient: true,
+			Err:       fmt.Errorf("trackers: HDB read validation response: %w", err),
+		}
 	}
 	if len(body) > hdbAuthResponseMaxBytes {
-		return &trackers.AuthResolutionError{Reason: "remote validation unavailable", Transient: true, Err: errors.New("trackers: HDB validation response exceeds limit")}
+		return &trackers.AuthResolutionError{
+			Reason:    "remote validation unavailable",
+			Transient: true,
+			Err:       errors.New("trackers: HDB validation response exceeds limit"),
+		}
 	}
 	bodyText := strings.ToLower(string(body))
 	location := strings.ToLower(resp.Header.Get("Location"))
-	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(location, "login") || strings.Contains(bodyText, "name=\"username\"") || strings.Contains(bodyText, "login.php") {
-		return &trackers.AuthResolutionError{Reason: "stored session expired", ConfirmedInvalid: true, Err: fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode)}
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(location, "login") ||
+		strings.Contains(bodyText, "name=\"username\"") ||
+		strings.Contains(bodyText, "login.php") {
+		return &trackers.AuthResolutionError{
+			Reason:           "stored session expired",
+			ConfirmedInvalid: true,
+			Err:              fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &trackers.AuthResolutionError{Reason: "remote validation failed", Transient: true, Err: fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode)}
+		return &trackers.AuthResolutionError{
+			Reason:    "remote validation failed",
+			Transient: true,
+			Err:       fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if !strings.Contains(bodyText, "upload") && !strings.Contains(bodyText, "torrent") {
-		return &trackers.AuthResolutionError{Reason: "stored session expired", ConfirmedInvalid: true, Err: errors.New("trackers: HDB upload marker not found")}
+		return &trackers.AuthResolutionError{
+			Reason:           "stored session expired",
+			ConfirmedInvalid: true,
+			Err:              errors.New("trackers: HDB upload marker not found"),
+		}
 	}
 	return nil
 }

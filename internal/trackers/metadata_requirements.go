@@ -111,7 +111,11 @@ func evaluateMetadataRequirementsWithRegistry(registry *Registry, tracker string
 		case severity == api.RuleFailureSeverityWarning:
 			reason = "missing recommended IMDb ID; PTP upload remains allowed"
 		}
-		failures = append(failures, api.RuleFailure{Rule: rule, Reason: reason, Severity: severity})
+		failures = append(failures, api.RuleFailure{
+			Rule:     rule,
+			Reason:   reason,
+			Severity: severity,
+		})
 	}
 	return failures, true
 }

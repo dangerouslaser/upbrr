@@ -101,7 +101,11 @@ func isEnglish(value string) bool {
 
 func categoryID(meta api.PreparedMetadata) string {
 	category := unit3d.Category(meta)
-	genres := strings.ToLower(strings.TrimSpace(strings.Join([]string{strings.TrimSpace(meta.Release.Genre), unit3d.Keywords(meta), unit3d.TMDBGenres(meta), unit3d.IMDBGenres(meta)}, ",")))
+	genres := strings.ToLower(
+		strings.TrimSpace(
+			strings.Join([]string{strings.TrimSpace(meta.Release.Genre), unit3d.Keywords(meta), unit3d.TMDBGenres(meta), unit3d.IMDBGenres(meta)}, ","),
+		),
+	)
 	hasEnglishAudio := unit3d.HasEnglishLanguage(meta.AudioLanguages)
 	hasEnglishSubs := unit3d.HasEnglishLanguage(meta.SubtitleLanguages)
 	containsDubbed := strings.Contains(strings.ToLower(strings.TrimSpace(meta.Audio)), "dubbed")

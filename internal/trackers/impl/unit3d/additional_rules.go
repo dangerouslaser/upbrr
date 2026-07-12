@@ -10,8 +10,17 @@ import (
 )
 
 var ruleResolutionOrder = map[string]int{
-	"480i": 1, "480p": 2, "576i": 3, "576p": 4, "720p": 5,
-	"1080i": 6, "1080p": 7, "1440p": 8, "2160p": 9, "4320p": 10, "8640p": 11,
+	"480i":  1,
+	"480p":  2,
+	"576i":  3,
+	"576p":  4,
+	"720p":  5,
+	"1080i": 6,
+	"1080p": 7,
+	"1440p": 8,
+	"2160p": 9,
+	"4320p": 10,
+	"8640p": 11,
 }
 
 // ResolutionBelow reports whether value ranks below minimum in the Unit3D resolution order.

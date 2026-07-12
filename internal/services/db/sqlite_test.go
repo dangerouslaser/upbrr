@@ -146,7 +146,11 @@ func TestSQLiteRepositoryCRUD(t *testing.T) {
 		t.Fatalf("expected no pending uploads, got %d", len(pending))
 	}
 
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "BLU", Status: "pending", SourcePath: "/tmp/file"}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "BLU",
+		Status:     "pending",
+		SourcePath: "/tmp/file",
+	}); err != nil {
 		t.Fatalf("create upload record: %v", err)
 	}
 
@@ -308,7 +312,11 @@ func TestSQLiteRepositoryCRUD(t *testing.T) {
 			IMDBID:            200,
 			SelectedReleaseID: "123",
 			Candidates: []api.BlurayReleaseCandidate{
-				{ReleaseID: "123", Title: "Example 4K", Score: 99.5},
+				{
+					ReleaseID: "123",
+					Title:     "Example 4K",
+					Score:     99.5,
+				},
 			},
 		},
 		UpdatedAt: idsStamp,
@@ -550,7 +558,12 @@ func TestSQLiteRepositoryHistoryCountsRuleSeverities(t *testing.T) {
 	}
 	ctx := context.Background()
 	sourcePath := filepath.Join(t.TempDir(), "example-release.mkv")
-	if err := repo.Save(ctx, FileMetadata{Path: sourcePath, Title: "Example Release", SourceSize: 1, UpdatedAt: time.Now().UTC()}); err != nil {
+	if err := repo.Save(ctx, FileMetadata{
+		Path:       sourcePath,
+		Title:      "Example Release",
+		SourceSize: 1,
+		UpdatedAt:  time.Now().UTC(),
+	}); err != nil {
 		t.Fatalf("save metadata: %v", err)
 	}
 	if err := repo.SaveTrackerRuleFailures(ctx, sourcePath, "PTP", []TrackerRuleFailure{
@@ -1378,11 +1391,19 @@ func TestSQLiteMigrationBranchesCanApplyDisjointLedgerMigrations(t *testing.T) {
 
 	registryA := []migrationStep{
 		{id: baselineMigrationID, apply: createBaselineSchema},
-		{id: "branch_a_feature", dependsOn: []string{baselineMigrationID}, apply: func(context.Context, migrationExecutor) error { return nil }},
+		{
+			id:        "branch_a_feature",
+			dependsOn: []string{baselineMigrationID},
+			apply:     func(context.Context, migrationExecutor) error { return nil },
+		},
 	}
 	registryB := []migrationStep{
 		{id: baselineMigrationID, apply: createBaselineSchema},
-		{id: "branch_b_feature", dependsOn: []string{baselineMigrationID}, apply: func(context.Context, migrationExecutor) error { return nil }},
+		{
+			id:        "branch_b_feature",
+			dependsOn: []string{baselineMigrationID},
+			apply:     func(context.Context, migrationExecutor) error { return nil },
+		},
 	}
 
 	if err := migrateContextWithRegistry(context.Background(), rawDB, registryA); err != nil {
@@ -1428,7 +1449,11 @@ func TestSQLiteMigrationFailsWhenAppliedMigrationIsMissingDependency(t *testing.
 
 	registry := []migrationStep{
 		{id: baselineMigrationID, apply: createBaselineSchema},
-		{id: "child", dependsOn: []string{baselineMigrationID}, apply: func(context.Context, migrationExecutor) error { return nil }},
+		{
+			id:        "child",
+			dependsOn: []string{baselineMigrationID},
+			apply:     func(context.Context, migrationExecutor) error { return nil },
+		},
 	}
 
 	err = migrateContextWithRegistry(context.Background(), rawDB, registry)
@@ -1450,15 +1475,27 @@ func TestValidatedMigrationRegistryRejectsInvalidDefinitions(t *testing.T) {
 
 	missingDependency := []migrationStep{
 		{id: baselineMigrationID, apply: createBaselineSchema},
-		{id: "child", dependsOn: []string{"missing"}, apply: func(context.Context, migrationExecutor) error { return nil }},
+		{
+			id:        "child",
+			dependsOn: []string{"missing"},
+			apply:     func(context.Context, migrationExecutor) error { return nil },
+		},
 	}
 	if _, err := validatedMigrationRegistry(missingDependency); err == nil || !strings.Contains(err.Error(), "depends on unknown migration") {
 		t.Fatalf("expected missing dependency definition error, got %v", err)
 	}
 
 	cycle := []migrationStep{
-		{id: baselineMigrationID, dependsOn: []string{"child"}, apply: createBaselineSchema},
-		{id: "child", dependsOn: []string{baselineMigrationID}, apply: func(context.Context, migrationExecutor) error { return nil }},
+		{
+			id:        baselineMigrationID,
+			dependsOn: []string{"child"},
+			apply:     createBaselineSchema,
+		},
+		{
+			id:        "child",
+			dependsOn: []string{baselineMigrationID},
+			apply:     func(context.Context, migrationExecutor) error { return nil },
+		},
 	}
 	if _, err := validatedMigrationRegistry(cycle); err == nil || !strings.Contains(err.Error(), "dependency cycle") {
 		t.Fatalf("expected dependency cycle error, got %v", err)
@@ -1554,13 +1591,25 @@ func TestSQLitePurgeContentData(t *testing.T) {
 		t.Fatalf("insert legacy ui_states: %v", err)
 	}
 
-	if err := repo.Save(ctx, FileMetadata{Path: targetPath, InfoHash: "hash-a", UpdatedAt: now}); err != nil {
+	if err := repo.Save(ctx, FileMetadata{
+		Path:      targetPath,
+		InfoHash:  "hash-a",
+		UpdatedAt: now,
+	}); err != nil {
 		t.Fatalf("save target metadata: %v", err)
 	}
-	if err := repo.Save(ctx, FileMetadata{Path: otherPath, InfoHash: "hash-b", UpdatedAt: now}); err != nil {
+	if err := repo.Save(ctx, FileMetadata{
+		Path:      otherPath,
+		InfoHash:  "hash-b",
+		UpdatedAt: now,
+	}); err != nil {
 		t.Fatalf("save other metadata: %v", err)
 	}
-	if err := repo.SaveExternalIDs(ctx, ExternalIDs{SourcePath: targetPath, TMDBID: 100, UpdatedAt: now}); err != nil {
+	if err := repo.SaveExternalIDs(ctx, ExternalIDs{
+		SourcePath: targetPath,
+		TMDBID:     100,
+		UpdatedAt:  now,
+	}); err != nil {
 		t.Fatalf("save external ids: %v", err)
 	}
 	if err := repo.SaveExternalMetadata(ctx, ExternalMetadata{
@@ -1649,10 +1698,18 @@ func TestSQLitePurgeContentData(t *testing.T) {
 	}}); err != nil {
 		t.Fatalf("save screenshot slots other: %v", err)
 	}
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "BLU", Status: "pending", SourcePath: targetPath}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "BLU",
+		Status:     "pending",
+		SourcePath: targetPath,
+	}); err != nil {
 		t.Fatalf("save upload record target: %v", err)
 	}
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "BLU", Status: "pending", SourcePath: otherPath}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "BLU",
+		Status:     "pending",
+		SourcePath: otherPath,
+	}); err != nil {
 		t.Fatalf("save upload record other: %v", err)
 	}
 	if err := repo.PurgeContentData(ctx, targetPath); err != nil {
@@ -1812,7 +1869,11 @@ func TestSQLiteRepositoryListStoredReleasePathsIncludesOrphans(t *testing.T) {
 	if err := repo.Save(ctx, FileMetadata{Path: "/media/a.mkv", UpdatedAt: now}); err != nil {
 		t.Fatalf("save metadata: %v", err)
 	}
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "BLU", Status: "pending", SourcePath: "/media/orphan-upload.mkv"}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "BLU",
+		Status:     "pending",
+		SourcePath: "/media/orphan-upload.mkv",
+	}); err != nil {
 		t.Fatalf("create upload record: %v", err)
 	}
 	if err := repo.SaveScreenshot(ctx, Screenshot{
@@ -1874,13 +1935,25 @@ func TestSQLiteRepositoryListPendingUploadsIncludesInternal(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "BLU", Status: "pending", SourcePath: "/tmp/a"}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "BLU",
+		Status:     "pending",
+		SourcePath: "/tmp/a",
+	}); err != nil {
 		t.Fatalf("create pending record: %v", err)
 	}
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "AITHER", Status: "pending-internal", SourcePath: "/tmp/b"}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "AITHER",
+		Status:     "pending-internal",
+		SourcePath: "/tmp/b",
+	}); err != nil {
 		t.Fatalf("create pending-internal record: %v", err)
 	}
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "HDB", Status: "uploaded", SourcePath: "/tmp/c"}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "HDB",
+		Status:     "uploaded",
+		SourcePath: "/tmp/c",
+	}); err != nil {
 		t.Fatalf("create uploaded record: %v", err)
 	}
 
@@ -2002,10 +2075,18 @@ func TestSQLiteRepositoryUpdateLatestUploadRecordStatus(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "BLU", Status: "pending", SourcePath: "/tmp/file"}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "BLU",
+		Status:     "pending",
+		SourcePath: "/tmp/file",
+	}); err != nil {
 		t.Fatalf("create first upload record: %v", err)
 	}
-	if err := repo.CreateUploadRecord(ctx, UploadRecord{Tracker: "BLU", Status: "pending", SourcePath: "/tmp/file"}); err != nil {
+	if err := repo.CreateUploadRecord(ctx, UploadRecord{
+		Tracker:    "BLU",
+		Status:     "pending",
+		SourcePath: "/tmp/file",
+	}); err != nil {
 		t.Fatalf("create second upload record: %v", err)
 	}
 

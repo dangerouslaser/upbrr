@@ -52,7 +52,13 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	}
 	entries := make([]api.DupeEntry, 0)
 	for page := 0; page <= 10; page++ {
-		params := url.Values{"page": {"torrents"}, "search": {fmt.Sprintf("tt%07d", meta.ExternalIDs.IMDBID)}, "active": {"0"}, "options": {"2"}, "pages": {strconv.Itoa(page)}}
+		params := url.Values{
+			"page":    {"torrents"},
+			"search":  {fmt.Sprintf("tt%07d", meta.ExternalIDs.IMDBID)},
+			"active":  {"0"},
+			"options": {"2"},
+			"pages":   {strconv.Itoa(page)},
+		}
 		status, body, err := commonhttp.GetText(ctx, s.http, baseURL+"/index.php", params, trackerCookies)
 		if err != nil || status < http.StatusOK || status >= http.StatusMultipleChoices {
 			return nil, hdsSkip("HDS search failed"), nil
@@ -73,7 +79,10 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 			if nameNode == nil {
 				continue
 			}
-			entry := api.DupeEntry{Name: metautil.FirstNonEmptyTrimmed(commonhttp.NodeText(nameNode), commonhttp.Attr(nameNode, "title")), Link: commonhttp.AbsoluteURL(baseURL, commonhttp.Attr(nameNode, "href"))}
+			entry := api.DupeEntry{
+				Name: metautil.FirstNonEmptyTrimmed(commonhttp.NodeText(nameNode), commonhttp.Attr(nameNode, "title")),
+				Link: commonhttp.AbsoluteURL(baseURL, commonhttp.Attr(nameNode, "href")),
+			}
 			for _, cell := range commonhttp.FindNodes(row, func(node *xhtml.Node) bool {
 				return node.Type == xhtml.ElementNode && node.Data == "td" && commonhttp.HasClass(node, "lista")
 			}) {

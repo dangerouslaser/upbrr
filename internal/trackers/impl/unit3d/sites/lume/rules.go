@@ -14,7 +14,19 @@ import (
 )
 
 func Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{RequireValidMISetting: true, BlockAdult: true, AdultMessage: "Porn is not allowed on LUME.", Language: &ruletypes.LanguageRule{Languages: []string{"english", "en", "eng"}, RequireAudio: true, RequireSubs: true, AllowOriginal: true, ApplyIfNonDisc: true}, ExtraCheck: checkRequirements}
+	return &ruletypes.RuleSet{
+		RequireValidMISetting: true,
+		BlockAdult:            true,
+		AdultMessage:          "Porn is not allowed on LUME.",
+		Language: &ruletypes.LanguageRule{
+			Languages:      []string{"english", "en", "eng"},
+			RequireAudio:   true,
+			RequireSubs:    true,
+			AllowOriginal:  true,
+			ApplyIfNonDisc: true,
+		},
+		ExtraCheck: checkRequirements,
+	}
 }
 
 func checkRequirements(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) ruletypes.Result {

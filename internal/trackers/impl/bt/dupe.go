@@ -30,7 +30,11 @@ type dupeSearcher struct {
 }
 
 func (Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, logger api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, logger: logger}
+	return &dupeSearcher{
+		cfg:    cfg,
+		http:   httpClient,
+		logger: logger,
+	}
 }
 
 func (h dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -396,7 +400,15 @@ func loadTrackerCookies(ctx context.Context, cfg config.Config, tracker, domain 
 	}
 	return loaded, nil
 }
-func doTextGet(ctx context.Context, client *http.Client, endpoint string, params url.Values, headers map[string]string, trackerCookies []*http.Cookie) (responseInfo, string, error) {
+
+func doTextGet(
+	ctx context.Context,
+	client *http.Client,
+	endpoint string,
+	params url.Values,
+	headers map[string]string,
+	trackerCookies []*http.Cookie,
+) (responseInfo, string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return responseInfo{}, "", fmt.Errorf("bt: create GET request: %w", err)

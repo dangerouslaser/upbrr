@@ -23,7 +23,18 @@ func Profile() unit3d.Profile {
 }
 
 func typeID(meta api.PreparedMetadata) string {
-	return map[string]string{"CUSTOM": "1", "BD100": "3", "BD66": "4", "BD50": "5", "BD25": "6", "NTSC DVD9": "7", "NTSC DVD5": "8", "PAL DVD9": "9", "PAL DVD5": "10", "3D": "11"}[discType(meta)]
+	return map[string]string{
+		"CUSTOM":    "1",
+		"BD100":     "3",
+		"BD66":      "4",
+		"BD50":      "5",
+		"BD25":      "6",
+		"NTSC DVD9": "7",
+		"NTSC DVD5": "8",
+		"PAL DVD9":  "9",
+		"PAL DVD5":  "10",
+		"3D":        "11",
+	}[discType(meta)]
 }
 
 func discType(meta api.PreparedMetadata) string {
@@ -113,7 +124,9 @@ func isOpera(meta api.PreparedMetadata) bool {
 	if meta.TrackerSiteOverrides.TIK.Opera != nil {
 		return *meta.TrackerSiteOverrides.TIK.Opera
 	}
-	values := strings.ToLower(strings.Join([]string{strings.TrimSpace(meta.Release.Genre), unit3d.TMDBGenres(meta), unit3d.IMDBGenres(meta), unit3d.Keywords(meta)}, ","))
+	values := strings.ToLower(
+		strings.Join([]string{strings.TrimSpace(meta.Release.Genre), unit3d.TMDBGenres(meta), unit3d.IMDBGenres(meta), unit3d.Keywords(meta)}, ","),
+	)
 	return strings.Contains(values, "opera") || strings.Contains(values, "musical")
 }
 
@@ -125,9 +138,34 @@ func isAsian(meta api.PreparedMetadata) bool {
 		return false
 	}
 	for _, country := range meta.ExternalMetadata.TMDB.OriginCountry {
-		if map[string]bool{"JP": true, "KR": true, "CN": true, "HK": true, "TW": true, "TH": true, "VN": true, "IN": true, "ID": true, "MY": true, "PH": true, "SG": true}[strings.ToUpper(strings.TrimSpace(country))] {
+		if map[string]bool{
+			"JP": true,
+			"KR": true,
+			"CN": true,
+			"HK": true,
+			"TW": true,
+			"TH": true,
+			"VN": true,
+			"IN": true,
+			"ID": true,
+			"MY": true,
+			"PH": true,
+			"SG": true,
+		}[strings.ToUpper(strings.TrimSpace(country))] {
 			return true
 		}
 	}
-	return map[string]bool{"ja": true, "ko": true, "zh": true, "th": true, "vi": true, "hi": true, "ta": true, "te": true, "ml": true, "id": true, "ms": true}[strings.ToLower(strings.TrimSpace(meta.ExternalMetadata.TMDB.OriginalLanguage))]
+	return map[string]bool{
+		"ja": true,
+		"ko": true,
+		"zh": true,
+		"th": true,
+		"vi": true,
+		"hi": true,
+		"ta": true,
+		"te": true,
+		"ml": true,
+		"id": true,
+		"ms": true,
+	}[strings.ToLower(strings.TrimSpace(meta.ExternalMetadata.TMDB.OriginalLanguage))]
 }

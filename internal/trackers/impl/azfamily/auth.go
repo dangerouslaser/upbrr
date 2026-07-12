@@ -6,5 +6,10 @@ package azfamily
 import "github.com/autobrr/upbrr/pkg/api"
 
 func (d *Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: d.Name(), DisplayName: d.Name(), AuthKind: "cookies", SupportsCookieFile: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          d.Name(),
+		DisplayName:        d.Name(),
+		AuthKind:           "cookies",
+		SupportsCookieFile: true,
+	}
 }

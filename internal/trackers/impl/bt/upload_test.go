@@ -181,12 +181,36 @@ func TestResolveVideoCodecMapsH264H265(t *testing.T) {
 		isHDR    bool
 		expected string
 	}{
-		{codec: "H264", isHDR: false, expected: "x264"},
-		{codec: "H265", isHDR: false, expected: "x265"},
-		{codec: "H265", isHDR: true, expected: "x265 HDR"},
-		{codec: "hevc", isHDR: false, expected: "x265"},
-		{codec: "avc", isHDR: false, expected: "x264"},
-		{codec: "OtherCodec", isHDR: false, expected: "OtherCodec"},
+		{
+			codec:    "H264",
+			isHDR:    false,
+			expected: "x264",
+		},
+		{
+			codec:    "H265",
+			isHDR:    false,
+			expected: "x265",
+		},
+		{
+			codec:    "H265",
+			isHDR:    true,
+			expected: "x265 HDR",
+		},
+		{
+			codec:    "hevc",
+			isHDR:    false,
+			expected: "x265",
+		},
+		{
+			codec:    "avc",
+			isHDR:    false,
+			expected: "x264",
+		},
+		{
+			codec:    "OtherCodec",
+			isHDR:    false,
+			expected: "OtherCodec",
+		},
 	}
 
 	for _, tc := range tests {

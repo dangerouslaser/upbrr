@@ -88,7 +88,12 @@ func CleanDescription(description string) bbcode.Report {
 		rawURL := imgURL
 		rawURL = bbcode.NormalizeImageRawURL(rawURL)
 		host := imagehost.ExtractHost(imgURL)
-		imagelist = append(imagelist, bbcode.Image{ImgURL: imgURL, RawURL: rawURL, WebURL: webURL, Host: host})
+		imagelist = append(imagelist, bbcode.Image{
+			ImgURL: imgURL,
+			RawURL: rawURL,
+			WebURL: webURL,
+			Host:   host,
+		})
 		return ""
 	})
 

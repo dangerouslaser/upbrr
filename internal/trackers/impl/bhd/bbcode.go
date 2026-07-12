@@ -26,8 +26,12 @@ var (
 	bhdLooseImg      = regexp.MustCompile(`(?i)(https?://[^\s\[\]]+\.(?:png|jpe?g|webp|gif)(?:\?[^\s\[\]]*)?)`)
 	bhdEmptyCenter   = regexp.MustCompile(`(?i)\[center\]\s*\[/center\]`)
 	bhdEmptyAlign    = regexp.MustCompile(`(?i)\[align=[^\]]+\]\s*\[/align\]`)
-	bhdTonemapNotice = regexp.MustCompile(`(?is)\[(?:center|align=center)\]\s*\[code\]\s*Screenshots\s+have\s+been\s+tonemapped\s+for\s+reference\s*\[/code\]\s*\[/(?:center|align)\]`)
-	bhdBotSignature  = regexp.MustCompile(`(?is)(?:\[(?:center|right|align=right)\]\s*(?:\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\]\s*)?\[b\]?Uploaded\s+Using\s+\[url=https://github\.com/HDInnovations/UNIT3D\]UNIT3D\[/url\]\s+Auto\s+Uploader\[/b\]?(?:\s*\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\])?\s*\[/(?:center|right|align)\])|(?:\[center\]\s*\[url=https://github\.com/z-ink/uploadrr\]\[img=\d+\]https://i\.ibb\.co/2NVWb0c/uploadrr\.webp\[/img\]\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=https://github\.com/edge20200/Only-Uploader\]Powered\s+by\s+Only-Uploader\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=/torrents\?perPage=\d+&name=[^\]]*\]\s*\[/url\]\s*\[/center\])|(?:\[center\]\s*(?:\[b\]\s*(?:\[size=\d+\])?brush(?:\[/size\])?\s*\[/b\]\s*)?This is an internal release which was first released exclusively on Aither\.\s*Cheers to all the Aither(?:\s+users)?\s*\[/center\])|(?:\[(?:center|right|align=right)\]\s*(?:\[url=[^\]]+\]\s*)?(?:\[size=[^\]]+\]\s*)?Created by(?:\s+[^[]*?)?\s*Upload Assistant(?:\s*\[/size\])?(?:\s*\[/url\])?\s*\[/(?:center|right|align)\])`)
+	bhdTonemapNotice = regexp.MustCompile(
+		`(?is)\[(?:center|align=center)\]\s*\[code\]\s*Screenshots\s+have\s+been\s+tonemapped\s+for\s+reference\s*\[/code\]\s*\[/(?:center|align)\]`,
+	)
+	bhdBotSignature = regexp.MustCompile(
+		`(?is)(?:\[(?:center|right|align=right)\]\s*(?:\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\]\s*)?\[b\]?Uploaded\s+Using\s+\[url=https://github\.com/HDInnovations/UNIT3D\]UNIT3D\[/url\]\s+Auto\s+Uploader\[/b\]?(?:\s*\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\])?\s*\[/(?:center|right|align)\])|(?:\[center\]\s*\[url=https://github\.com/z-ink/uploadrr\]\[img=\d+\]https://i\.ibb\.co/2NVWb0c/uploadrr\.webp\[/img\]\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=https://github\.com/edge20200/Only-Uploader\]Powered\s+by\s+Only-Uploader\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=/torrents\?perPage=\d+&name=[^\]]*\]\s*\[/url\]\s*\[/center\])|(?:\[center\]\s*(?:\[b\]\s*(?:\[size=\d+\])?brush(?:\[/size\])?\s*\[/b\]\s*)?This is an internal release which was first released exclusively on Aither\.\s*Cheers to all the Aither(?:\s+users)?\s*\[/center\])|(?:\[(?:center|right|align=right)\]\s*(?:\[url=[^\]]+\]\s*)?(?:\[size=[^\]]+\]\s*)?Created by(?:\s+[^[]*?)?\s*Upload Assistant(?:\s*\[/size\])?(?:\s*\[/url\])?\s*\[/(?:center|right|align)\])`,
+	)
 )
 
 func CleanDescription(description string, options BBCodeOptions) bbcode.Report {
@@ -41,7 +45,11 @@ func CleanDescription(description string, options BBCodeOptions) bbcode.Report {
 				report.Notes = append(report.Notes, bbcode.Note{Kind: "nfo", Message: err.Error()})
 			}
 		}
-		report.Artifacts = append(report.Artifacts, bbcode.Artifact{Name: "bhd.nfo", Kind: "nfo", Content: desc})
+		report.Artifacts = append(report.Artifacts, bbcode.Artifact{
+			Name:    "bhd.nfo",
+			Kind:    "nfo",
+			Content: desc,
+		})
 	}
 
 	desc = bhdSizePattern.ReplaceAllString(desc, "")
@@ -67,7 +75,12 @@ func CleanDescription(description string, options BBCodeOptions) bbcode.Report {
 			web = imgURL
 		}
 		rawURL := bbcode.NormalizeImageRawURL(imgURL)
-		imagelist = append(imagelist, bbcode.Image{ImgURL: imgURL, RawURL: rawURL, WebURL: web, Host: host})
+		imagelist = append(imagelist, bbcode.Image{
+			ImgURL: imgURL,
+			RawURL: rawURL,
+			WebURL: web,
+			Host:   host,
+		})
 	}
 
 	urlImgMatches := bhdURLImgPattern.FindAllStringSubmatch(desc, -1)
@@ -129,7 +142,16 @@ func CleanDescription(description string, options BBCodeOptions) bbcode.Report {
 		report.Description = ""
 	}
 	if bbcode.IsOnlyTags(report.Description) {
-		return bbcode.Report{Images: imagelist, Notes: report.Notes, Artifacts: report.Artifacts}
+		return bbcode.Report{
+			Images:    imagelist,
+			Notes:     report.Notes,
+			Artifacts: report.Artifacts,
+		}
 	}
-	return bbcode.Report{Description: report.Description, Images: imagelist, Notes: report.Notes, Artifacts: report.Artifacts}
+	return bbcode.Report{
+		Description: report.Description,
+		Images:      imagelist,
+		Notes:       report.Notes,
+		Artifacts:   report.Artifacts,
+	}
 }

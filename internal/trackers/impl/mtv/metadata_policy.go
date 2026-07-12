@@ -6,5 +6,11 @@ package mtv
 import "github.com/autobrr/upbrr/internal/trackers"
 
 func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
-	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB, trackers.MetadataFieldIMDB}}, {Scope: trackers.MetadataScopeTV, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTVDBTitle}}}}
+	return &trackers.TrackerMetadataPolicy{
+		RequireKnownCategory: true,
+		Requirements: []trackers.MetadataRequirement{
+			{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB, trackers.MetadataFieldIMDB}},
+			{Scope: trackers.MetadataScopeTV, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTVDBTitle}},
+		},
+	}
 }

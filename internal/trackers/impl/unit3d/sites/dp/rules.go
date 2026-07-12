@@ -8,5 +8,14 @@ import "github.com/autobrr/upbrr/internal/trackers/ruletypes"
 var nordic = []string{"english", "norwegian", "norsk", "no", "nb", "nn", "swedish", "sv", "danish", "da", "finnish", "fi", "icelandic", "is"}
 
 func Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{BlockSingleFileFolder: true, BlockHardcodedSubs: true, BlockGroupUnlessType: map[string][]string{"EVO": {"WEBDL"}}, Language: &ruletypes.LanguageRule{Languages: nordic, RequireAudio: true, RequireSubs: true}}
+	return &ruletypes.RuleSet{
+		BlockSingleFileFolder: true,
+		BlockHardcodedSubs:    true,
+		BlockGroupUnlessType:  map[string][]string{"EVO": {"WEBDL"}},
+		Language: &ruletypes.LanguageRule{
+			Languages:    nordic,
+			RequireAudio: true,
+			RequireSubs:  true,
+		},
+	}
 }

@@ -101,8 +101,12 @@ func TestCoreDeleteHistoryReleaseRemovesStoredArtifacts(t *testing.T) {
 
 	repo := &cleanupRepo{
 		screenshots: []api.Screenshot{{SourcePath: sourcePath, ImagePath: tmpFile}},
-		uploaded:    []api.UploadedImageLink{{SourcePath: sourcePath, ImagePath: cacheFile, Host: "imgbox"}},
-		finals:      []api.ScreenshotFinalSelection{{ImagePath: nfoFile}},
+		uploaded: []api.UploadedImageLink{{
+			SourcePath: sourcePath,
+			ImagePath:  cacheFile,
+			Host:       "imgbox",
+		}},
+		finals: []api.ScreenshotFinalSelection{{ImagePath: nfoFile}},
 		slots: []api.ScreenshotSlot{{
 			SourcePath: sourcePath,
 			ImagePath:  slotFile,

@@ -31,7 +31,17 @@ var (
 )
 
 var videoExtensions = map[string]struct{}{
-	".mkv": {}, ".mp4": {}, ".avi": {}, ".mov": {}, ".wmv": {}, ".webm": {}, ".ts": {}, ".m2ts": {}, ".m2v": {}, ".mpg": {}, ".mpeg": {},
+	".mkv":  {},
+	".mp4":  {},
+	".avi":  {},
+	".mov":  {},
+	".wmv":  {},
+	".webm": {},
+	".ts":   {},
+	".m2ts": {},
+	".m2v":  {},
+	".mpg":  {},
+	".mpeg": {},
 }
 
 type Result struct {

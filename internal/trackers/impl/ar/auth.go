@@ -26,5 +26,12 @@ func (d *Definition) AuthSessionResolver() trackers.AuthSessionResolver {
 }
 
 func cookieLoginCapability(name string) api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: name, DisplayName: name, AuthKind: "cookies_login", SupportsCookieFile: true, SupportsLogin: true, SupportsAutoLogin: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          name,
+		DisplayName:        name,
+		AuthKind:           "cookies_login",
+		SupportsCookieFile: true,
+		SupportsLogin:      true,
+		SupportsAutoLogin:  true,
+	}
 }

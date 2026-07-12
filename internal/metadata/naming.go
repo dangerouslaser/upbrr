@@ -14,8 +14,10 @@ import (
 )
 
 var (
-	namingTVPathHintPattern     = regexp.MustCompile(`(?i)[\\/](tv|tvshows?|series)[\\/]`)
-	namingTVNameHintPattern     = regexp.MustCompile(`(?i)\bS\d{1,2}(?:E\d{1,3})?\b|\b\d{1,2}x\d{2,3}\b|\b(?:season|series)\s*\d+\b|\b(19\d{2}|20\d{2})[.-]\d{2}[.-]\d{2}\b`)
+	namingTVPathHintPattern = regexp.MustCompile(`(?i)[\\/](tv|tvshows?|series)[\\/]`)
+	namingTVNameHintPattern = regexp.MustCompile(
+		`(?i)\bS\d{1,2}(?:E\d{1,3})?\b|\b\d{1,2}x\d{2,3}\b|\b(?:season|series)\s*\d+\b|\b(19\d{2}|20\d{2})[.-]\d{2}[.-]\d{2}\b`,
+	)
 	namingSubsPleaseHintPattern = regexp.MustCompile(`(?i)subsplease`)
 	namingAnimeEpisodeHint      = regexp.MustCompile(`(?i)-\s*\d{1,3}\s*\(1080p\)`)
 	namingWebDLFilenamePattern  = regexp.MustCompile(`(?i)(^|[ ._-])web([ ._-]|$)|web-?dl`)
@@ -30,7 +32,17 @@ func BuildReleaseName(req api.ReleaseNameRequest, logger api.Logger) api.Release
 	typeValue := strings.ToUpper(strings.TrimSpace(req.Type))
 	typeValue = normalizeReleaseTypeForCategory(category, typeValue, strings.TrimSpace(req.Source), "")
 	matchType := normalizeReleaseType(typeValue)
-	logger.Tracef("metadata: release name input category=%q type=%q normalized_type=%q source=%q season=%q episode=%q date=%q manual_date=%t", category, typeValue, matchType, strings.TrimSpace(req.Source), strings.TrimSpace(req.Season), strings.TrimSpace(req.Episode), strings.TrimSpace(req.DailyDate), req.ManualDate)
+	logger.Tracef(
+		"metadata: release name input category=%q type=%q normalized_type=%q source=%q season=%q episode=%q date=%q manual_date=%t",
+		category,
+		typeValue,
+		matchType,
+		strings.TrimSpace(req.Source),
+		strings.TrimSpace(req.Season),
+		strings.TrimSpace(req.Episode),
+		strings.TrimSpace(req.DailyDate),
+		req.ManualDate,
+	)
 	title := strings.TrimSpace(req.Title)
 	altTitle := strings.TrimSpace(req.AltTitle)
 	year := req.Year
@@ -100,7 +112,16 @@ func BuildReleaseName(req api.ReleaseNameRequest, logger api.Logger) api.Release
 		}
 	}
 
-	logger.Tracef("metadata: release name build category=%q type=%q source=%q disc=%q title=%q season=%q episode=%q", category, matchType, source, req.DiscType, title, season, episode)
+	logger.Tracef(
+		"metadata: release name build category=%q type=%q source=%q disc=%q title=%q season=%q episode=%q",
+		category,
+		matchType,
+		source,
+		req.DiscType,
+		title,
+		season,
+		episode,
+	)
 
 	name := ""
 	missing := make([]string, 0)
@@ -150,7 +171,23 @@ func BuildReleaseName(req api.ReleaseNameRequest, logger api.Logger) api.Release
 		case matchType == "DISC":
 			switch strings.ToUpper(strings.TrimSpace(req.DiscType)) {
 			case "BDMV":
-				name = joinParts(title, yearValue, altTitle, seasonEpisode, threeD, edition, hybrid, repack, resolution, region, uhd, source, hdr, videoCodec, audio)
+				name = joinParts(
+					title,
+					yearValue,
+					altTitle,
+					seasonEpisode,
+					threeD,
+					edition,
+					hybrid,
+					repack,
+					resolution,
+					region,
+					uhd,
+					source,
+					hdr,
+					videoCodec,
+					audio,
+				)
 				missing = []string{"edition", "region", "distributor"}
 			case "DVD":
 				name = joinParts(title, yearValue, altTitle, seasonEpisode+threeD, repack, edition, region, source, dvdSize, audio)
@@ -160,19 +197,87 @@ func BuildReleaseName(req api.ReleaseNameRequest, logger api.Logger) api.Release
 				missing = []string{"edition", "region", "distributor"}
 			}
 		case matchType == "REMUX" && sourceIn(source, "BluRay", "HDDVD"):
-			name = joinParts(title, yearValue, altTitle, seasonEpisode, episodeTitle, part, threeD, edition, hybrid, repack, resolution, uhd, source, "REMUX", hdr, videoCodec, audio)
+			name = joinParts(
+				title,
+				yearValue,
+				altTitle,
+				seasonEpisode,
+				episodeTitle,
+				part,
+				threeD,
+				edition,
+				hybrid,
+				repack,
+				resolution,
+				uhd,
+				source,
+				"REMUX",
+				hdr,
+				videoCodec,
+				audio,
+			)
 			missing = []string{"edition", "description"}
 		case matchType == "REMUX" && sourceIn(source, "PAL DVD", "NTSC DVD", "DVD"):
 			name = joinParts(title, yearValue, altTitle, seasonEpisode, episodeTitle, part, edition, repack, source, "REMUX", audio)
 			missing = []string{"edition", "description"}
 		case matchType == "ENCODE":
-			name = joinParts(title, yearValue, altTitle, seasonEpisode, episodeTitle, part, edition, hybrid, repack, resolution, uhd, source, audio, hdr, videoName)
+			name = joinParts(
+				title,
+				yearValue,
+				altTitle,
+				seasonEpisode,
+				episodeTitle,
+				part,
+				edition,
+				hybrid,
+				repack,
+				resolution,
+				uhd,
+				source,
+				audio,
+				hdr,
+				videoName,
+			)
 			missing = []string{"edition", "description"}
 		case matchType == "WEBDL":
-			name = joinParts(title, yearValue, altTitle, seasonEpisode, episodeTitle, part, edition, hybrid, repack, resolution, uhd, service, "WEB-DL", audio, hdr, videoName)
+			name = joinParts(
+				title,
+				yearValue,
+				altTitle,
+				seasonEpisode,
+				episodeTitle,
+				part,
+				edition,
+				hybrid,
+				repack,
+				resolution,
+				uhd,
+				service,
+				"WEB-DL",
+				audio,
+				hdr,
+				videoName,
+			)
 			missing = []string{"edition", "service"}
 		case matchType == "WEBRIP":
-			name = joinParts(title, yearValue, altTitle, seasonEpisode, episodeTitle, part, edition, hybrid, repack, resolution, uhd, service, "WEBRip", audio, hdr, videoName)
+			name = joinParts(
+				title,
+				yearValue,
+				altTitle,
+				seasonEpisode,
+				episodeTitle,
+				part,
+				edition,
+				hybrid,
+				repack,
+				resolution,
+				uhd,
+				service,
+				"WEBRip",
+				audio,
+				hdr,
+				videoName,
+			)
 			missing = []string{"edition", "service"}
 		case matchType == "HDTV":
 			name = joinParts(title, yearValue, altTitle, seasonEpisode, episodeTitle, part, edition, repack, resolution, source, audio, videoName)
@@ -183,7 +288,14 @@ func BuildReleaseName(req api.ReleaseNameRequest, logger api.Logger) api.Release
 
 	nameNoTag := strings.TrimSpace(name)
 	if nameNoTag == "" {
-		logger.Tracef("metadata: release name build skipped (empty base) category=%q type=%q source=%q season=%q episode=%q", category, matchType, source, season, episode)
+		logger.Tracef(
+			"metadata: release name build skipped (empty base) category=%q type=%q source=%q season=%q episode=%q",
+			category,
+			matchType,
+			source,
+			season,
+			episode,
+		)
 		return api.ReleaseNameResult{MissingFields: missing}
 	}
 	nameWithTag := strings.TrimSpace(nameNoTag + tag)
@@ -276,7 +388,21 @@ func releaseNameRequestFromMeta(meta api.PreparedMetadata, logger api.Logger) ap
 
 	typeValue = normalizeReleaseTypeForCategory(category, typeValue, source, meta.SourcePath)
 
-	logger.Tracef("metadata: release name request resolved category=%q type=%q base_type=%q source=%q season=%q episode=%q date=%q tv_pack=%t year=%d search_year=%q year_source=%q tvdb_year_from_alias=%t", category, typeValue, baseType, source, strings.TrimSpace(meta.SeasonStr), strings.TrimSpace(meta.EpisodeStr), strings.TrimSpace(meta.DailyEpisodeDate), meta.TVPack, year, searchYear, tvdbYearSource, tvdbYearFromAlias)
+	logger.Tracef(
+		"metadata: release name request resolved category=%q type=%q base_type=%q source=%q season=%q episode=%q date=%q tv_pack=%t year=%d search_year=%q year_source=%q tvdb_year_from_alias=%t",
+		category,
+		typeValue,
+		baseType,
+		source,
+		strings.TrimSpace(meta.SeasonStr),
+		strings.TrimSpace(meta.EpisodeStr),
+		strings.TrimSpace(meta.DailyEpisodeDate),
+		meta.TVPack,
+		year,
+		searchYear,
+		tvdbYearSource,
+		tvdbYearFromAlias,
+	)
 
 	dailyDate := strings.TrimSpace(meta.DailyEpisodeDate)
 	manualDate := strings.EqualFold(category, "TV") && dailyDate != "" && !meta.TVPack

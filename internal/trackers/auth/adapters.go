@@ -124,7 +124,11 @@ func (a trackerAdapter) Validate(ctx context.Context, cfg config.TrackerConfig, 
 	if err := a.resolve(ctx, cfg, dbPath, api.TrackerAuthLoginRequest{}); err != nil {
 		return Session{}, classifyAdapterError(a.capability.TrackerID, err)
 	}
-	return Session{TrackerID: normalizeTrackerID(a.capability.TrackerID), State: SessionStateReady, Message: "session ready"}, nil
+	return Session{
+		TrackerID: normalizeTrackerID(a.capability.TrackerID),
+		State:     SessionStateReady,
+		Message:   "session ready",
+	}, nil
 }
 
 func (a trackerAdapter) Login(ctx context.Context, cfg config.TrackerConfig, dbPath string, req api.TrackerAuthLoginRequest) (Session, error) {
@@ -134,7 +138,11 @@ func (a trackerAdapter) Login(ctx context.Context, cfg config.TrackerConfig, dbP
 	if err := a.resolve(ctx, cfg, dbPath, req); err != nil {
 		return Session{}, classifyAdapterError(a.capability.TrackerID, err)
 	}
-	return Session{TrackerID: normalizeTrackerID(a.capability.TrackerID), State: SessionStateReady, Message: "session ready"}, nil
+	return Session{
+		TrackerID: normalizeTrackerID(a.capability.TrackerID),
+		State:     SessionStateReady,
+		Message:   "session ready",
+	}, nil
 }
 
 func (a trackerAdapter) Submit2FA(ctx context.Context, cfg config.TrackerConfig, dbPath string, req api.TrackerAuthLoginRequest) (Session, error) {
@@ -173,27 +181,66 @@ func classifyAdapterError(trackerID string, err error) error {
 	var resolution *trackerscatalog.AuthResolutionError
 	if errors.As(err, &resolution) {
 		if resolution.AuthRequired {
-			return &AuthRequiredError{TrackerID: trackerID, Reason: resolution.Reason, Err: err}
+			return &AuthRequiredError{
+				TrackerID: trackerID,
+				Reason:    resolution.Reason,
+				Err:       err,
+			}
 		}
-		return &ValidationError{TrackerID: trackerID, ConfirmedInvalid: resolution.ConfirmedInvalid, Transient: resolution.Transient, Reason: resolution.Reason, Err: err}
+		return &ValidationError{
+			TrackerID:        trackerID,
+			ConfirmedInvalid: resolution.ConfirmedInvalid,
+			Transient:        resolution.Transient,
+			Reason:           resolution.Reason,
+			Err:              err,
+		}
 	}
 	if strings.EqualFold(trackerID, "BTN") && strings.Contains(strings.ToLower(err.Error()), "stored session confirmed invalid") {
-		return &ValidationError{TrackerID: trackerID, ConfirmedInvalid: true, Reason: "stored session expired", Err: err}
+		return &ValidationError{
+			TrackerID:        trackerID,
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              err,
+		}
 	}
 	if isSubmitted2FARejected(err) {
-		return &ValidationError{TrackerID: trackerID, Transient: true, Submitted2FARejected: true, Reason: "submitted 2FA rejected", Err: err}
+		return &ValidationError{
+			TrackerID:            trackerID,
+			Transient:            true,
+			Submitted2FARejected: true,
+			Reason:               "submitted 2FA rejected",
+			Err:                  err,
+		}
 	}
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
-		return &ValidationError{TrackerID: trackerID, Transient: true, Reason: "remote validation unavailable", Err: err}
+		return &ValidationError{
+			TrackerID: trackerID,
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       err,
+		}
 	}
 	lower := strings.ToLower(err.Error())
 	switch {
 	case contains2FARequiredText(lower):
-		return &Needs2FAError{TrackerID: trackerID, Reason: "2FA required", Err: err}
+		return &Needs2FAError{
+			TrackerID: trackerID,
+			Reason:    "2FA required",
+			Err:       err,
+		}
 	case strings.Contains(lower, "username") || strings.Contains(lower, "password") || strings.Contains(lower, "announce_url") || strings.Contains(lower, "not configured"):
-		return &AuthRequiredError{TrackerID: trackerID, Reason: "credentials missing", Err: err}
+		return &AuthRequiredError{
+			TrackerID: trackerID,
+			Reason:    "credentials missing",
+			Err:       err,
+		}
 	default:
-		return &ValidationError{TrackerID: trackerID, Transient: true, Reason: "remote validation failed", Err: err}
+		return &ValidationError{
+			TrackerID: trackerID,
+			Transient: true,
+			Reason:    "remote validation failed",
+			Err:       err,
+		}
 	}
 }
 

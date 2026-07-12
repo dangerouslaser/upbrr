@@ -198,7 +198,15 @@ func (b *Backend) DetectDiscType(ctx context.Context, path string) (string, erro
 	return wrapWebResult(filesystem.DetectDiscType(ctx, path))
 }
 
-func (b *Backend) FetchMetadata(sessionID string, path string, sourceLookupURL string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackersList []string, confirmBDMVRescan bool) (api.MetadataPreview, error) {
+func (b *Backend) FetchMetadata(
+	sessionID string,
+	path string,
+	sourceLookupURL string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackersList []string,
+	confirmBDMVRescan bool,
+) (api.MetadataPreview, error) {
 	rt, err := b.requireRuntime()
 	if err != nil {
 		return api.MetadataPreview{}, err
@@ -258,7 +266,15 @@ func (b *Backend) SelectBlurayCandidate(path string, releaseID string) (api.Meta
 	return wrapWebResult(selector.SelectBlurayCandidate(ctx, path, releaseID))
 }
 
-func (b *Backend) ResetMetadata(sessionID string, path string, sourceLookupURL string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackersList []string, confirmBDMVRescan bool) (api.MetadataPreview, error) {
+func (b *Backend) ResetMetadata(
+	sessionID string,
+	path string,
+	sourceLookupURL string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackersList []string,
+	confirmBDMVRescan bool,
+) (api.MetadataPreview, error) {
 	if err := b.requireCore(); err != nil {
 		return api.MetadataPreview{}, err
 	}
@@ -359,7 +375,12 @@ func (b *Backend) ResetMetadata(sessionID string, path string, sourceLookupURL s
 	return wrapWebResult(b.currentCore().FetchMetadataPreview(progressCtx, req))
 }
 
-func (b *Backend) CheckDupes(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackersList []string) (api.DupeCheckSummary, error) {
+func (b *Backend) CheckDupes(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackersList []string,
+) (api.DupeCheckSummary, error) {
 	if err := b.requireCore(); err != nil {
 		return api.DupeCheckSummary{}, err
 	}
@@ -377,7 +398,14 @@ func (b *Backend) CheckDupes(path string, overrides api.ExternalIDOverrides, nam
 	return wrapWebResult(b.currentCore().CheckDupes(ctx, req))
 }
 
-func (b *Backend) FetchPreparation(sessionID string, path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackersList []string, ignoreDupesFor []string) (api.PreparationPreview, error) {
+func (b *Backend) FetchPreparation(
+	sessionID string,
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackersList []string,
+	ignoreDupesFor []string,
+) (api.PreparationPreview, error) {
 	if err := b.requireCore(); err != nil {
 		return api.PreparationPreview{}, err
 	}
@@ -405,7 +433,19 @@ func (b *Backend) FetchPreparation(sessionID string, path string, overrides api.
 	return wrapWebResult(b.currentCore().FetchPreparationPreview(progressCtx, req))
 }
 
-func (b *Backend) FetchTrackerDryRun(sessionID string, path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackersList []string, ignoreDupesFor []string, questionnaireAnswers map[string]map[string]string, descriptionGroups []api.DescriptionBuilderGroup, debug bool, noSeed bool, runLogLevel string) (api.TrackerDryRunPreview, error) {
+func (b *Backend) FetchTrackerDryRun(
+	sessionID string,
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackersList []string,
+	ignoreDupesFor []string,
+	questionnaireAnswers map[string]map[string]string,
+	descriptionGroups []api.DescriptionBuilderGroup,
+	debug bool,
+	noSeed bool,
+	runLogLevel string,
+) (api.TrackerDryRunPreview, error) {
 	rt, err := b.requireRuntime()
 	if err != nil {
 		return api.TrackerDryRunPreview{}, err
@@ -456,7 +496,13 @@ func (b *Backend) FetchTrackerDryRun(sessionID string, path string, overrides ap
 	return wrapWebResult(runCore.FetchTrackerDryRunPreview(progressCtx, req))
 }
 
-func (b *Backend) FetchDescriptionBuilder(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackersList []string, ignoreDupesFor []string) (api.DescriptionBuilderPreview, error) {
+func (b *Backend) FetchDescriptionBuilder(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackersList []string,
+	ignoreDupesFor []string,
+) (api.DescriptionBuilderPreview, error) {
 	if err := b.requireCore(); err != nil {
 		return api.DescriptionBuilderPreview{}, err
 	}
@@ -484,7 +530,14 @@ func (b *Backend) RenderDescription(raw string) (string, error) {
 	return wrapWebResult(b.currentCore().RenderDescription(ctx, raw))
 }
 
-func (b *Backend) SaveDescriptionOverride(path string, groupKey string, raw string, trackers []string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides) (api.DescriptionBuilderGroup, error) {
+func (b *Backend) SaveDescriptionOverride(
+	path string,
+	groupKey string,
+	raw string,
+	trackers []string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+) (api.DescriptionBuilderGroup, error) {
 	if err := b.requireCore(); err != nil {
 		return api.DescriptionBuilderGroup{}, err
 	}
@@ -568,7 +621,13 @@ func (b *Backend) FetchScreenshotPlan(path string, overrides api.ExternalIDOverr
 	return wrapWebResult(b.currentCore().FetchScreenshotPlan(ctx, req))
 }
 
-func (b *Backend) GenerateScreenshots(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, selections []api.ScreenshotSelection, purpose api.ScreenshotPurpose) (api.ScreenshotResult, error) {
+func (b *Backend) GenerateScreenshots(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	selections []api.ScreenshotSelection,
+	purpose api.ScreenshotPurpose,
+) (api.ScreenshotResult, error) {
 	if err := b.requireCore(); err != nil {
 		return api.ScreenshotResult{}, err
 	}
@@ -585,7 +644,12 @@ func (b *Backend) GenerateScreenshots(path string, overrides api.ExternalIDOverr
 	return wrapWebResult(b.currentCore().GenerateScreenshots(ctx, req, selections, purpose))
 }
 
-func (b *Backend) PreviewScreenshotFrame(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, timestampSeconds float64) (string, error) {
+func (b *Backend) PreviewScreenshotFrame(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	timestampSeconds float64,
+) (string, error) {
 	if err := b.requireCore(); err != nil {
 		return "", err
 	}
@@ -638,7 +702,12 @@ func (b *Backend) DeleteTrackerImageURL(path string, overrides api.ExternalIDOve
 	}, imageURL))
 }
 
-func (b *Backend) SaveFinalScreenshotSelections(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, images []api.ScreenshotImage) error {
+func (b *Backend) SaveFinalScreenshotSelections(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	images []api.ScreenshotImage,
+) error {
 	if err := b.requireCore(); err != nil {
 		return err
 	}
@@ -719,7 +788,14 @@ func (b *Backend) ListUploadedImages(path string, overrides api.ExternalIDOverri
 	}))
 }
 
-func (b *Backend) UploadImages(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackersList []string, host string, images []api.ScreenshotImage) (api.UploadImagesResult, error) {
+func (b *Backend) UploadImages(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackersList []string,
+	host string,
+	images []api.ScreenshotImage,
+) (api.UploadImagesResult, error) {
 	rt, err := b.requireRuntime()
 	if err != nil {
 		return api.UploadImagesResult{}, err
@@ -1397,7 +1473,11 @@ func (b *Backend) buildRunOptions(debug bool, noSeed bool, runLogLevel string) (
 	if err != nil {
 		return runOptions{}, fmt.Errorf("web: %w", err)
 	}
-	return runOptions{Debug: debug, NoSeed: noSeed, RunLogLevel: normalized}, nil
+	return runOptions{
+		Debug:       debug,
+		NoSeed:      noSeed,
+		RunLogLevel: normalized,
+	}, nil
 }
 
 // buildRunCoreFromSnapshot creates a per-run core and logger from the same

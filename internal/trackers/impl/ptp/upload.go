@@ -153,9 +153,20 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		errText = "upload failed"
 	}
 	if failurePath != "" {
-		return api.UploadSummary{}, fmt.Errorf("trackers: PTP upload failed status=%d url=%s error=%s failure=%s", resp.StatusCode, commonhttp.RedactErrorDetail(finalURL), compactError(errText), failurePath)
+		return api.UploadSummary{}, fmt.Errorf(
+			"trackers: PTP upload failed status=%d url=%s error=%s failure=%s",
+			resp.StatusCode,
+			commonhttp.RedactErrorDetail(finalURL),
+			compactError(errText),
+			failurePath,
+		)
 	}
-	return api.UploadSummary{}, fmt.Errorf("trackers: PTP upload failed status=%d url=%s error=%s", resp.StatusCode, commonhttp.RedactErrorDetail(finalURL), compactError(errText))
+	return api.UploadSummary{}, fmt.Errorf(
+		"trackers: PTP upload failed status=%d url=%s error=%s",
+		resp.StatusCode,
+		commonhttp.RedactErrorDetail(finalURL),
+		compactError(errText),
+	)
 }
 
 func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.TrackerDryRunEntry, error) {
@@ -270,7 +281,10 @@ func buildDescription(meta api.PreparedMetadata, trackerConfig config.TrackerCon
 		sections = append(sections, convertDescription(baseDescription))
 	}
 	if strings.EqualFold(strings.TrimSpace(meta.Type), "WEBDL") && strings.TrimSpace(meta.ServiceLongName) != "" && trackerConfig.AddWebSourceToDesc {
-		sections = append(sections, fmt.Sprintf("[quote][align=center]This release is sourced from %s[/align][/quote]", strings.TrimSpace(meta.ServiceLongName)))
+		sections = append(
+			sections,
+			fmt.Sprintf("[quote][align=center]This release is sourced from %s[/align][/quote]", strings.TrimSpace(meta.ServiceLongName)),
+		)
 	}
 	if shots := buildScreenshotSection(meta, assets.Screenshots); shots != "" {
 		sections = append(sections, shots)
@@ -591,7 +605,10 @@ func resolvePublicPosterAddress(ctx context.Context, host string, port string) (
 }
 
 func isPublicPosterIP(ip netip.Addr) bool {
-	if !ip.IsValid() || !ip.IsGlobalUnicast() || ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsInterfaceLocalMulticast() || ip.IsMulticast() || ip.IsUnspecified() {
+	if !ip.IsValid() || !ip.IsGlobalUnicast() || ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() ||
+		ip.IsInterfaceLocalMulticast() ||
+		ip.IsMulticast() ||
+		ip.IsUnspecified() {
 		return false
 	}
 	return !ipInPrefixes(ip, reservedPosterPrefixes)
@@ -685,7 +702,14 @@ func resolveSession(ctx context.Context, trackerConfig config.TrackerConfig, dbP
 	return resolveSessionLogin(ctx, trackerConfig, dbPath, baseURL, logger, api.TrackerAuthLoginRequest{})
 }
 
-func resolveSessionLogin(ctx context.Context, trackerConfig config.TrackerConfig, dbPath string, baseURL string, logger api.Logger, login api.TrackerAuthLoginRequest) (*http.Client, string, error) {
+func resolveSessionLogin(
+	ctx context.Context,
+	trackerConfig config.TrackerConfig,
+	dbPath string,
+	baseURL string,
+	logger api.Logger,
+	login api.TrackerAuthLoginRequest,
+) (*http.Client, string, error) {
 	if logger == nil {
 		logger = api.NopLogger{}
 	}
@@ -696,7 +720,8 @@ func resolveSessionLogin(ctx context.Context, trackerConfig config.TrackerConfig
 		if tokenErr == nil {
 			return client, token, nil
 		}
-		if strings.TrimSpace(trackerConfig.Username) == "" || strings.TrimSpace(trackerConfig.Password) == "" || strings.TrimSpace(normalizedAnnounceURL(trackerConfig.AnnounceURL)) == "" {
+		if strings.TrimSpace(trackerConfig.Username) == "" || strings.TrimSpace(trackerConfig.Password) == "" ||
+			strings.TrimSpace(normalizedAnnounceURL(trackerConfig.AnnounceURL)) == "" {
 			return nil, "", tokenErr
 		}
 	}
@@ -740,7 +765,12 @@ func fetchAntiCsrfToken(ctx context.Context, baseURL string, cookies map[string]
 			continue
 		}
 		// #nosec G124 -- Outbound tracker jar cookie mirrors configured PTP session values.
-		jarCookies = append(jarCookies, &http.Cookie{Name: name, Value: value, Path: "/", Domain: parsed.Hostname()})
+		jarCookies = append(jarCookies, &http.Cookie{
+			Name:   name,
+			Value:  value,
+			Path:   "/",
+			Domain: parsed.Hostname(),
+		})
 	}
 	jar.SetCookies(parsed, jarCookies)
 	client := &http.Client{Timeout: 30 * time.Second, Jar: jar}
@@ -751,7 +781,14 @@ func fetchAntiCsrfToken(ctx context.Context, baseURL string, cookies map[string]
 	return client, token, nil
 }
 
-func loginAndFetchAntiCsrfToken(ctx context.Context, trackerConfig config.TrackerConfig, dbPath string, baseURL string, _ api.Logger, login api.TrackerAuthLoginRequest) (*http.Client, string, error) {
+func loginAndFetchAntiCsrfToken(
+	ctx context.Context,
+	trackerConfig config.TrackerConfig,
+	dbPath string,
+	baseURL string,
+	_ api.Logger,
+	login api.TrackerAuthLoginRequest,
+) (*http.Client, string, error) {
 	username := strings.TrimSpace(trackerConfig.Username)
 	password := strings.TrimSpace(trackerConfig.Password)
 	announceURL := normalizedAnnounceURL(trackerConfig.AnnounceURL)
@@ -1057,7 +1094,8 @@ func resolveType(meta api.PreparedMetadata) string {
 	if meta.ExternalMetadata.IMDB != nil && strings.Contains(strings.ToLower(meta.ExternalMetadata.IMDB.Type), "concert") {
 		return "Music"
 	}
-	if meta.ExternalMetadata.TMDB != nil && (strings.Contains(strings.ToLower(meta.ExternalMetadata.TMDB.Genres), "documentary") || strings.Contains(strings.ToLower(meta.ExternalMetadata.TMDB.Keywords), "documentary")) {
+	if meta.ExternalMetadata.TMDB != nil &&
+		(strings.Contains(strings.ToLower(meta.ExternalMetadata.TMDB.Genres), "documentary") || strings.Contains(strings.ToLower(meta.ExternalMetadata.TMDB.Keywords), "documentary")) {
 		return "Documentary"
 	}
 	if category == "movie" {
@@ -1447,12 +1485,51 @@ func buildQuestionnaire(meta api.PreparedMetadata, groupID string) *api.TrackerQ
 	}
 	title, year := resolveGroupTitleYear(meta)
 	fields := []api.TrackerQuestionnaireField{
-		{Key: "title", Label: "Group Title", Kind: "text", Value: title, Required: true},
-		{Key: "year", Label: "Year", Kind: "text", Value: year, Required: false, Placeholder: "Release year"},
-		{Key: "poster", Label: "Poster URL", Kind: "text", Value: resolvePoster(meta), Required: true},
-		{Key: "tags", Label: "Tags", Kind: "text", Value: resolveTags(meta), Required: true, Placeholder: "Comma separated tags"},
-		{Key: "trailer", Label: "Trailer URL", Kind: "text", Value: resolveTrailer(meta), Required: false, Placeholder: "YouTube trailer URL"},
-		{Key: "album_desc", Label: "Group Description", Kind: "textarea", Value: resolveOverview(meta), Required: false},
+		{
+			Key:      "title",
+			Label:    "Group Title",
+			Kind:     "text",
+			Value:    title,
+			Required: true,
+		},
+		{
+			Key:         "year",
+			Label:       "Year",
+			Kind:        "text",
+			Value:       year,
+			Required:    false,
+			Placeholder: "Release year",
+		},
+		{
+			Key:      "poster",
+			Label:    "Poster URL",
+			Kind:     "text",
+			Value:    resolvePoster(meta),
+			Required: true,
+		},
+		{
+			Key:         "tags",
+			Label:       "Tags",
+			Kind:        "text",
+			Value:       resolveTags(meta),
+			Required:    true,
+			Placeholder: "Comma separated tags",
+		},
+		{
+			Key:         "trailer",
+			Label:       "Trailer URL",
+			Kind:        "text",
+			Value:       resolveTrailer(meta),
+			Required:    false,
+			Placeholder: "YouTube trailer URL",
+		},
+		{
+			Key:      "album_desc",
+			Label:    "Group Description",
+			Kind:     "textarea",
+			Value:    resolveOverview(meta),
+			Required: false,
+		},
 	}
 	return &api.TrackerQuestionnaire{
 		Tracker: "PTP",

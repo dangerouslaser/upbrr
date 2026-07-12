@@ -133,7 +133,11 @@ func TestFilterDupesSingleEpisodeKeepsMatchingSeasonPack(t *testing.T) {
 		Type:        "WEBDL",
 		SourcePath:  "x",
 	}
-	dupes := []api.DupeEntry{{Name: "Show.S01.1080p.WEB-DL.x264-OTHER", Link: "https://example.invalid/pack", ID: "pack-1"}}
+	dupes := []api.DupeEntry{{
+		Name: "Show.S01.1080p.WEB-DL.x264-OTHER",
+		Link: "https://example.invalid/pack",
+		ID:   "pack-1",
+	}}
 
 	filtered, match := FilterDupes(dupes, meta, "AITHER", config.Config{}, api.NopLogger{})
 	if len(filtered) != 1 {

@@ -37,16 +37,20 @@ func TestDefinitionBuildUploadDryRunBuildsPayload(t *testing.T) {
 			SourcePath:        filepath.Join(tmp, "Movie.mkv"),
 			TorrentPath:       torrentPath,
 			MediaInfoTextPath: mediaInfoPath,
-			ExternalIDs:       api.ExternalIDs{TMDBID: 123, IMDBID: 456, Category: "TV"},
-			ReleaseName:       "Movie.2025.1080p.WEB-DL.DD+5.1.H264-GRP",
-			Release:           api.ReleaseInfo{Resolution: "1080p"},
-			Type:              "WEBDL",
-			Source:            "WEB",
-			Audio:             "DD+ 5.1",
-			HDR:               "HDR10+ DV",
-			Edition:           "Hybrid Director",
-			TVPack:            true,
-			SeasonStr:         "S00",
+			ExternalIDs: api.ExternalIDs{
+				TMDBID:   123,
+				IMDBID:   456,
+				Category: "TV",
+			},
+			ReleaseName: "Movie.2025.1080p.WEB-DL.DD+5.1.H264-GRP",
+			Release:     api.ReleaseInfo{Resolution: "1080p"},
+			Type:        "WEBDL",
+			Source:      "WEB",
+			Audio:       "DD+ 5.1",
+			HDR:         "HDR10+ DV",
+			Edition:     "Hybrid Director",
+			TVPack:      true,
+			SeasonStr:   "S00",
 		},
 		TrackerConfig: config.TrackerConfig{APIKey: "token", DraftDefault: true},
 		AppConfig: config.Config{
@@ -197,7 +201,11 @@ func TestResolveTypeRejectsBHD576iResolution(t *testing.T) {
 func TestResolveTypeRejectsHDDVDRemuxEvenWithUHD(t *testing.T) {
 	t.Parallel()
 
-	meta := api.PreparedMetadata{Type: "REMUX", Source: "HDDVD", UHD: "UHD"}
+	meta := api.PreparedMetadata{
+		Type:   "REMUX",
+		Source: "HDDVD",
+		UHD:    "UHD",
+	}
 	if got := resolveType(meta); got != "Other" {
 		t.Fatalf("expected BHD type Other for HD-DVD remux, got %q", got)
 	}
@@ -307,12 +315,16 @@ func TestUploadRetriesInvalidIMDb(t *testing.T) {
 			SourcePath:        filepath.Join(tmp, "Movie.mkv"),
 			TorrentPath:       torrentPath,
 			MediaInfoTextPath: mediaInfoPath,
-			ExternalIDs:       api.ExternalIDs{TMDBID: 123, IMDBID: 456, Category: "MOVIE"},
-			ReleaseName:       "Movie.2025.1080p.BluRay.DD+5.1.H264-GRP",
-			Release:           api.ReleaseInfo{Resolution: "1080p"},
-			Type:              "REMUX",
-			Source:            "BluRay",
-			Audio:             "DD+ 5.1",
+			ExternalIDs: api.ExternalIDs{
+				TMDBID:   123,
+				IMDBID:   456,
+				Category: "MOVIE",
+			},
+			ReleaseName: "Movie.2025.1080p.BluRay.DD+5.1.H264-GRP",
+			Release:     api.ReleaseInfo{Resolution: "1080p"},
+			Type:        "REMUX",
+			Source:      "BluRay",
+			Audio:       "DD+ 5.1",
 		},
 		TrackerConfig: config.TrackerConfig{APIKey: "token"},
 		AppConfig:     config.Config{},

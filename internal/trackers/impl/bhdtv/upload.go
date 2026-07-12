@@ -68,7 +68,12 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		if artifactErr != nil && req.Logger != nil {
 			req.Logger.Warnf("trackers: BHDTV failure artifact write failed: %v", artifactErr)
 		}
-		message := metautil.FirstNonEmptyTrimmed(commonhttp.ExtractHTTPErrorDetail(responseBody), commonhttp.RedactErrorDetail(response.Message), commonhttp.RedactErrorDetail(response.Status), "upload response did not include a view URL")
+		message := metautil.FirstNonEmptyTrimmed(
+			commonhttp.ExtractHTTPErrorDetail(responseBody),
+			commonhttp.RedactErrorDetail(response.Message),
+			commonhttp.RedactErrorDetail(response.Status),
+			"upload response did not include a view URL",
+		)
 		if artifactPath != "" {
 			message += " (" + artifactPath + ")"
 		}
@@ -113,7 +118,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
 		Files: []api.TrackerDryRunFile{
-			{Field: "file", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""},
+			{
+				Field:   "file",
+				Path:    state.torrentPath,
+				Present: strings.TrimSpace(state.torrentPath) != "",
+			},
 		},
 	}, nil
 }

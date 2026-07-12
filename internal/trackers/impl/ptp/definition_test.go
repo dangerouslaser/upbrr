@@ -115,9 +115,21 @@ func TestDefinitionBuildDescriptionUsesAllowedNonPixhostRawScreenshots(t *testin
 	}
 
 	screenshots := []api.ScreenshotImage{
-		{Host: "imgbb", RawURL: "https://i.ibb.co/raw-1/source.png", ImgURL: "https://i.ibb.co/thumb-1/source.png"},
-		{Host: "onlyimage", RawURL: "https://onlyimage.org/images/raw-2.png", ImgURL: "https://onlyimage.org/images/medium-2.png"},
-		{Host: "ptscreens", RawURL: "https://ptscreens.com/images/raw-3.png", ImgURL: "https://ptscreens.com/images/medium-3.png"},
+		{
+			Host:   "imgbb",
+			RawURL: "https://i.ibb.co/raw-1/source.png",
+			ImgURL: "https://i.ibb.co/thumb-1/source.png",
+		},
+		{
+			Host:   "onlyimage",
+			RawURL: "https://onlyimage.org/images/raw-2.png",
+			ImgURL: "https://onlyimage.org/images/medium-2.png",
+		},
+		{
+			Host:   "ptscreens",
+			RawURL: "https://ptscreens.com/images/raw-3.png",
+			ImgURL: "https://ptscreens.com/images/medium-3.png",
+		},
 	}
 	result, err := New().BuildDescription(context.Background(), trackers.DescriptionRequest{
 		Tracker: "PTP",
@@ -168,7 +180,12 @@ func TestDefinitionBuildUploadDryRunForExistingGroup(t *testing.T) {
 			VideoCodec:  "AVC",
 			ExternalIDs: api.ExternalIDs{Category: "MOVIE", IMDBID: 1234567},
 			ExternalMetadata: api.ExternalMetadata{
-				TMDB: &api.TMDBMetadata{Title: "Movie", Year: 2026, Poster: "https://img.example/poster.jpg", Genres: "Action"},
+				TMDB: &api.TMDBMetadata{
+					Title:  "Movie",
+					Year:   2026,
+					Poster: "https://img.example/poster.jpg",
+					Genres: "Action",
+				},
 			},
 		},
 		TrackerConfig: config.TrackerConfig{
@@ -297,7 +314,11 @@ func TestDefinitionUploadSuccess(t *testing.T) {
 				t.Error("unexpected login credentials")
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "cookievalue", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "cookievalue",
+				Path:  "/",
+			})
 			_ = json.NewEncoder(w).Encode(map[string]any{
 				"Result":        "Ok",
 				"AntiCsrfToken": "csrf-token",
@@ -447,7 +468,11 @@ func TestLoginAndFetchAntiCsrfTokenHandles2FA(t *testing.T) {
 			t.Errorf("expected six digit TfaCode, got %q", code)
 			return
 		}
-		http.SetCookie(w, &http.Cookie{Name: "session", Value: "cookievalue", Path: "/"})
+		http.SetCookie(w, &http.Cookie{
+			Name:  "session",
+			Value: "cookievalue",
+			Path:  "/",
+		})
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"Result":        "Ok",
 			"AntiCsrfToken": "csrf-token",

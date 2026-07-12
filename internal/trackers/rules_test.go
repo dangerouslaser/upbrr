@@ -420,23 +420,41 @@ func TestEvaluateRulesBLUContainerRules(t *testing.T) {
 		wantBlock bool
 	}{
 		{
-			name:      "non disc defaults to mkv",
-			meta:      api.PreparedMetadata{Type: "WEBDL", Container: "avi", ValidMediaInfoSettings: true},
+			name: "non disc defaults to mkv",
+			meta: api.PreparedMetadata{
+				Type:                   "WEBDL",
+				Container:              "avi",
+				ValidMediaInfoSettings: true,
+			},
 			wantBlock: true,
 		},
 		{
-			name:      "hdtv allows ts",
-			meta:      api.PreparedMetadata{Type: "HDTV", Container: "ts", ValidMediaInfoSettings: true},
+			name: "hdtv allows ts",
+			meta: api.PreparedMetadata{
+				Type:                   "HDTV",
+				Container:              "ts",
+				ValidMediaInfoSettings: true,
+			},
 			wantBlock: false,
 		},
 		{
-			name:      "dolby vision webdl allows mp4",
-			meta:      api.PreparedMetadata{Type: "WEBDL", Container: "mp4", WebDV: true, ValidMediaInfoSettings: true},
+			name: "dolby vision webdl allows mp4",
+			meta: api.PreparedMetadata{
+				Type:                   "WEBDL",
+				Container:              "mp4",
+				WebDV:                  true,
+				ValidMediaInfoSettings: true,
+			},
 			wantBlock: false,
 		},
 		{
-			name:      "disc skips container rule",
-			meta:      api.PreparedMetadata{DiscType: "BDMV", Type: "WEBDL", Container: "avi", ValidMediaInfoSettings: true},
+			name: "disc skips container rule",
+			meta: api.PreparedMetadata{
+				DiscType:               "BDMV",
+				Type:                   "WEBDL",
+				Container:              "avi",
+				ValidMediaInfoSettings: true,
+			},
 			wantBlock: false,
 		},
 	}

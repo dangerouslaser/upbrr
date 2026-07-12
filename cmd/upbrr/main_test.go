@@ -451,7 +451,11 @@ func TestServePersistConfigListenOnlyClearsStoredBaseURL(t *testing.T) {
 	runtime.Port = 9090
 	runtime.BaseURL = "/temporary/"
 
-	persisted := servePersistConfig(stored, runtime, map[string]bool{"persist-listen": true, "addr": true, "base-url": true})
+	persisted := servePersistConfig(stored, runtime, map[string]bool{
+		"persist-listen": true,
+		"addr":           true,
+		"base-url":       true,
+	})
 	if persisted.Host != "0.0.0.0" || persisted.Port != 9090 {
 		t.Fatalf("listen settings not persisted: %#v", persisted)
 	}
@@ -464,21 +468,38 @@ func TestServePersistConfigListenOnlyClearsStoredBaseURL(t *testing.T) {
 }
 
 func TestServePersistConfigWebConfigPersistsBaseURL(t *testing.T) {
-	stored := webserver.CLIConfig{Host: "localhost", Port: 7480, BaseURL: "/stored/"}
+	stored := webserver.CLIConfig{
+		Host:    "localhost",
+		Port:    7480,
+		BaseURL: "/stored/",
+	}
 	runtime := stored
 	runtime.Host = "0.0.0.0"
 	runtime.Port = 9090
 	runtime.BaseURL = "/explicit/"
 
-	persisted := servePersistConfig(stored, runtime, map[string]bool{"persist-listen": true, "persist-web-config": true, "addr": true, "base-url": true})
+	persisted := servePersistConfig(stored, runtime, map[string]bool{
+		"persist-listen":     true,
+		"persist-web-config": true,
+		"addr":               true,
+		"base-url":           true,
+	})
 	if persisted.Host != "0.0.0.0" || persisted.Port != 9090 || persisted.BaseURL != "/explicit/" {
 		t.Fatalf("explicit web config not persisted: %#v", persisted)
 	}
 }
 
 func TestServePersistConfigListenOnlyPersistsExplicitListenFields(t *testing.T) {
-	stored := webserver.CLIConfig{Host: "localhost", Port: 7480, BaseURL: "/stored/"}
-	runtime := webserver.CLIConfig{Host: "0.0.0.0", Port: 9090, BaseURL: "/env/"}
+	stored := webserver.CLIConfig{
+		Host:    "localhost",
+		Port:    7480,
+		BaseURL: "/stored/",
+	}
+	runtime := webserver.CLIConfig{
+		Host:    "0.0.0.0",
+		Port:    9090,
+		BaseURL: "/env/",
+	}
 
 	persisted := servePersistConfig(stored, runtime, map[string]bool{"persist-listen": true, "port": true})
 	if persisted.Host != "localhost" || persisted.Port != 9090 || persisted.BaseURL != "" {
@@ -489,8 +510,16 @@ func TestServePersistConfigListenOnlyPersistsExplicitListenFields(t *testing.T) 
 func TestServePersistConfigListenOnlyIgnoresInvalidStoredBaseURLWhenSaving(t *testing.T) {
 	tmpDir := t.TempDir()
 	dbPath := filepath.Join(tmpDir, "state", "upbrr.db")
-	stored := webserver.CLIConfig{Host: "localhost", Port: 7480, BaseURL: "javascript:alert(1)"}
-	runtime := webserver.CLIConfig{Host: "127.0.0.1", Port: 9090, BaseURL: "javascript:alert(1)"}
+	stored := webserver.CLIConfig{
+		Host:    "localhost",
+		Port:    7480,
+		BaseURL: "javascript:alert(1)",
+	}
+	runtime := webserver.CLIConfig{
+		Host:    "127.0.0.1",
+		Port:    9090,
+		BaseURL: "javascript:alert(1)",
+	}
 
 	persisted := servePersistConfig(stored, runtime, map[string]bool{"persist-listen": true, "host": true})
 	if err := webserver.SaveCLIConfig(dbPath, persisted); err != nil {

@@ -6,5 +6,10 @@ package hdt
 import "github.com/autobrr/upbrr/pkg/api"
 
 func (Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "HDT", DisplayName: "HDT", AuthKind: "cookies", SupportsCookieFile: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          "HDT",
+		DisplayName:        "HDT",
+		AuthKind:           "cookies",
+		SupportsCookieFile: true,
+	}
 }

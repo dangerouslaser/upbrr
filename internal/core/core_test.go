@@ -79,10 +79,26 @@ func TestFirstRequestedTracker(t *testing.T) {
 		trackers []string
 		want     string
 	}{
-		{name: "nil", trackers: nil, want: ""},
-		{name: "empty first", trackers: []string{"", "BHD"}, want: "BHD"},
-		{name: "whitespace first", trackers: []string{" \t", " HDB "}, want: "HDB"},
-		{name: "all empty", trackers: []string{"", "  "}, want: ""},
+		{
+			name:     "nil",
+			trackers: nil,
+			want:     "",
+		},
+		{
+			name:     "empty first",
+			trackers: []string{"", "BHD"},
+			want:     "BHD",
+		},
+		{
+			name:     "whitespace first",
+			trackers: []string{" \t", " HDB "},
+			want:     "HDB",
+		},
+		{
+			name:     "all empty",
+			trackers: []string{"", "  "},
+			want:     "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -827,12 +843,20 @@ func TestRunUploadPreparedDryRunInjectsSelectedTrackers(t *testing.T) {
 		{
 			Tracker: "AITHER",
 			Status:  "ready",
-			Files:   []api.TrackerDryRunFile{{Field: "torrent", Path: "/tmp/aither.torrent", Present: true}},
+			Files: []api.TrackerDryRunFile{{
+				Field:   "torrent",
+				Path:    "/tmp/aither.torrent",
+				Present: true,
+			}},
 		},
 		{
 			Tracker: "BLU",
 			Status:  "ready",
-			Files:   []api.TrackerDryRunFile{{Field: "torrent", Path: "/tmp/blu.torrent", Present: true}},
+			Files: []api.TrackerDryRunFile{{
+				Field:   "torrent",
+				Path:    "/tmp/blu.torrent",
+				Present: true,
+			}},
 		},
 	}}
 	client := &stubClient{}
@@ -3626,11 +3650,19 @@ func TestSanitizeTrackerDryRunEntriesRedactsBridgePayload(t *testing.T) {
 			"api_key":     "policy-secret",
 			"description": "kept",
 		},
-		Files: []api.TrackerDryRunFile{{Field: "torrent", Path: `C:\path\to\Example.Release.2026.1080p-GRP.torrent`, Present: true}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "torrent",
+			Path:    `C:\path\to\Example.Release.2026.1080p-GRP.torrent`,
+			Present: true,
+		}},
 		DebugSections: []api.TrackerDryRunDebugSection{{
 			Endpoint: "https://tracker.example/debug?passkey=policy-passkey",
 			Payload:  map[string]string{"auth_key": "policy-auth", "name": "kept"},
-			Files:    []api.TrackerDryRunFile{{Field: "nfo", Path: `/media/releases/Example.Release.2026.1080p-GRP.nfo`, Present: true}},
+			Files: []api.TrackerDryRunFile{{
+				Field:   "nfo",
+				Path:    `/media/releases/Example.Release.2026.1080p-GRP.nfo`,
+				Present: true,
+			}},
 		}},
 		ImageHost: api.ImageHostFeedback{Warnings: []api.ImageHostWarning{{
 			Host:    "example",
@@ -4662,7 +4694,12 @@ type stubMeta struct {
 func (s *stubMeta) Prepare(_ context.Context, req api.Request) (api.PreparedMetadata, error) {
 	s.calls++
 	s.options = req.Options
-	meta := api.PreparedMetadata{SourcePath: req.Paths[0], Paths: req.Paths, Mode: req.Mode, Options: req.Options}
+	meta := api.PreparedMetadata{
+		SourcePath: req.Paths[0],
+		Paths:      req.Paths,
+		Mode:       req.Mode,
+		Options:    req.Options,
+	}
 	if s.prepared.SourcePath == "" {
 		s.prepared.SourcePath = req.Paths[0]
 	}

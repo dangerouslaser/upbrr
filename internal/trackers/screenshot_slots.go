@@ -38,7 +38,11 @@ var (
 	slotComparisonURL     = regexp.MustCompile(`(?i)https?://[^\s\]]+\.(?:png|jpe?g|gif|webp)`)
 	slotURLImgPattern     = regexp.MustCompile(`(?is)\[url=(https?://[^\]]+)\]\s*\[img[^\]]*\](.*?)\[/img\]\s*\[/url\]`)
 	slotImgPattern        = regexp.MustCompile(`(?is)\[img[^\]]*\](.*?)\[/img\]`)
-	posterLikeSlotHosts   = map[string]struct{}{"image.tmdb.org": {}, "themoviedb.org": {}, "www.themoviedb.org": {}}
+	posterLikeSlotHosts   = map[string]struct{}{
+		"image.tmdb.org":     {},
+		"themoviedb.org":     {},
+		"www.themoviedb.org": {},
+	}
 )
 
 type parsedDescriptionSlot struct {
@@ -747,7 +751,13 @@ func ApplyUploadedVariantsToSlots(slots []api.ScreenshotSlot, uploads []api.Uplo
 	result := SlotUploadAttachmentResult{}
 	seenUploads := make(map[string]struct{}, len(uploads))
 	for _, upload := range uploads {
-		uploadKey := strings.ToLower(strings.TrimSpace(upload.Host)) + "\x00" + normalizeUsageScope(upload.UsageScope) + "\x00" + strings.TrimSpace(upload.ImagePath)
+		uploadKey := strings.ToLower(
+			strings.TrimSpace(upload.Host),
+		) + "\x00" + normalizeUsageScope(
+			upload.UsageScope,
+		) + "\x00" + strings.TrimSpace(
+			upload.ImagePath,
+		)
 		if _, exists := seenUploads[uploadKey]; exists {
 			continue
 		}
@@ -1037,7 +1047,13 @@ func slotIdentity(slot api.ScreenshotSlot) string {
 	return "unknown"
 }
 
-func upsertScreenshotVariantsFromUploads(ctx context.Context, repo api.MetadataRepository, sourcePath string, slots []api.ScreenshotSlot, uploads []api.UploadedImageLink) error {
+func upsertScreenshotVariantsFromUploads(
+	ctx context.Context,
+	repo api.MetadataRepository,
+	sourcePath string,
+	slots []api.ScreenshotSlot,
+	uploads []api.UploadedImageLink,
+) error {
 	if repo == nil || len(slots) == 0 || len(uploads) == 0 {
 		return nil
 	}

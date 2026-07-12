@@ -618,7 +618,14 @@ func TestSceneDetectorFolderMatchDetectsRenamedFile(t *testing.T) {
 		SourcePath:  "/data/Example.Driver.2026.1080p.BluRay.x264-GRP",
 		VideoPath:   "/data/Example.Driver.2026.1080p.BluRay.x264-GRP/example-driver-renamed.mkv",
 		ExternalIDs: api.ExternalIDs{IMDBID: 12345},
-		Release:     api.ReleaseInfo{Resolution: "1080p", Year: 2026, Group: "GRP", Source: "BluRay", Codec: []string{"x264"}, Language: []string{"English"}},
+		Release: api.ReleaseInfo{
+			Resolution: "1080p",
+			Year:       2026,
+			Group:      "GRP",
+			Source:     "BluRay",
+			Codec:      []string{"x264"},
+			Language:   []string{"English"},
+		},
 	}
 	detector := newSRRDBDetector(server.Client(), server.URL, t.TempDir(), t.TempDir())
 	result, err := detector.Detect(context.Background(), meta)
@@ -1050,7 +1057,11 @@ func TestSceneDetectorFallsBackToRWhenIMDbFindsNoMatch(t *testing.T) {
 		SourcePath:  "/data/" + release,
 		VideoPath:   "/data/" + release + "/example.driver.2026.1080p.bluray.x264-grp.mkv",
 		ExternalIDs: api.ExternalIDs{IMDBID: 12345},
-		Release:     api.ReleaseInfo{Resolution: "1080p", Year: 2026, Group: "GRP"},
+		Release: api.ReleaseInfo{
+			Resolution: "1080p",
+			Year:       2026,
+			Group:      "GRP",
+		},
 	}
 	detector := newSRRDBDetector(server.Client(), server.URL, t.TempDir(), t.TempDir())
 	result, err := detector.Detect(context.Background(), meta)

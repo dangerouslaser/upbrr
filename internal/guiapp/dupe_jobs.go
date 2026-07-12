@@ -139,7 +139,11 @@ func (a *App) StartDupeCheck(path string, overrides api.ExternalIDOverrides, nam
 		if normalized == "" {
 			continue
 		}
-		states[normalized] = DupeCheckTrackerState{Tracker: normalized, Status: "queued", Message: "queued"}
+		states[normalized] = DupeCheckTrackerState{
+			Tracker: normalized,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 
 	job := &dupeCheckJob{
@@ -471,7 +475,11 @@ func buildDupeCheckSnapshot(job *dupeCheckJob) DupeCheckSnapshot {
 		}
 		state, ok := job.states[normalized]
 		if !ok {
-			state = DupeCheckTrackerState{Tracker: normalized, Status: "queued", Message: "queued"}
+			state = DupeCheckTrackerState{
+				Tracker: normalized,
+				Status:  "queued",
+				Message: "queued",
+			}
 		}
 		trackers = append(trackers, state)
 		seen[normalized] = struct{}{}

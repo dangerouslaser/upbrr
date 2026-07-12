@@ -22,11 +22,21 @@ func TestProfileResolvers(t *testing.T) {
 	if got := profile.ResolveCategoryID(foreign); got != "3" {
 		t.Fatalf("foreign category = %q", got)
 	}
-	asian := api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "MOVIE"}, AudioLanguages: []string{"English"}, SubtitleLanguages: []string{"English"}, ExternalMetadata: api.ExternalMetadata{TMDB: &api.TMDBMetadata{OriginalLanguage: "en", OriginCountry: []string{"JP"}}}}
+	asian := api.PreparedMetadata{
+		ExternalIDs:       api.ExternalIDs{Category: "MOVIE"},
+		AudioLanguages:    []string{"English"},
+		SubtitleLanguages: []string{"English"},
+		ExternalMetadata:  api.ExternalMetadata{TMDB: &api.TMDBMetadata{OriginalLanguage: "en", OriginCountry: []string{"JP"}}},
+	}
 	if got := profile.ResolveCategoryID(asian); got != "6" {
 		t.Fatalf("Asian category = %q", got)
 	}
-	opera := api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "TV"}, AudioLanguages: []string{"English"}, SubtitleLanguages: []string{"English"}, Release: api.ReleaseInfo{Genre: "Opera"}}
+	opera := api.PreparedMetadata{
+		ExternalIDs:       api.ExternalIDs{Category: "TV"},
+		AudioLanguages:    []string{"English"},
+		SubtitleLanguages: []string{"English"},
+		Release:           api.ReleaseInfo{Genre: "Opera"},
+	}
 	if got := profile.ResolveCategoryID(opera); got != "5" {
 		t.Fatalf("opera category = %q", got)
 	}

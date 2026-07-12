@@ -41,6 +41,11 @@ pre-commit:
             stage_fixed: true
             fail_text: "golangci-lint fmt failed. See output above."
 
+          - name: literalpolicy
+            glob: "**/*.go"
+            run: go run ./cmd/literalpolicy
+            fail_text: "Composite literal layout failed. Run `make fmt-go`."
+
           - name: logpolicy
             glob:
               - "internal/*.go"

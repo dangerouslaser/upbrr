@@ -118,7 +118,9 @@ func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
 }
 
 func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
-	return &trackers.TrackerMetadataPolicy{Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB}}}}
+	return &trackers.TrackerMetadataPolicy{
+		Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldTMDB}}},
+	}
 }
 
 // Rules declares validation required by every Unit3D upload.
@@ -195,7 +197,17 @@ func (d *Definition) BuildDescription(ctx context.Context, req trackers.Descript
 	}
 	description := strings.TrimSpace(assets.Description)
 	if !assets.Final {
-		description, err = buildUnit3DDescription(ctx, d.name, req.Meta, req.AppConfig, req.TrackerConfig, req.Logger, assets.Description, assets.MenuImages, assets.Screenshots)
+		description, err = buildUnit3DDescription(
+			ctx,
+			d.name,
+			req.Meta,
+			req.AppConfig,
+			req.TrackerConfig,
+			req.Logger,
+			assets.Description,
+			assets.MenuImages,
+			assets.Screenshots,
+		)
 		if err != nil {
 			return trackers.DescriptionResult{}, err
 		}
@@ -235,7 +247,21 @@ func RegisterProfiles(registry *trackers.Registry, profiles []Profile) error {
 			cloned.RequireValidMISetting = true
 			rules = &cloned
 		}
-		if err := registry.RegisterDescriptor(trackers.Descriptor{Name: profile.Name, BaseURL: profile.BaseURL, Definition: definition, DupeFactory: definition, Rules: rules, DupePolicy: profile.DupePolicy, UploadArtifact: profile.UploadArtifact, Metadata: definition.MetadataPolicy(), BannedPolicy: profile.BannedPolicy, BannedGroups: append([]string(nil), profile.BannedGroups...), ImageHost: profile.ImageHost, ClaimPolicy: profile.ClaimPolicy, DescriptionGroup: profile.DescriptionGroup}); err != nil {
+		if err := registry.RegisterDescriptor(trackers.Descriptor{
+			Name:             profile.Name,
+			BaseURL:          profile.BaseURL,
+			Definition:       definition,
+			DupeFactory:      definition,
+			Rules:            rules,
+			DupePolicy:       profile.DupePolicy,
+			UploadArtifact:   profile.UploadArtifact,
+			Metadata:         definition.MetadataPolicy(),
+			BannedPolicy:     profile.BannedPolicy,
+			BannedGroups:     append([]string(nil), profile.BannedGroups...),
+			ImageHost:        profile.ImageHost,
+			ClaimPolicy:      profile.ClaimPolicy,
+			DescriptionGroup: profile.DescriptionGroup,
+		}); err != nil {
 			return fmt.Errorf("trackers: %w", err)
 		}
 	}

@@ -138,7 +138,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
 		Questionnaire:    state.questionnaire,
-		Files:            []api.TrackerDryRunFile{{Field: "file", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "file",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -209,7 +213,12 @@ func resolveCookies(ctx context.Context, logger api.Logger, cfg config.TrackerCo
 			return nil, errors.New("trackers: FL cookies not found")
 		}
 		// #nosec G124 -- Dry-run sentinel is an outbound tracker jar cookie, not a browser-set cookie.
-		return []*http.Cookie{{Name: "dryrun", Value: "1", Domain: ".filelist.io", Path: "/"}}, nil
+		return []*http.Cookie{{
+			Name:   "dryrun",
+			Value:  "1",
+			Domain: ".filelist.io",
+			Path:   "/",
+		}}, nil
 	}
 	if strings.TrimSpace(cfg.Username) == "" || strings.TrimSpace(cfg.Password) == "" {
 		return nil, errors.New("trackers: FL cookie invalid/missing and username/password not configured")
@@ -334,7 +343,11 @@ func buildDescription(assets trackers.DescriptionAssets) string {
 func buildQuestionnaire(meta api.PreparedMetadata, computedName string) *api.TrackerQuestionnaire {
 	answers := questionnaireAnswers(meta)
 	return &api.TrackerQuestionnaire{Tracker: "FL", Fields: []api.TrackerQuestionnaireField{{
-		Key: "name", Label: "FileList Name", Kind: "text", Value: metautil.FirstNonEmptyTrimmed(strings.TrimSpace(answers["name"]), computedName), Required: true,
+		Key:      "name",
+		Label:    "FileList Name",
+		Kind:     "text",
+		Value:    metautil.FirstNonEmptyTrimmed(strings.TrimSpace(answers["name"]), computedName),
+		Required: true,
 	}}}
 }
 

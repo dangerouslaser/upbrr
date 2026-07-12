@@ -196,7 +196,8 @@ func filterDupes(dupes []api.DupeEntry, meta api.PreparedMetadata, tracker strin
 			if strings.Contains(normalized, "hdtv") && !containsAny(normalized, []string{"web-dl", "web -dl", "webdl", "web dl"}) {
 				return true
 			}
-			if containsAny(normalized, []string{"blu-ray", "blu ray", "bluray", "blu -ray"}) && !containsAny(normalized, []string{"web-dl", "web -dl", "webdl", "web dl"}) {
+			if containsAny(normalized, []string{"blu-ray", "blu ray", "bluray", "blu -ray"}) &&
+				!containsAny(normalized, []string{"web-dl", "web -dl", "webdl", "web dl"}) {
 				return true
 			}
 		}
@@ -259,7 +260,9 @@ func filterDupes(dupes []api.DupeEntry, meta api.PreparedMetadata, tracker strin
 			return false
 		}
 
-		if len(dupes) == 1 && !strings.EqualFold(meta.DiscType, "BDMV") && policy.AllowSizeVariance1080 && fileSize > 0 && strings.Contains(targetResolution, "1080") && strings.Contains(videoEncode, "x264") {
+		if len(dupes) == 1 && !strings.EqualFold(meta.DiscType, "BDMV") && policy.AllowSizeVariance1080 && fileSize > 0 &&
+			strings.Contains(targetResolution, "1080") &&
+			strings.Contains(videoEncode, "x264") {
 			if entry.SizeKnown && entry.SizeBytes > 0 {
 				sizeDiff := float64(fileSize-entry.SizeBytes) / float64(entry.SizeBytes)
 				if sizeDiff >= 0.20 {

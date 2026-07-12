@@ -32,7 +32,11 @@ type ptpLookup struct {
 }
 
 func (d *Definition) NewDataLookup(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DataLookup {
-	return &dataLookup{cfg: cfg, http: httpClient, endpoint: ptpBaseURL + ptpTorrentPath}
+	return &dataLookup{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: ptpBaseURL + ptpTorrentPath,
+	}
 }
 
 func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest) (datatypes.Result, error) {
@@ -56,7 +60,11 @@ func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest)
 	if found.imdbID == 0 && foundID == "" {
 		return datatypes.Result{}, nil
 	}
-	result := datatypes.Result{TrackerID: foundID, IMDBID: found.imdbID, InfoHash: found.infoHash}
+	result := datatypes.Result{
+		TrackerID: foundID,
+		IMDBID:    found.imdbID,
+		InfoHash:  found.infoHash,
+	}
 	if foundID == "" || req.OnlyID && !req.KeepImages {
 		return result, nil
 	}
@@ -172,7 +180,11 @@ func parsePTPResponse(body map[string]any, trackerID, searchTerm string) ptpLook
 			selectedID, infoHash = id, ptpString(item["InfoHash"])
 		}
 	}
-	return ptpLookup{trackerID: selectedID, imdbID: ptpInt(body["ImdbId"]), infoHash: infoHash}
+	return ptpLookup{
+		trackerID: selectedID,
+		imdbID:    ptpInt(body["ImdbId"]),
+		infoHash:  infoHash,
+	}
 }
 
 func ptpMap(value any) map[string]any { result, _ := value.(map[string]any); return result }

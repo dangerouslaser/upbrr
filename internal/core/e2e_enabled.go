@@ -55,10 +55,19 @@ func maybeApplyE2EServices(_ context.Context, services *api.ServiceSet, cfg conf
 		services.Trackers = e2eTrackerService{endpoint: os.Getenv(e2eTrackerURLEnv), repo: repo}
 	}
 	if services.Images == nil {
-		services.Images = e2eImageService{endpoint: os.Getenv(e2eImageURLEnv), shotPath: os.Getenv(e2eShotPathEnv), tmpRoot: tmpRoot, repo: repo}
+		services.Images = e2eImageService{
+			endpoint: os.Getenv(e2eImageURLEnv),
+			shotPath: os.Getenv(e2eShotPathEnv),
+			tmpRoot:  tmpRoot,
+			repo:     repo,
+		}
 	}
 	if services.Screenshots == nil {
-		services.Screenshots = e2eScreenshotService{shotPath: os.Getenv(e2eShotPathEnv), tmpRoot: tmpRoot, repo: repo}
+		services.Screenshots = e2eScreenshotService{
+			shotPath: os.Getenv(e2eShotPathEnv),
+			tmpRoot:  tmpRoot,
+			repo:     repo,
+		}
 	}
 	if services.Clients == nil {
 		services.Clients = e2eClientService{}
@@ -175,7 +184,12 @@ func (s e2eMetadataService) Prepare(ctx context.Context, req api.Request) (api.P
 
 func (e e2eMetadataService) RefreshPreparedMetadata(_ context.Context, meta api.PreparedMetadata) (api.PreparedMetadata, error) {
 	if strings.TrimSpace(meta.ReleaseName) == "" {
-		prepared, err := e.Prepare(context.Background(), api.Request{Paths: []string{meta.SourcePath}, Mode: meta.Mode, Trackers: meta.Trackers, Options: meta.Options})
+		prepared, err := e.Prepare(context.Background(), api.Request{
+			Paths:    []string{meta.SourcePath},
+			Mode:     meta.Mode,
+			Trackers: meta.Trackers,
+			Options:  meta.Options,
+		})
 		if err != nil {
 			return api.PreparedMetadata{}, err
 		}
@@ -283,7 +297,12 @@ func (s e2eTrackerService) Upload(ctx context.Context, meta api.PreparedMetadata
 			continue
 		}
 		if s.repo != nil {
-			if err := s.repo.CreateUploadRecord(ctx, db.UploadRecord{Tracker: name, Status: "pending", SourcePath: meta.SourcePath, CreatedAt: time.Now().UTC()}); err != nil {
+			if err := s.repo.CreateUploadRecord(ctx, db.UploadRecord{
+				Tracker:    name,
+				Status:     "pending",
+				SourcePath: meta.SourcePath,
+				CreatedAt:  time.Now().UTC(),
+			}); err != nil {
 				return api.UploadSummary{}, fmt.Errorf("e2e tracker: create record: %w", err)
 			}
 		}
@@ -348,7 +367,11 @@ func (s e2eTrackerService) BuildUploadDryRun(_ context.Context, meta api.Prepare
 				"name":     meta.ReleaseName,
 				"category": string(api.CategoryMovie),
 			},
-			Files: []api.TrackerDryRunFile{{Field: "torrent", Path: meta.TorrentPath, Present: strings.TrimSpace(meta.TorrentPath) != ""}},
+			Files: []api.TrackerDryRunFile{{
+				Field:   "torrent",
+				Path:    meta.TorrentPath,
+				Present: strings.TrimSpace(meta.TorrentPath) != "",
+			}},
 			ImageHost: api.ImageHostFeedback{
 				Status:       "ready",
 				SelectedHost: "imgbb",
@@ -420,7 +443,13 @@ func (s e2eImageService) ListCandidates(_ context.Context, meta api.PreparedMeta
 	return []api.ScreenshotImage{shot}, nil
 }
 
-func (s e2eImageService) Upload(ctx context.Context, meta api.PreparedMetadata, host string, usageScope string, images []api.ScreenshotImage) ([]api.UploadedImageLink, error) {
+func (s e2eImageService) Upload(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	host string,
+	usageScope string,
+	images []api.ScreenshotImage,
+) ([]api.UploadedImageLink, error) {
 	if strings.TrimSpace(s.endpoint) == "" {
 		return nil, errors.New("e2e image: endpoint is required")
 	}
@@ -500,22 +529,35 @@ func (s e2eScreenshotService) Plan(_ context.Context, meta api.PreparedMetadata,
 		return api.ScreenshotPlan{}, err
 	}
 	return api.ScreenshotPlan{
-		SourcePath:          meta.SourcePath,
-		DurationSeconds:     120,
-		FrameRate:           24,
-		SuggestedSelections: []api.ScreenshotSelection{{Index: 1, TimestampSeconds: shot.TimestampSeconds, Frame: 240}},
+		SourcePath:      meta.SourcePath,
+		DurationSeconds: 120,
+		FrameRate:       24,
+		SuggestedSelections: []api.ScreenshotSelection{{
+			Index:            1,
+			TimestampSeconds: shot.TimestampSeconds,
+			Frame:            240,
+		}},
 		ExistingScreenshots: []api.ScreenshotImage{shot},
 		FinalSelections:     []api.ScreenshotImage{shot},
 	}, nil
 }
 
-func (s e2eScreenshotService) Capture(_ context.Context, meta api.PreparedMetadata, _ []api.ScreenshotSelection, purpose api.ScreenshotPurpose) (api.ScreenshotResult, error) {
+func (s e2eScreenshotService) Capture(
+	_ context.Context,
+	meta api.PreparedMetadata,
+	_ []api.ScreenshotSelection,
+	purpose api.ScreenshotPurpose,
+) (api.ScreenshotResult, error) {
 	shot, err := s.image(meta)
 	if err != nil {
 		return api.ScreenshotResult{}, err
 	}
 	shot.Purpose = purpose
-	return api.ScreenshotResult{SourcePath: meta.SourcePath, Purpose: purpose, Images: []api.ScreenshotImage{shot}}, nil
+	return api.ScreenshotResult{
+		SourcePath: meta.SourcePath,
+		Purpose:    purpose,
+		Images:     []api.ScreenshotImage{shot},
+	}, nil
 }
 
 func (s e2eScreenshotService) PreviewFrame(_ context.Context, meta api.PreparedMetadata, timestampSeconds float64) (api.ScreenshotPreview, error) {
@@ -527,7 +569,13 @@ func (s e2eScreenshotService) PreviewFrame(_ context.Context, meta api.PreparedM
 	if err != nil {
 		return api.ScreenshotPreview{}, fmt.Errorf("e2e screenshots: read preview: %w", err)
 	}
-	return api.ScreenshotPreview{TimestampSeconds: timestampSeconds, ImageBytes: payload, Width: shot.Width, Height: shot.Height, SizeBytes: shot.SizeBytes}, nil
+	return api.ScreenshotPreview{
+		TimestampSeconds: timestampSeconds,
+		ImageBytes:       payload,
+		Width:            shot.Width,
+		Height:           shot.Height,
+		SizeBytes:        shot.SizeBytes,
+	}, nil
 }
 
 func (s e2eScreenshotService) Delete(_ context.Context, _ api.PreparedMetadata, _ string) error {
@@ -595,7 +643,15 @@ func e2eManagedScreenshot(shotPath string, tmpRoot string, meta api.PreparedMeta
 	if err != nil {
 		return api.ScreenshotImage{}, fmt.Errorf("e2e screenshots: stat managed screenshot: %w", err)
 	}
-	return api.ScreenshotImage{Index: 1, TimestampSeconds: 10, Path: managedPath, Purpose: api.ScreenshotPurposeFinal, Width: 320, Height: 180, SizeBytes: info.Size()}, nil
+	return api.ScreenshotImage{
+		Index:            1,
+		TimestampSeconds: 10,
+		Path:             managedPath,
+		Purpose:          api.ScreenshotPurposeFinal,
+		Width:            320,
+		Height:           180,
+		SizeBytes:        info.Size(),
+	}, nil
 }
 
 func writeJSONE2E(w io.Writer, value any) error {

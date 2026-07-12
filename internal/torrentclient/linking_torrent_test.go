@@ -53,7 +53,11 @@ func writeQbitTestTorrentForSource(t *testing.T, torrentPath string, sourcePath 
 
 func writeQbitTestTorrent(t *testing.T, torrentPath string, rootName string, files map[string]string, multi bool) {
 	t.Helper()
-	info := metainfo.Info{Name: rootName, PieceLength: 16 * 1024, Private: new(true)}
+	info := metainfo.Info{
+		Name:        rootName,
+		PieceLength: 16 * 1024,
+		Private:     new(true),
+	}
 	if multi {
 		for rel, source := range files {
 			fileInfo, err := os.Stat(source)
@@ -179,8 +183,16 @@ func TestCreateTorrentLinkPlanRollsBackCreatedLinksUnderExistingRoot(t *testing.
 	plan := torrentLinkPlan{
 		root: "Example.Release.2026",
 		files: []torrentLinkFile{
-			{sourcePath: firstSource, destRel: filepath.Join("Example.Release.2026", "first.mkv"), length: 5},
-			{sourcePath: secondSource, destRel: filepath.Join("Example.Release.2026", "second.mkv"), length: 5},
+			{
+				sourcePath: firstSource,
+				destRel:    filepath.Join("Example.Release.2026", "first.mkv"),
+				length:     5,
+			},
+			{
+				sourcePath: secondSource,
+				destRel:    filepath.Join("Example.Release.2026", "second.mkv"),
+				length:     5,
+			},
 		},
 		torrentIsMulti: true,
 	}

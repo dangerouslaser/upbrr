@@ -594,7 +594,11 @@ func (t TrackersConfig) MarshalJSON() ([]byte, error) {
 	}
 	preferredTracker := strings.TrimSpace(t.PreferredTracker)
 
-	payload, err := json.Marshal(trackersJSON{DefaultTrackers: defaultTrackers, PreferredTracker: preferredTracker, Trackers: trackers})
+	payload, err := json.Marshal(trackersJSON{
+		DefaultTrackers:  defaultTrackers,
+		PreferredTracker: preferredTracker,
+		Trackers:         trackers,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("config: marshal trackers config: %w", err)
 	}

@@ -55,11 +55,24 @@ func NewServiceWithRegistry(cfg config.Config, logger api.Logger, repo db.Metada
 }
 
 // NewServiceWithRegistryAndImages returns a tracker service with explicit registry and image-hosting dependencies.
-func NewServiceWithRegistryAndImages(cfg config.Config, logger api.Logger, repo db.MetadataRepository, registry *Registry, images api.ImageHostingService) *Service {
+func NewServiceWithRegistryAndImages(
+	cfg config.Config,
+	logger api.Logger,
+	repo db.MetadataRepository,
+	registry *Registry,
+	images api.ImageHostingService,
+) *Service {
 	if logger == nil {
 		logger = api.NopLogger{}
 	}
-	return &Service{cfg: cfg, logger: logger, repo: repo, images: images, banned: NewBannedGroupCheckerWithRegistry(cfg.MainSettings.DBPath, registry), registry: registry}
+	return &Service{
+		cfg:      cfg,
+		logger:   logger,
+		repo:     repo,
+		images:   images,
+		banned:   NewBannedGroupCheckerWithRegistry(cfg.MainSettings.DBPath, registry),
+		registry: registry,
+	}
 }
 
 // Upload submits prepared metadata to the resolved tracker set.
@@ -159,7 +172,12 @@ func (s *Service) Upload(ctx context.Context, meta api.PreparedMetadata) (api.Up
 			recordMu.Unlock()
 
 			if err := s.repo.UpdateLatestUploadRecordStatus(updateCtx, meta.SourcePath, trimmedTracker, trimmedStatus); err != nil {
-				s.logger.Warnf("trackers: status update failed tracker=%s status=%s err=%s", trimmedTracker, trimmedStatus, redaction.RedactValue(err.Error(), nil))
+				s.logger.Warnf(
+					"trackers: status update failed tracker=%s status=%s err=%s",
+					trimmedTracker,
+					trimmedStatus,
+					redaction.RedactValue(err.Error(), nil),
+				)
 				recordMu.Lock()
 				recordStatuses[trimmedTracker] = recordStatusState{status: trimmedStatus}
 				recordMu.Unlock()
@@ -359,7 +377,12 @@ func (s *Service) Upload(ctx context.Context, meta api.PreparedMetadata) (api.Up
 	return summary, nil
 }
 
-func (s *Service) uploadTrackersConcurrently(ctx context.Context, meta api.PreparedMetadata, trackers []string, preflight imageHostPreflight) ([]trackerUploadResult, error) {
+func (s *Service) uploadTrackersConcurrently(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	trackers []string,
+	preflight imageHostPreflight,
+) ([]trackerUploadResult, error) {
 	workerCount := s.maxConcurrentTrackerUploads(len(trackers))
 	results := make([]trackerUploadResult, len(trackers))
 	if workerCount <= 0 {
@@ -873,7 +896,13 @@ func (s *Service) BuildPreparation(ctx context.Context, meta api.PreparedMetadat
 
 // preparationImageHostPreferences returns the first upload host each tracker
 // should prefer when generated screenshots need hosted URLs.
-func preparationImageHostPreferences(appCfg config.Config, meta api.PreparedMetadata, trackers []string, logger api.Logger, registry *Registry) map[string]string {
+func preparationImageHostPreferences(
+	appCfg config.Config,
+	meta api.PreparedMetadata,
+	trackers []string,
+	logger api.Logger,
+	registry *Registry,
+) map[string]string {
 	if meta.ImageHostOverrides.PreferredHost != nil {
 		return nil
 	}
@@ -994,7 +1023,18 @@ func (s *Service) BuildUploadDryRun(ctx context.Context, meta api.PreparedMetada
 			results = append(results, entry)
 			continue
 		}
-		resolution, err := ensureDescriptionImageHostWithDataAndRegistry(ctx, tracker, trackerMeta, s.cfg, trackerCfg, s.repo, s.images, s.logger, s.registry, preloaded)
+		resolution, err := ensureDescriptionImageHostWithDataAndRegistry(
+			ctx,
+			tracker,
+			trackerMeta,
+			s.cfg,
+			trackerCfg,
+			s.repo,
+			s.images,
+			s.logger,
+			s.registry,
+			preloaded,
+		)
 		if err != nil {
 			s.logger.Warnf("trackers: dry-run image host resolution failed tracker=%s err=%s", tracker, redaction.RedactValue(err.Error(), nil))
 			entry.Status = "error"
@@ -1335,7 +1375,12 @@ func preparationGroupKey(group string, host string, usageScope string) string {
 	return trimmedGroup + "|" + trimmedHost + "|" + trimmedScope
 }
 
-func preparationDescriptionGroup(grouped map[string]*api.PreparationDescription, order *[]string, groupKey string, candidate api.PreparationDescription) *api.PreparationDescription {
+func preparationDescriptionGroup(
+	grouped map[string]*api.PreparationDescription,
+	order *[]string,
+	groupKey string,
+	candidate api.PreparationDescription,
+) *api.PreparationDescription {
 	baseKey := strings.TrimSpace(groupKey)
 	if baseKey == "" {
 		baseKey = "description"
@@ -1362,7 +1407,12 @@ func preparationDescriptionGroup(grouped map[string]*api.PreparationDescription,
 	}
 }
 
-func matchingUnit3DPreparationDescriptionGroup(grouped map[string]*api.PreparationDescription, order []string, groupKey string, candidate api.PreparationDescription) *api.PreparationDescription {
+func matchingUnit3DPreparationDescriptionGroup(
+	grouped map[string]*api.PreparationDescription,
+	order []string,
+	groupKey string,
+	candidate api.PreparationDescription,
+) *api.PreparationDescription {
 	if preparationDescriptionBaseGroup(groupKey) != "unit3d" {
 		return nil
 	}
@@ -1387,7 +1437,12 @@ func preparationDescriptionBaseGroup(groupKey string) string {
 	return baseGroup
 }
 
-func addPreparationDescriptionGroup(grouped map[string]*api.PreparationDescription, order *[]string, groupKey string, candidate api.PreparationDescription) *api.PreparationDescription {
+func addPreparationDescriptionGroup(
+	grouped map[string]*api.PreparationDescription,
+	order *[]string,
+	groupKey string,
+	candidate api.PreparationDescription,
+) *api.PreparationDescription {
 	entry := candidate
 	entry.GroupKey = groupKey
 	entry.Trackers = []string{}

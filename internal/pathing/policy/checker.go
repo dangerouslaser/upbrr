@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -289,11 +290,9 @@ func (c *checker) checkSprintf(call *ast.CallExpr) {
 	if hasSlashDataSignal(call) {
 		return
 	}
-	for _, arg := range call.Args[1:] {
-		if hasLocalPathSignal(arg) {
-			c.addViolation(call.Pos(), "use filepath.Join instead of fmt.Sprintf to build local filesystem paths")
-			return
-		}
+	if slices.ContainsFunc(call.Args[1:], hasLocalPathSignal) {
+		c.addViolation(call.Pos(), "use filepath.Join instead of fmt.Sprintf to build local filesystem paths")
+		return
 	}
 }
 
@@ -609,7 +608,12 @@ func isLocalPathName(name string) bool {
 	if lower == "" || isSlashDataName(lower) {
 		return false
 	}
-	if strings.Contains(lower, "filepath") || strings.Contains(lower, "dbpath") || strings.Contains(lower, "sourcepath") || strings.Contains(lower, "targetpath") || strings.Contains(lower, "outputpath") || strings.Contains(lower, "artifactpath") || strings.Contains(lower, "configpath") || strings.Contains(lower, "mediainfopath") {
+	if strings.Contains(lower, "filepath") || strings.Contains(lower, "dbpath") || strings.Contains(lower, "sourcepath") ||
+		strings.Contains(lower, "targetpath") ||
+		strings.Contains(lower, "outputpath") ||
+		strings.Contains(lower, "artifactpath") ||
+		strings.Contains(lower, "configpath") ||
+		strings.Contains(lower, "mediainfopath") {
 		return true
 	}
 	if strings.Contains(lower, "pathparts") || strings.Contains(lower, "fileparts") || strings.Contains(lower, "dirparts") {

@@ -382,7 +382,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         state.endpoint,
 		Payload:          cloneFields(state.fields),
 		Questionnaire:    state.questionnaire,
-		Files:            []api.TrackerDryRunFile{{Field: "file", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "file",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -1013,7 +1017,22 @@ func isMusicVideoCategoryHint(value string) bool {
 }
 
 func isVideoCategoryHint(value string) bool {
-	return hasCategoryHintToken(value, "movie", "movies", "film", "films", "tv", "tveps", "episode", "episodes", "anime", "video", "videos", "documentary", "documentaries")
+	return hasCategoryHintToken(
+		value,
+		"movie",
+		"movies",
+		"film",
+		"films",
+		"tv",
+		"tveps",
+		"episode",
+		"episodes",
+		"anime",
+		"video",
+		"videos",
+		"documentary",
+		"documentaries",
+	)
 }
 
 func hasCategoryHintToken(value string, want ...string) bool {

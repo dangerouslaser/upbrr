@@ -96,7 +96,11 @@ func TestResolveSessionForTrackerAuthReportsPostLoginCookiePersistenceFailure(t 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/login":
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "abc", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "abc",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`<input name="token" value="abcdefghijklmnop">`))
 		case "/index.php":
 			_, _ = w.Write([]byte(`authkey=abcdefghijklmnopqrstuvwxyzABCDEF`))
@@ -132,7 +136,11 @@ func TestResolveSessionForTrackerAuthSavesCookiesWhenLoginResponseContainsAuthKe
 				_, _ = w.Write([]byte(`<input name="token" value="abcdefghijklmnop">`))
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "fresh", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "fresh",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`authkey=abcdefghijklmnopqrstuvwxyzABCDEF`))
 		case "/index.php":
 			indexRequests++
@@ -243,7 +251,11 @@ func TestResolveSessionForTrackerAuthPostsLoginToRedirectedHost(t *testing.T) {
 			return
 		case r.URL.Path == "/login" && r.Method == http.MethodPost:
 			postedCanonicalLogin = true
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "fresh", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "fresh",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`authkey=abcdefghijklmnopqrstuvwxyzABCDEF`))
 		default:
 			http.NotFound(w, r)
@@ -291,7 +303,11 @@ func TestUploadPostsToRedirectedLoginHost(t *testing.T) {
 		case r.URL.Path == "/login" && r.Method == http.MethodGet:
 			_, _ = w.Write([]byte(`<input name="token" value="abcdefghijklmnop">`))
 		case r.URL.Path == "/login" && r.Method == http.MethodPost:
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "fresh", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "fresh",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`authkey=abcdefghijklmnopqrstuvwxyzABCDEF`))
 		case r.URL.Path == mtvUploadPath && r.Method == http.MethodPost && strings.HasPrefix(r.Host, "localhost:"):
 			t.Error("upload POST used original host")
@@ -397,7 +413,11 @@ func TestResolveSessionForTrackerAuthDoesNotPersistCookiesBeforeAuthKeyValidatio
 				_, _ = w.Write([]byte(`<input name="token" value="abcdefghijklmnop">`))
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "unverified", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "unverified",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`<html>logged in without auth key</html>`))
 		case "/index.php":
 			_, _ = w.Write([]byte(`<html>temporary account notice</html>`))
@@ -448,7 +468,11 @@ func TestResolveSessionForTrackerAuthLoginUsesManual2FACode(t *testing.T) {
 				return
 			}
 			gotCode = r.FormValue("code")
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`authkey=abcdefghijklmnopqrstuvwxyzABCDEF`))
 		default:
 			http.NotFound(w, r)
@@ -598,7 +622,11 @@ func TestResolveSessionForTrackerAuthLoginReportsSafeAuthKeyDiagnostics(t *testi
 				_, _ = w.Write([]byte(`<input name="token" value="abcdefghijklmnop">`))
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`<html>login accepted but no upload token secret-response-body</html>`))
 		case "/index.php":
 			_, _ = w.Write([]byte(`<html>logged in but no upload token other-secret-body</html>`))

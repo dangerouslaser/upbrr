@@ -63,7 +63,12 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: %w", err)
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+"/api.php?api_key="+req.TrackerConfig.APIKey+"&action=upload", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		baseURL+"/api.php?api_key="+req.TrackerConfig.APIKey+"&action=upload",
+		bytes.NewReader(body),
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: GPW upload request build: %s", commonhttp.RedactErrorDetail(err.Error()))
 	}
@@ -74,7 +79,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		return api.UploadSummary{}, fmt.Errorf("trackers: GPW upload request: %w", err)
 	}
 	defer resp.Body.Close()
-	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 300, commonhttp.DefaultResponsePreviewBytes)
+	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(
+		resp,
+		resp.StatusCode >= 200 && resp.StatusCode < 300,
+		commonhttp.DefaultResponsePreviewBytes,
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: GPW read upload response: %w", err)
 	}
@@ -99,10 +108,24 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 				return api.UploadSummary{}, fmt.Errorf("trackers: %w", err)
 			}
 		}
-		return api.UploadSummary{Uploaded: 1, UploadedTorrents: []api.UploadedTorrent{{Tracker: "GPW", TorrentID: id, TorrentURL: tURL, DownloadURL: tURL, TorrentPath: artifactPath}}}, nil
+		return api.UploadSummary{Uploaded: 1, UploadedTorrents: []api.UploadedTorrent{{
+			Tracker:     "GPW",
+			TorrentID:   id,
+			TorrentURL:  tURL,
+			DownloadURL: tURL,
+			TorrentPath: artifactPath,
+		}}}, nil
 	}
 	_, _ = commonhttp.WriteFailureArtifact(req.Meta, req.AppConfig.MainSettings.DBPath, "GPW", "upload_failure", responsePreview, ".json")
-	return api.UploadSummary{}, fmt.Errorf("trackers: GPW %s", metautil.FirstNonEmptyTrimmed(commonhttp.ExtractHTTPErrorDetail(responsePreview), commonhttp.RedactErrorDetail(decoded.Error), commonhttp.RedactErrorDetail(decoded.Message), "upload failed"))
+	return api.UploadSummary{}, fmt.Errorf(
+		"trackers: GPW %s",
+		metautil.FirstNonEmptyTrimmed(
+			commonhttp.ExtractHTTPErrorDetail(responsePreview),
+			commonhttp.RedactErrorDetail(decoded.Error),
+			commonhttp.RedactErrorDetail(decoded.Message),
+			"upload failed",
+		),
+	)
 }
 
 func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.TrackerDryRunEntry, error) {
@@ -131,7 +154,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         baseURL + "/api.php?api_key=" + req.TrackerConfig.APIKey + "&action=upload",
 		Payload:          cloneFields(state.fields),
 		Questionnaire:    state.questionnaire,
-		Files:            []api.TrackerDryRunFile{{Field: "file_input", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "file_input",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -263,11 +290,41 @@ func buildQuestionnaire(meta api.PreparedMetadata, groupID string, answers map[s
 		return nil
 	}
 	fields := []api.TrackerQuestionnaireField{
-		{Key: "poster_url", Label: "Poster URL", Kind: "text", Value: metautil.FirstNonEmptyTrimmed(answers["poster_url"], resolvePoster(meta)), Required: true},
-		{Key: "director_imdb", Label: "Director IMDb ID", Kind: "text", Value: answers["director_imdb"], Placeholder: "nm0000138", Required: true},
-		{Key: "director_name", Label: "Director Name", Kind: "text", Value: metautil.FirstNonEmptyTrimmed(answers["director_name"], resolveDirectorName(meta)), Required: true},
-		{Key: "director_chinese", Label: "Director Chinese", Kind: "text", Value: answers["director_chinese"]},
-		{Key: "tags", Label: "Tags", Kind: "text", Value: metautil.FirstNonEmptyTrimmed(answers["tags"], resolveTags(meta)), Required: true},
+		{
+			Key:      "poster_url",
+			Label:    "Poster URL",
+			Kind:     "text",
+			Value:    metautil.FirstNonEmptyTrimmed(answers["poster_url"], resolvePoster(meta)),
+			Required: true,
+		},
+		{
+			Key:         "director_imdb",
+			Label:       "Director IMDb ID",
+			Kind:        "text",
+			Value:       answers["director_imdb"],
+			Placeholder: "nm0000138",
+			Required:    true,
+		},
+		{
+			Key:      "director_name",
+			Label:    "Director Name",
+			Kind:     "text",
+			Value:    metautil.FirstNonEmptyTrimmed(answers["director_name"], resolveDirectorName(meta)),
+			Required: true,
+		},
+		{
+			Key:   "director_chinese",
+			Label: "Director Chinese",
+			Kind:  "text",
+			Value: answers["director_chinese"],
+		},
+		{
+			Key:      "tags",
+			Label:    "Tags",
+			Kind:     "text",
+			Value:    metautil.FirstNonEmptyTrimmed(answers["tags"], resolveTags(meta)),
+			Required: true,
+		},
 	}
 	return &api.TrackerQuestionnaire{Tracker: "GPW", Fields: fields}
 }
@@ -332,7 +389,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 

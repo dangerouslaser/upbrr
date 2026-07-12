@@ -26,7 +26,11 @@ func TestDupeSearcherSendsAPIKeyHeader(t *testing.T) {
 		if query.Get("apikey") != "" {
 			t.Fatal("apikey should not be sent as a query parameter")
 		}
-		for key, want := range map[string]string{"t": "search", "o": "json", "tmdb": "123"} {
+		for key, want := range map[string]string{
+			"t":    "search",
+			"o":    "json",
+			"tmdb": "123",
+		} {
 			if got := query.Get(key); got != want {
 				t.Fatalf("query %s = %q, want %q", key, got, want)
 			}
@@ -38,7 +42,11 @@ func TestDupeSearcherSendsAPIKeyHeader(t *testing.T) {
 			t.Fatal("expected User-Agent header")
 		}
 		body := `{"item":[{"fileName":"Example.Release.2026.1080p-GRP","resolution":"1080p","guid":"https://example.invalid/torrents.php?id=1","link":"https://example.invalid/download.php?id=1"}]}`
-		return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(body)), Header: make(http.Header)}, nil
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(body)),
+			Header:     make(http.Header),
+		}, nil
 	})}
 
 	cfg := config.Config{Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{"ANT": {APIKey: "token"}}}}

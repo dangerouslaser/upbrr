@@ -89,7 +89,11 @@ func NewBannedGroupCheckerWithRegistry(dbPath string, registry *Registry) *Banne
 		return nil
 	}
 	basePath = filepath.Join(basePath, "banned")
-	return &BannedGroupChecker{basePath: basePath, registry: registry, cache: make(map[string]map[string]struct{})}
+	return &BannedGroupChecker{
+		basePath: basePath,
+		registry: registry,
+		cache:    make(map[string]map[string]struct{}),
+	}
 }
 
 // IsBanned reports whether group is banned for tracker after normalizing both
@@ -167,7 +171,11 @@ func (c *BannedGroupChecker) refreshDynamic(
 		}
 		if err != nil {
 			if logger != nil {
-				logger.Warnf("trackers: banned groups refresh failed tracker=%s decision=cache_fallback err=%s", tracker, redaction.RedactValue(err.Error(), nil))
+				logger.Warnf(
+					"trackers: banned groups refresh failed tracker=%s decision=cache_fallback err=%s",
+					tracker,
+					redaction.RedactValue(err.Error(), nil),
+				)
 			}
 			continue
 		}
@@ -676,7 +684,15 @@ func stripTRaSHReleaseGroupPattern(value string) string {
 
 // fetchDynamicBannedGroupsPage fetches and parses one blacklist page, including
 // SPD's alternate Authorization header form when bearer auth is rejected.
-func fetchDynamicBannedGroupsPage(ctx context.Context, client *http.Client, endpoint string, tracker string, apiKey string, cursor string, rawAPIKeyFallback bool) ([]string, []json.RawMessage, string, error) {
+func fetchDynamicBannedGroupsPage(
+	ctx context.Context,
+	client *http.Client,
+	endpoint string,
+	tracker string,
+	apiKey string,
+	cursor string,
+	rawAPIKeyFallback bool,
+) ([]string, []json.RawMessage, string, error) {
 	var raw json.RawMessage
 	var statusCode int
 	var err error
@@ -710,7 +726,14 @@ func fetchDynamicBannedGroupsPage(ctx context.Context, client *http.Client, endp
 
 // doBannedGroupsRequest performs one HTTP request and returns only decoded JSON
 // for successful responses so error paths never include remote response bodies.
-func doBannedGroupsRequest(ctx context.Context, client *http.Client, endpoint string, tracker string, authValue string, cursor string) (json.RawMessage, int, error) {
+func doBannedGroupsRequest(
+	ctx context.Context,
+	client *http.Client,
+	endpoint string,
+	tracker string,
+	authValue string,
+	cursor string,
+) (json.RawMessage, int, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("build banned groups request %s: %w", tracker, err)

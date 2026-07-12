@@ -26,7 +26,13 @@ func PrepareTrackerUploadTorrent(meta api.PreparedMetadata, dbPath string, track
 }
 
 // PrepareTrackerUploadTorrentWithRegistry prepares tracker-specific torrent metainfo using registry policy.
-func PrepareTrackerUploadTorrentWithRegistry(meta api.PreparedMetadata, dbPath string, tracker string, trackerConfig config.TrackerConfig, registry *Registry) (api.PreparedMetadata, error) {
+func PrepareTrackerUploadTorrentWithRegistry(
+	meta api.PreparedMetadata,
+	dbPath string,
+	tracker string,
+	trackerConfig config.TrackerConfig,
+	registry *Registry,
+) (api.PreparedMetadata, error) {
 	source, announce, ok := trackerUploadTorrentFieldsWithRegistry(tracker, trackerConfig, registry)
 	if !ok {
 		return meta, nil
@@ -81,7 +87,13 @@ func PrepareDryRunInjectionTorrent(meta api.PreparedMetadata, dbPath string, tra
 }
 
 // PrepareDryRunInjectionTorrentWithRegistry prepares a dry-run torrent artifact using registry policy.
-func PrepareDryRunInjectionTorrentWithRegistry(meta api.PreparedMetadata, dbPath string, tracker string, trackerConfig config.TrackerConfig, registry *Registry) (api.PreparedMetadata, error) {
+func PrepareDryRunInjectionTorrentWithRegistry(
+	meta api.PreparedMetadata,
+	dbPath string,
+	tracker string,
+	trackerConfig config.TrackerConfig,
+	registry *Registry,
+) (api.PreparedMetadata, error) {
 	source, announce, ok := trackerUploadTorrentFieldsWithRegistry(tracker, trackerConfig, registry)
 	if !ok {
 		source = strings.ToUpper(strings.TrimSpace(tracker))

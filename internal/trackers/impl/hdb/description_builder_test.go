@@ -92,8 +92,16 @@ func TestBuildDescriptionReplacesExistingScreenshotBlock(t *testing.T) {
 
 [align=right][url=https://github.com/autobrr/upbrr][size=10]upbrr[/size][/url][/align]`
 	screens := []api.ScreenshotImage{
-		{ImgURL: "https://t.hdbits.org/51q8jo2.jpg", RawURL: "https://img.hdbits.org/51q8jo2.jpg", WebURL: "https://img.hdbits.org/51q8jo2"},
-		{ImgURL: "https://t.hdbits.org/w0S7ltI.jpg", RawURL: "https://img.hdbits.org/w0S7ltI.jpg", WebURL: "https://img.hdbits.org/w0S7ltI"},
+		{
+			ImgURL: "https://t.hdbits.org/51q8jo2.jpg",
+			RawURL: "https://img.hdbits.org/51q8jo2.jpg",
+			WebURL: "https://img.hdbits.org/51q8jo2",
+		},
+		{
+			ImgURL: "https://t.hdbits.org/w0S7ltI.jpg",
+			RawURL: "https://img.hdbits.org/w0S7ltI.jpg",
+			WebURL: "https://img.hdbits.org/w0S7ltI",
+		},
 	}
 
 	description, err := BuildDescription(context.Background(), meta, config.Config{}, base, nil, screens)

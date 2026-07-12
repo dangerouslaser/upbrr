@@ -14,7 +14,17 @@ import (
 )
 
 func Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{RequireValidMISetting: true, BlockDVDRip: true, Language: &ruletypes.LanguageRule{Languages: []string{"english", "en", "eng"}, RequireAudio: true, RequireSubs: true, ApplyIfNonDisc: true}, ExtraCheck: checkRules}
+	return &ruletypes.RuleSet{
+		RequireValidMISetting: true,
+		BlockDVDRip:           true,
+		Language: &ruletypes.LanguageRule{
+			Languages:      []string{"english", "en", "eng"},
+			RequireAudio:   true,
+			RequireSubs:    true,
+			ApplyIfNonDisc: true,
+		},
+		ExtraCheck: checkRules,
+	}
 }
 
 func checkRules(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) ruletypes.Result {

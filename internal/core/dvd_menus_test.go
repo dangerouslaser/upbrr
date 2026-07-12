@@ -45,8 +45,20 @@ func TestImportMenuImagesPersistsPurposeAndDeduplicatesManagedCopy(t *testing.T)
 	}
 	now := time.Now().UTC()
 	if err := repo.SaveFinalSelections(context.Background(), sourcePath, []api.ScreenshotFinalSelection{
-		{SourcePath: sourcePath, ImagePath: filepath.Join(root, "auto.png"), Order: 0, Source: api.ScreenshotSelectionSourceDVDMenu, SelectedAt: now},
-		{SourcePath: sourcePath, ImagePath: filepath.Join(root, "normal.png"), Order: 1, Source: "generated", SelectedAt: now},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  filepath.Join(root, "auto.png"),
+			Order:      0,
+			Source:     api.ScreenshotSelectionSourceDVDMenu,
+			SelectedAt: now,
+		},
+		{
+			SourcePath: sourcePath,
+			ImagePath:  filepath.Join(root, "normal.png"),
+			Order:      1,
+			Source:     "generated",
+			SelectedAt: now,
+		},
 	}); err != nil {
 		t.Fatalf("seed selections: %v", err)
 	}

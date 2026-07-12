@@ -6,5 +6,9 @@ package stc
 import "github.com/autobrr/upbrr/internal/trackers/ruletypes"
 
 func Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{BlockAdult: true, AdultMessage: "Porn is not allowed", RequireTVOnly: true}
+	return &ruletypes.RuleSet{
+		BlockAdult:    true,
+		AdultMessage:  "Porn is not allowed",
+		RequireTVOnly: true,
+	}
 }

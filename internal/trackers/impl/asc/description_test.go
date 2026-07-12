@@ -134,7 +134,12 @@ func TestHomepageURLFixLeavesOtherASCLinksUnchanged(t *testing.T) {
 	}
 
 	cast := buildCastSection(meta, []richCreditItem{
-		{ID: 42, Name: "Jane Example", Character: "Hero", ProfilePath: "/profile.jpg"},
+		{
+			ID:          42,
+			Name:        "Jane Example",
+			Character:   "Hero",
+			ProfilePath: "/profile.jpg",
+		},
 	})
 	if !strings.Contains(cast, "[url=https://www.themoviedb.org/person/42?language=pt-BR]") {
 		t.Fatalf("expected TMDB cast link to stay unchanged, got %q", cast)

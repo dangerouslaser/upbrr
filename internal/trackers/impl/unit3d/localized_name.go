@@ -14,7 +14,12 @@ import (
 var localizedCodecReplacer = strings.NewReplacer("DD+ ", "DDP", "DD ", "DD", "AAC ", "AAC", "FLAC ", "FLAC")
 var localizedAudioMarkerReplacer = strings.NewReplacer("Dubbed", "", "Dual-Audio", "")
 var localizedAudioTagRegex = regexp.MustCompile(`(?i)-([^.-]+)\.(?:DUAL|MULTI)`)
-var portugueseLanguageNames = map[string]struct{}{"português": {}, "portuguese": {}, "pt-br": {}, "pt": {}}
+var portugueseLanguageNames = map[string]struct{}{
+	"português":  {},
+	"portuguese": {},
+	"pt-br":      {},
+	"pt":         {},
+}
 
 // FormatLocalizedName applies the shared Portuguese-localized naming convention
 // used by Unit3D sites that opt into it.

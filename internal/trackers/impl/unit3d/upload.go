@@ -89,7 +89,17 @@ func uploadUnit3D(ctx context.Context, req trackers.UploadRequest) (api.UploadSu
 	}
 	description := strings.TrimSpace(assets.Description)
 	if !assets.Final {
-		description, err = buildUnit3DDescription(ctx, trackerName, req.Meta, req.AppConfig, req.TrackerConfig, logger, assets.Description, assets.MenuImages, assets.Screenshots)
+		description, err = buildUnit3DDescription(
+			ctx,
+			trackerName,
+			req.Meta,
+			req.AppConfig,
+			req.TrackerConfig,
+			logger,
+			assets.Description,
+			assets.MenuImages,
+			assets.Screenshots,
+		)
 		if err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 				return api.UploadSummary{}, err
@@ -173,7 +183,11 @@ func uploadUnit3D(ctx context.Context, req trackers.UploadRequest) (api.UploadSu
 
 	logger.Debugf("trackers: %s received HTTP %d response", trackerName, resp.StatusCode)
 
-	body, bodyPreview, err := commonhttp.ReadUploadResponseBody(resp, resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices, commonhttp.DefaultResponsePreviewBytes)
+	body, bodyPreview, err := commonhttp.ReadUploadResponseBody(
+		resp,
+		resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices,
+		commonhttp.DefaultResponsePreviewBytes,
+	)
 	if err != nil {
 		logger.Errorf("trackers: %s failed to read response body: %v", trackerName, err)
 		return api.UploadSummary{}, fmt.Errorf("trackers: %s read response body: %w", trackerName, err)
@@ -376,7 +390,17 @@ func buildUploadDryRunUnit3D(ctx context.Context, req trackers.UploadRequest) (a
 	}
 	description := strings.TrimSpace(assets.Description)
 	if !assets.Final {
-		description, err = buildUnit3DDescription(ctx, trackerName, req.Meta, req.AppConfig, req.TrackerConfig, logger, assets.Description, assets.MenuImages, assets.Screenshots)
+		description, err = buildUnit3DDescription(
+			ctx,
+			trackerName,
+			req.Meta,
+			req.AppConfig,
+			req.TrackerConfig,
+			logger,
+			assets.Description,
+			assets.MenuImages,
+			assets.Screenshots,
+		)
 		if err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 				return api.TrackerDryRunEntry{}, err
@@ -412,7 +436,11 @@ func buildUploadDryRunUnit3D(ctx context.Context, req trackers.UploadRequest) (a
 		Present: strings.TrimSpace(torrentPath) != "",
 	}}
 	if strings.TrimSpace(nfoPath) != "" {
-		files = append(files, api.TrackerDryRunFile{Field: "nfo", Path: nfoPath, Present: true})
+		files = append(files, api.TrackerDryRunFile{
+			Field:   "nfo",
+			Path:    nfoPath,
+			Present: true,
+		})
 	}
 
 	message := "dry-run payload generated"

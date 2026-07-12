@@ -340,9 +340,21 @@ func TestBaseURLPreservesExplicitBaseURL(t *testing.T) {
 		baseURL string
 		want    string
 	}{
-		{name: "path trailing slash", baseURL: " https://example.test/upbrr/ ", want: "https://example.test/upbrr/"},
-		{name: "root slash", baseURL: "https://example.test/", want: "https://example.test/"},
-		{name: "query fragment stripped", baseURL: "https://example.test/upbrr/?token=secret#frag", want: "https://example.test/upbrr/"},
+		{
+			name:    "path trailing slash",
+			baseURL: " https://example.test/upbrr/ ",
+			want:    "https://example.test/upbrr/",
+		},
+		{
+			name:    "root slash",
+			baseURL: "https://example.test/",
+			want:    "https://example.test/",
+		},
+		{
+			name:    "query fragment stripped",
+			baseURL: "https://example.test/upbrr/?token=secret#frag",
+			want:    "https://example.test/upbrr/",
+		},
 	}
 
 	for _, tc := range cases {
@@ -372,12 +384,42 @@ func TestBaseURLSynthesizesLocalOriginForPathOnlyBaseURL(t *testing.T) {
 		baseURL string
 		want    string
 	}{
-		{name: "wildcard ipv4", host: "0.0.0.0", baseURL: " /upbrr/ ", want: "http://localhost:49152/upbrr/"},
-		{name: "wildcard ipv6", host: "::", baseURL: "upbrr", want: "http://localhost:49152/upbrr/"},
-		{name: "bracketed wildcard ipv6", host: "[::]", baseURL: "/tools/upbrr", want: "http://localhost:49152/tools/upbrr/"},
-		{name: "scoped ipv6", host: "fe80::1%zone", baseURL: "/upbrr/", want: "http://[fe80::1%25zone]:49152/upbrr/"},
-		{name: "query and fragment dropped", host: "127.0.0.1", baseURL: "/upbrr/?token=secret#frag", want: "http://127.0.0.1:49152/upbrr/"},
-		{name: "root path", host: "127.0.0.1", baseURL: "/", want: "http://127.0.0.1:49152"},
+		{
+			name:    "wildcard ipv4",
+			host:    "0.0.0.0",
+			baseURL: " /upbrr/ ",
+			want:    "http://localhost:49152/upbrr/",
+		},
+		{
+			name:    "wildcard ipv6",
+			host:    "::",
+			baseURL: "upbrr",
+			want:    "http://localhost:49152/upbrr/",
+		},
+		{
+			name:    "bracketed wildcard ipv6",
+			host:    "[::]",
+			baseURL: "/tools/upbrr",
+			want:    "http://localhost:49152/tools/upbrr/",
+		},
+		{
+			name:    "scoped ipv6",
+			host:    "fe80::1%zone",
+			baseURL: "/upbrr/",
+			want:    "http://[fe80::1%25zone]:49152/upbrr/",
+		},
+		{
+			name:    "query and fragment dropped",
+			host:    "127.0.0.1",
+			baseURL: "/upbrr/?token=secret#frag",
+			want:    "http://127.0.0.1:49152/upbrr/",
+		},
+		{
+			name:    "root path",
+			host:    "127.0.0.1",
+			baseURL: "/",
+			want:    "http://127.0.0.1:49152",
+		},
 	}
 
 	for _, tc := range cases {
@@ -446,7 +488,11 @@ func TestBaseURLEscapesScopedIPv6Zone(t *testing.T) {
 					Port: 7480,
 				},
 			}
-			got := server.baseURL(&net.TCPAddr{IP: net.ParseIP("fe80::1"), Port: 49152, Zone: "zone"})
+			got := server.baseURL(&net.TCPAddr{
+				IP:   net.ParseIP("fe80::1"),
+				Port: 49152,
+				Zone: "zone",
+			})
 			if got != tc.want {
 				t.Fatalf("baseURL() = %q, want %q", got, tc.want)
 			}

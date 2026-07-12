@@ -46,6 +46,20 @@ func additionalPayload(req trackers.UploadRequest, data map[string]string) {
 
 func editionID(edition string) (string, bool) {
 	normalized := strings.ReplaceAll(strings.ToLower(strings.TrimSpace(edition)), "’", "'")
-	value, ok := map[string]string{"collector's edition": "1", "director's cut": "2", "extended cut": "3", "extended uncut": "4", "extended unrated": "5", "limited edition": "6", "special edition": "7", "theatrical cut": "8", "uncut": "9", "unrated": "10", "x cut": "11", "alternative cut": "12", "other": "0"}[normalized]
+	value, ok := map[string]string{
+		"collector's edition": "1",
+		"director's cut":      "2",
+		"extended cut":        "3",
+		"extended uncut":      "4",
+		"extended unrated":    "5",
+		"limited edition":     "6",
+		"special edition":     "7",
+		"theatrical cut":      "8",
+		"uncut":               "9",
+		"unrated":             "10",
+		"x cut":               "11",
+		"alternative cut":     "12",
+		"other":               "0",
+	}[normalized]
 	return value, ok
 }

@@ -19,7 +19,14 @@ import (
 
 var editCLIDescriptionFile = editDescriptionFile
 
-func maybeEditCLIDescriptions(ctx context.Context, coreSvc api.Core, reader *bufio.Reader, req api.Request, review api.UploadReview, opts cliOptions) (api.Request, api.UploadReview, error) {
+func maybeEditCLIDescriptions(
+	ctx context.Context,
+	coreSvc api.Core,
+	reader *bufio.Reader,
+	req api.Request,
+	review api.UploadReview,
+	opts cliOptions,
+) (api.Request, api.UploadReview, error) {
 	if req.Options.OnlyID || opts.OnlyID {
 		return req, review, nil
 	}

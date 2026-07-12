@@ -492,7 +492,14 @@ func prepareCLIImages(ctx context.Context, coreSvc api.Core, req api.Request, lo
 // of the queue still runs, with a summary error returned at the end if any item
 // failed. Outside queue mode the first failure aborts immediately, preserving
 // the original single/multi-path behavior.
-func processCLIPaths(ctx context.Context, paths []string, queueMode bool, itemTimeout time.Duration, logger api.Logger, process func(ctx context.Context, sourcePath string) error) error {
+func processCLIPaths(
+	ctx context.Context,
+	paths []string,
+	queueMode bool,
+	itemTimeout time.Duration,
+	logger api.Logger,
+	process func(ctx context.Context, sourcePath string) error,
+) error {
 	failed := make([]string, 0)
 	var firstErr error
 	// abortOnCancel returns a terminal error when the parent context is done (a
@@ -558,7 +565,12 @@ func processCLIPaths(ctx context.Context, paths []string, queueMode bool, itemTi
 // BuildUploadReview, RunUploadPrepared, etc.) and honored only when those calls
 // check ctx. A core operation that ignores ctx will run past itemTimeout; the
 // timeout cannot forcibly kill in-flight work.
-func runCLIPathWithTimeout(ctx context.Context, itemTimeout time.Duration, sourcePath string, process func(ctx context.Context, sourcePath string) error) error {
+func runCLIPathWithTimeout(
+	ctx context.Context,
+	itemTimeout time.Duration,
+	sourcePath string,
+	process func(ctx context.Context, sourcePath string) error,
+) error {
 	itemCtx, cancel := context.WithTimeout(ctx, itemTimeout)
 	defer cancel()
 	return process(itemCtx, sourcePath)
@@ -1325,7 +1337,11 @@ func buildCLIUploadDebugReviews(ctx context.Context, coreSvc api.Core, sourcePat
 	return reviews, nil
 }
 
-func cloneCLIExternalIDSelectionsForResolvedPath(selections map[string]api.ExternalIDSelection, sourcePath string, resolvedPath string) map[string]api.ExternalIDSelection {
+func cloneCLIExternalIDSelectionsForResolvedPath(
+	selections map[string]api.ExternalIDSelection,
+	sourcePath string,
+	resolvedPath string,
+) map[string]api.ExternalIDSelection {
 	if len(selections) == 0 {
 		return selections
 	}
@@ -1405,7 +1421,15 @@ func handleBDMVPlaylistSelection(ctx context.Context, paths []string, coreSvc ap
 // human wait does not trip the per-disc deadline. A context error from any timed
 // operation aborts (returns) rather than skipping the path, surfacing
 // cancellation instead of swallowing it.
-func handleBDMVDiscSelection(discCtx context.Context, promptCtx context.Context, path string, coreSvc api.Core, cfg config.Config, logger api.Logger, opts cliOptions) error {
+func handleBDMVDiscSelection(
+	discCtx context.Context,
+	promptCtx context.Context,
+	path string,
+	coreSvc api.Core,
+	cfg config.Config,
+	logger api.Logger,
+	opts cliOptions,
+) error {
 	// Check if this path is a BDMV folder
 	discType, err := filesystem.DetectDiscType(discCtx, path)
 	if err != nil {

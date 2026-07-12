@@ -146,7 +146,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         uploadURL,
 		Payload:          payload,
 		Questionnaire:    state.questionnaire,
-		Files:            []api.TrackerDryRunFile{{Field: "file", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "file",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -212,7 +216,12 @@ func resolveChannel(ctx context.Context, req trackers.UploadRequest) (string, st
 	return "", "answer the channel questionnaire with a valid channel id or tag", &api.TrackerQuestionnaire{
 		Tracker: "SPD",
 		Fields: []api.TrackerQuestionnaireField{{
-			Key: "channel", Label: "Channel", Kind: "text", Value: input, Placeholder: "1 or channel tag", Required: true,
+			Key:         "channel",
+			Label:       "Channel",
+			Kind:        "text",
+			Value:       input,
+			Placeholder: "1 or channel tag",
+			Required:    true,
 		}},
 	}
 }
@@ -271,7 +280,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 
@@ -444,7 +456,8 @@ func containsWord(a string, b string) bool {
 }
 
 func isSD(res string) bool {
-	return strings.HasPrefix(strings.TrimSpace(res), "480") || strings.HasPrefix(strings.TrimSpace(res), "576") || strings.HasPrefix(strings.TrimSpace(res), "540")
+	return strings.HasPrefix(strings.TrimSpace(res), "480") || strings.HasPrefix(strings.TrimSpace(res), "576") ||
+		strings.HasPrefix(strings.TrimSpace(res), "540")
 }
 
 func genresText(meta api.PreparedMetadata) string {

@@ -45,7 +45,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	if err != nil {
 		return nil, ptsSkip("PTS search failed"), nil
 	}
-	req.URL.RawQuery = url.Values{"incldead": {"1"}, "search": {fmt.Sprintf("tt%07d", meta.ExternalIDs.IMDBID)}, "search_area": {"4"}}.Encode()
+	req.URL.RawQuery = url.Values{
+		"incldead":    {"1"},
+		"search":      {fmt.Sprintf("tt%07d", meta.ExternalIDs.IMDBID)},
+		"search_area": {"4"},
+	}.Encode()
 	req.Header.Set("User-Agent", "upbrr")
 	commonhttp.ApplyCookies(req, trackerCookies)
 	resp, err := s.http.Do(req)

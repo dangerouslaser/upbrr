@@ -31,11 +31,30 @@ func categoryID(meta api.PreparedMetadata) string {
 }
 
 func typeID(meta api.PreparedMetadata) string {
-	return map[string]string{"DISC": "1", "REMUX": "3", "WEBDL": "4", "WEBRIP": "5", "HDTV": "6", "ENCODE": "12"}[unit3d.InferType(meta)]
+	return map[string]string{
+		"DISC":   "1",
+		"REMUX":  "3",
+		"WEBDL":  "4",
+		"WEBRIP": "5",
+		"HDTV":   "6",
+		"ENCODE": "12",
+	}[unit3d.InferType(meta)]
 }
 
 func resolutionID(meta api.PreparedMetadata) string {
-	if value, ok := map[string]string{"8640p": "10", "4320p": "11", "2160p": "1", "1440p": "2", "1080p": "2", "1080i": "3", "720p": "5", "576p": "6", "576i": "7", "480p": "8", "480i": "9"}[unit3d.Resolution(meta)]; ok {
+	if value, ok := map[string]string{
+		"8640p": "10",
+		"4320p": "11",
+		"2160p": "1",
+		"1440p": "2",
+		"1080p": "2",
+		"1080i": "3",
+		"720p":  "5",
+		"576p":  "6",
+		"576i":  "7",
+		"480p":  "8",
+		"480i":  "9",
+	}[unit3d.Resolution(meta)]; ok {
 		return value
 	}
 	return "10"

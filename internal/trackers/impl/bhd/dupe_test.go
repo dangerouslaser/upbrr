@@ -69,9 +69,13 @@ func TestBHDSearchUsesExternalIDs(t *testing.T) {
 		{
 			name: "tmdb takes precedence over imdb",
 			meta: api.PreparedMetadata{
-				SourcePath:  "source",
-				ExternalIDs: api.ExternalIDs{TMDBID: 123, IMDBID: 7654321, Category: "MOVIE"},
-				Release:     api.ReleaseInfo{Resolution: "2160p"},
+				SourcePath: "source",
+				ExternalIDs: api.ExternalIDs{
+					TMDBID:   123,
+					IMDBID:   7654321,
+					Category: "MOVIE",
+				},
+				Release: api.ReleaseInfo{Resolution: "2160p"},
 			},
 			wantTMDBID:   "movie/123",
 			wantCategory: "Movies",

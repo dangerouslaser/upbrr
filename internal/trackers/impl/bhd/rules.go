@@ -13,7 +13,12 @@ import (
 )
 
 func (d *Definition) Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{RequireValidMISetting: true, BlockAdult: true, AdultMessage: "Porn/xxx is not allowed at BHD.", ExtraCheck: checkRequirements}
+	return &ruletypes.RuleSet{
+		RequireValidMISetting: true,
+		BlockAdult:            true,
+		AdultMessage:          "Porn/xxx is not allowed at BHD.",
+		ExtraCheck:            checkRequirements,
+	}
 }
 
 func checkRequirements(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) ruletypes.Result {
@@ -24,7 +29,13 @@ func checkRequirements(ctx context.Context, meta api.PreparedMetadata, _ api.Log
 	case "REMUX", "ENCODE", "WEBDL", "WEBRIP":
 		container := strings.ToLower(strings.TrimSpace(meta.Container))
 		if container != "" && container != "mkv" && container != "mp4" {
-			return ruletypes.Fail(fmt.Sprintf("Container %q is not allowed for %s. Only MKV and MP4 are permitted.", meta.Container, strings.ToUpper(strings.TrimSpace(meta.Type))))
+			return ruletypes.Fail(
+				fmt.Sprintf(
+					"Container %q is not allowed for %s. Only MKV and MP4 are permitted.",
+					meta.Container,
+					strings.ToUpper(strings.TrimSpace(meta.Type)),
+				),
+			)
 		}
 	}
 	return ruletypes.Pass()

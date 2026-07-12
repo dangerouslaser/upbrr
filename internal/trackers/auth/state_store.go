@@ -155,7 +155,12 @@ func (s *AuthStateStore) Delete(ctx context.Context, trackerID string, stateKey 
 	if err := validateStateInputs("Delete", trackerID, stateKey); err != nil {
 		return err
 	}
-	_, err := s.db.ExecContext(ctx, `DELETE FROM tracker_auth_state WHERE tracker_id = ? AND state_key = ?`, normalizeTrackerID(trackerID), strings.TrimSpace(stateKey))
+	_, err := s.db.ExecContext(
+		ctx,
+		`DELETE FROM tracker_auth_state WHERE tracker_id = ? AND state_key = ?`,
+		normalizeTrackerID(trackerID),
+		strings.TrimSpace(stateKey),
+	)
 	if err != nil {
 		return fmt.Errorf("tracker auth state: delete: %w", err)
 	}

@@ -36,7 +36,11 @@ func TestBuildDescriptionUsesPreparedDiscMenuAssets(t *testing.T) {
 		t.Fatalf("normal screenshot leaked into ANT description: %q", result.Description)
 	}
 
-	final := trackers.DescriptionAssets{Description: " Authoritative final token ", Final: true, MenuImages: assets.MenuImages}
+	final := trackers.DescriptionAssets{
+		Description: " Authoritative final token ",
+		Final:       true,
+		MenuImages:  assets.MenuImages,
+	}
 	result, err = New().BuildDescription(context.Background(), trackers.DescriptionRequest{Tracker: "ANT", Assets: &final})
 	if err != nil {
 		t.Fatalf("build final description: %v", err)

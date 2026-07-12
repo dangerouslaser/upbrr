@@ -222,7 +222,12 @@ func resolveAuthKey(ctx context.Context, baseURL string, cookies map[string]stri
 			continue
 		}
 		// #nosec G124 -- Outbound tracker jar cookie mirrors configured MTV session values.
-		jarCookies = append(jarCookies, &http.Cookie{Name: name, Value: value, Path: "/", Domain: parsedBase.Hostname()})
+		jarCookies = append(jarCookies, &http.Cookie{
+			Name:   name,
+			Value:  value,
+			Path:   "/",
+			Domain: parsedBase.Hostname(),
+		})
 	}
 	jar.SetCookies(parsedBase, jarCookies)
 
@@ -311,7 +316,12 @@ func ResolveSessionForTrackerAuthLogin(ctx context.Context, cfg config.TrackerCo
 // follows a submitted manual code. Authenticated cookies and the effective base
 // URL are returned only after auth-key discovery so upload can reuse any
 // canonical host reached during login redirects.
-func loginAndResolveAuthKey(ctx context.Context, cfg config.TrackerConfig, baseURL string, login api.TrackerAuthLoginRequest) (string, *http.Client, map[string]string, string, error) {
+func loginAndResolveAuthKey(
+	ctx context.Context,
+	cfg config.TrackerConfig,
+	baseURL string,
+	login api.TrackerAuthLoginRequest,
+) (string, *http.Client, map[string]string, string, error) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return "", nil, nil, "", fmt.Errorf("trackers: MTV create login cookie jar: %w", err)
@@ -382,7 +392,12 @@ func loginAndResolveAuthKey(ctx context.Context, cfg config.TrackerConfig, baseU
 		twoFactorForm.Set("token", twoFactorTokenMatch[1])
 		twoFactorForm.Set("code", code)
 		twoFactorForm.Set("submit", "login")
-		twoReq, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(effectiveBaseURL, "/")+"/twofactor/login", strings.NewReader(twoFactorForm.Encode()))
+		twoReq, err := http.NewRequestWithContext(
+			ctx,
+			http.MethodPost,
+			strings.TrimRight(effectiveBaseURL, "/")+"/twofactor/login",
+			strings.NewReader(twoFactorForm.Encode()),
+		)
 		if err != nil {
 			return "", nil, nil, "", fmt.Errorf("trackers: MTV build 2FA login request: %w", err)
 		}
@@ -409,7 +424,12 @@ func loginAndResolveAuthKey(ctx context.Context, cfg config.TrackerConfig, baseU
 	auth, authedClient, err := resolveAuthKeyFromClient(ctx, effectiveBaseURL, client)
 	if err != nil {
 		if submittedManualCode && errors.Is(err, errMTVAuthKeyNotFound) {
-			return "", nil, nil, "", fmt.Errorf("trackers: MTV auth key not found after submitted 2FA final_%s: %w: %w", finalAuthTrace, err, ErrSubmitted2FARejected)
+			return "", nil, nil, "", fmt.Errorf(
+				"trackers: MTV auth key not found after submitted 2FA final_%s: %w: %w",
+				finalAuthTrace,
+				err,
+				ErrSubmitted2FARejected,
+			)
 		}
 		if errors.Is(err, errMTVAuthKeyNotFound) {
 			return "", nil, nil, "", fmt.Errorf("trackers: MTV auth key not found after login final_%s: %w", finalAuthTrace, err)
@@ -675,7 +695,17 @@ func resolveResolution(meta api.PreparedMetadata) string {
 func resolveResolutionID(meta api.PreparedMetadata) string {
 	res := strings.ToLower(strings.TrimSpace(resolveResolution(meta)))
 	values := map[string]string{
-		"8640p": "0", "4320p": "4000", "2160p": "2160", "1440p": "1440", "1080p": "1080", "1080i": "1080", "720p": "720", "576p": "0", "576i": "0", "480p": "480", "480i": "480",
+		"8640p": "0",
+		"4320p": "4000",
+		"2160p": "2160",
+		"1440p": "1440",
+		"1080p": "1080",
+		"1080i": "1080",
+		"720p":  "720",
+		"576p":  "0",
+		"576i":  "0",
+		"480p":  "480",
+		"480i":  "480",
 	}
 	if value, ok := values[res]; ok {
 		return value
@@ -735,7 +765,18 @@ func resolveSourceID(meta api.PreparedMetadata) string {
 		return "7"
 	}
 	mapping := map[string]string{
-		"DISC": "1", "WEBDL": "9", "WEBRIP": "10", "HDTV": "1", "SDTV": "2", "TVRIP": "3", "DVD": "4", "DVDRIP": "5", "BDRIP": "8", "VHS": "6", "MIXED": "11", "ENCODE": "7",
+		"DISC":   "1",
+		"WEBDL":  "9",
+		"WEBRIP": "10",
+		"HDTV":   "1",
+		"SDTV":   "2",
+		"TVRIP":  "3",
+		"DVD":    "4",
+		"DVDRIP": "5",
+		"BDRIP":  "8",
+		"VHS":    "6",
+		"MIXED":  "11",
+		"ENCODE": "7",
 	}
 	if value, ok := mapping[resolveType(meta)]; ok {
 		return value

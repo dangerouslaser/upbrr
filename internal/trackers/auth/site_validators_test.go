@@ -123,7 +123,11 @@ func TestValidateARStoredCookiesBoundsSuccessfulResponseBody(t *testing.T) {
 		wantTransient bool
 	}{
 		{name: "at limit", bodySize: authResponseBytes},
-		{name: "over limit", bodySize: authResponseBytes + 1, wantTransient: true},
+		{
+			name:          "over limit",
+			bodySize:      authResponseBytes + 1,
+			wantTransient: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

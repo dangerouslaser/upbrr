@@ -26,7 +26,11 @@ type dataLookup struct {
 }
 
 func (d *Definition) NewDataLookup(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DataLookup {
-	return &dataLookup{cfg: cfg, http: httpClient, endpoint: "https://anthelion.me/api.php"}
+	return &dataLookup{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: "https://anthelion.me/api.php",
+	}
 }
 
 func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest) (datatypes.Result, error) {
@@ -38,7 +42,11 @@ func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest)
 	if apiKey == "" || fileName == "" {
 		return datatypes.Result{}, nil
 	}
-	params := url.Values{"t": {"search"}, "filename": {fileName}, "o": {"json"}}
+	params := url.Values{
+		"t":        {"search"},
+		"filename": {fileName},
+		"o":        {"json"},
+	}
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, l.endpoint, nil)
 	if err != nil {
 		return datatypes.Result{}, fmt.Errorf("trackerdata: ant request: %w", err)
@@ -64,7 +72,11 @@ func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest)
 	if len(item) == 0 {
 		return datatypes.Result{}, nil
 	}
-	return datatypes.Result{TrackerID: "1", IMDBID: antIMDB(item["imdb"]), TMDBID: int(antInt(item["tmdb"]))}, nil
+	return datatypes.Result{
+		TrackerID: "1",
+		IMDBID:    antIMDB(item["imdb"]),
+		TMDBID:    int(antInt(item["tmdb"])),
+	}, nil
 }
 
 func matchDataItem(items []map[string]any, fileName string) map[string]any {

@@ -6,5 +6,10 @@ package is
 import "github.com/autobrr/upbrr/pkg/api"
 
 func (Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "IS", DisplayName: "IS", AuthKind: "cookies", SupportsCookieFile: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          "IS",
+		DisplayName:        "IS",
+		AuthKind:           "cookies",
+		SupportsCookieFile: true,
+	}
 }

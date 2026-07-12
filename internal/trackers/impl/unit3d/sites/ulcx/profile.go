@@ -30,7 +30,8 @@ func buildName(meta api.PreparedMetadata, _ config.TrackerConfig) string {
 	if name == "" {
 		name = strings.TrimSpace(meta.ReleaseNameNoTag)
 	}
-	if strings.EqualFold(strings.TrimSpace(meta.Type), "WEBDL") && (strings.Contains(strings.ToLower(strings.TrimSpace(meta.Edition)), "hybrid") || meta.WebDV) {
+	if strings.EqualFold(strings.TrimSpace(meta.Type), "WEBDL") &&
+		(strings.Contains(strings.ToLower(strings.TrimSpace(meta.Edition)), "hybrid") || meta.WebDV) {
 		name = strings.Replace(name, "Hybrid ", "", 1)
 	}
 	return strings.TrimSpace(strings.Join(strings.Fields(name), " "))

@@ -95,7 +95,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		}
 	}
 	return api.UploadSummary{Uploaded: 1, UploadedTorrents: []api.UploadedTorrent{{
-		Tracker: "TL", TorrentID: torrentID, TorrentURL: urlValue, DownloadURL: urlValue, TorrentPath: artifactPath,
+		Tracker:     "TL",
+		TorrentID:   torrentID,
+		TorrentURL:  urlValue,
+		DownloadURL: urlValue,
+		TorrentPath: artifactPath,
 	}}}, nil
 }
 
@@ -113,7 +117,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Description:      state.description,
 		Endpoint:         state.endpoint,
 		Payload:          cloneFields(state.fields),
-		Files:            []api.TrackerDryRunFile{{Field: "torrent", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "torrent",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -188,8 +196,16 @@ func prepareUploadState(ctx context.Context, req trackers.UploadRequest) (upload
 		}
 	}
 	state.files = []commonhttp.FileField{
-		{FieldName: "torrent", FileName: "torrent.torrent", Path: torrentPath},
-		{FieldName: "nfo", FileName: "description.txt", Content: []byte(description)},
+		{
+			FieldName: "torrent",
+			FileName:  "torrent.torrent",
+			Path:      torrentPath,
+		},
+		{
+			FieldName: "nfo",
+			FileName:  "description.txt",
+			Content:   []byte(description),
+		},
 	}
 	client, err := cookieClient(ctx, req.AppConfig.MainSettings.DBPath)
 	if err != nil {
@@ -278,7 +294,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 

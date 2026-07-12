@@ -34,7 +34,11 @@ type dupeSearcher struct {
 }
 
 func (Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, logger api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, logger: logger}
+	return &dupeSearcher{
+		cfg:    cfg,
+		http:   httpClient,
+		logger: logger,
+	}
 }
 
 func (h dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -389,7 +393,14 @@ func rtfCategory(meta api.PreparedMetadata) string {
 	return ""
 }
 
-func rtfJSONRequest(ctx context.Context, client *http.Client, method, endpoint string, params url.Values, body map[string]any, headers map[string]string) (int, any, error) {
+func rtfJSONRequest(
+	ctx context.Context,
+	client *http.Client,
+	method, endpoint string,
+	params url.Values,
+	body map[string]any,
+	headers map[string]string,
+) (int, any, error) {
 	var payload []byte
 	var err error
 	if body != nil {

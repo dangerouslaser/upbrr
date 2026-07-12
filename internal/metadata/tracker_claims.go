@@ -488,7 +488,11 @@ func uniqueUpperTrackers(values []string) []string {
 	return out
 }
 
-func addMetadataTrackerBlockReason(blocked map[string][]api.TrackerBlockReason, tracker string, reason api.TrackerBlockReason) map[string][]api.TrackerBlockReason {
+func addMetadataTrackerBlockReason(
+	blocked map[string][]api.TrackerBlockReason,
+	tracker string,
+	reason api.TrackerBlockReason,
+) map[string][]api.TrackerBlockReason {
 	name := strings.ToUpper(strings.TrimSpace(tracker))
 	if name == "" || strings.TrimSpace(string(reason)) == "" {
 		return blocked

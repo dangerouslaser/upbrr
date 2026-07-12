@@ -18,10 +18,72 @@ func TestProfileNameParity(t *testing.T) {
 		meta api.PreparedMetadata
 		want string
 	}{
-		{name: "localized web", meta: api.PreparedMetadata{Type: "WEBDL", Tag: "-GRP", Audio: "DD+ 5.1", VideoEncode: "H.264", AudioLanguages: []string{"German"}, Release: api.ReleaseInfo{Resolution: "1080p"}, ExternalMetadata: api.ExternalMetadata{TMDB: &api.TMDBMetadata{Year: 2025, LocalizedTitles: map[string]string{"de": "Beispiel Film"}}}}, want: "Beispiel Film 2025 GERMAN 1080p WEB-DL DD+ 5.1 H.264-GRP"},
-		{name: "full disc", meta: api.PreparedMetadata{Type: "DISC", Region: "GER", Tag: "-GRP", Audio: "DTS-HD MA 5.1", VideoCodec: "AVC", AudioLanguages: []string{"German", "English"}, Release: api.ReleaseInfo{Title: "Example Movie", Year: 2024, Resolution: "1080p", Source: "Blu-ray", Size: "BD50"}}, want: "Example Movie 2024 1080p COMPLETE GER Blu-ray BD50 DTS-HD MA 5.1 AVC-GRP"},
-		{name: "markers", meta: api.PreparedMetadata{ReleaseName: "Example.Movie.2024.[INTERNAL].(UPSCALED).1080p.WEB-DL.DDP5.1.H.264-GRP", Type: "WEBDL", Tag: "-GRP", Audio: "DDP5.1", VideoEncode: "H.264", AudioLanguages: []string{"German"}, Release: api.ReleaseInfo{Title: "Example Movie", Year: 2024, Resolution: "1080p"}}, want: "Example Movie 2024 GERMAN 1080p UPSCALE WEB-DL DDP5.1 H.264 iNTERNAL-GRP"},
-		{name: "hdr", meta: api.PreparedMetadata{Type: "WEBDL", Tag: "-GRP", Audio: "DDP5.1", HDR: "DV HDR", VideoEncode: "H.265", AudioLanguages: []string{"German"}, Release: api.ReleaseInfo{Title: "Example Movie", Year: 2026, Resolution: "2160p"}}, want: "Example Movie 2026 GERMAN 2160p WEB-DL DDP5.1 DV HDR H.265-GRP"},
+		{
+			name: "localized web",
+			meta: api.PreparedMetadata{
+				Type:             "WEBDL",
+				Tag:              "-GRP",
+				Audio:            "DD+ 5.1",
+				VideoEncode:      "H.264",
+				AudioLanguages:   []string{"German"},
+				Release:          api.ReleaseInfo{Resolution: "1080p"},
+				ExternalMetadata: api.ExternalMetadata{TMDB: &api.TMDBMetadata{Year: 2025, LocalizedTitles: map[string]string{"de": "Beispiel Film"}}},
+			},
+			want: "Beispiel Film 2025 GERMAN 1080p WEB-DL DD+ 5.1 H.264-GRP",
+		},
+		{
+			name: "full disc",
+			meta: api.PreparedMetadata{
+				Type:           "DISC",
+				Region:         "GER",
+				Tag:            "-GRP",
+				Audio:          "DTS-HD MA 5.1",
+				VideoCodec:     "AVC",
+				AudioLanguages: []string{"German", "English"},
+				Release: api.ReleaseInfo{
+					Title:      "Example Movie",
+					Year:       2024,
+					Resolution: "1080p",
+					Source:     "Blu-ray",
+					Size:       "BD50",
+				},
+			},
+			want: "Example Movie 2024 1080p COMPLETE GER Blu-ray BD50 DTS-HD MA 5.1 AVC-GRP",
+		},
+		{
+			name: "markers",
+			meta: api.PreparedMetadata{
+				ReleaseName:    "Example.Movie.2024.[INTERNAL].(UPSCALED).1080p.WEB-DL.DDP5.1.H.264-GRP",
+				Type:           "WEBDL",
+				Tag:            "-GRP",
+				Audio:          "DDP5.1",
+				VideoEncode:    "H.264",
+				AudioLanguages: []string{"German"},
+				Release: api.ReleaseInfo{
+					Title:      "Example Movie",
+					Year:       2024,
+					Resolution: "1080p",
+				},
+			},
+			want: "Example Movie 2024 GERMAN 1080p UPSCALE WEB-DL DDP5.1 H.264 iNTERNAL-GRP",
+		},
+		{
+			name: "hdr",
+			meta: api.PreparedMetadata{
+				Type:           "WEBDL",
+				Tag:            "-GRP",
+				Audio:          "DDP5.1",
+				HDR:            "DV HDR",
+				VideoEncode:    "H.265",
+				AudioLanguages: []string{"German"},
+				Release: api.ReleaseInfo{
+					Title:      "Example Movie",
+					Year:       2026,
+					Resolution: "2160p",
+				},
+			},
+			want: "Example Movie 2026 GERMAN 2160p WEB-DL DDP5.1 DV HDR H.265-GRP",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -30,7 +92,19 @@ func TestProfileNameParity(t *testing.T) {
 			}
 		})
 	}
-	ignored := build(api.PreparedMetadata{ReleaseName: "Example.Movie.2024.Regradedness.Internalized.Lineage.1080p.WEB-DL.DDP5.1.H.264-LD", Type: "WEBDL", Tag: "-LD", Audio: "DDP5.1", VideoEncode: "H.264", AudioLanguages: []string{"English"}, Release: api.ReleaseInfo{Title: "Example Movie", Year: 2024, Resolution: "1080p"}}, config.TrackerConfig{})
+	ignored := build(api.PreparedMetadata{
+		ReleaseName:    "Example.Movie.2024.Regradedness.Internalized.Lineage.1080p.WEB-DL.DDP5.1.H.264-LD",
+		Type:           "WEBDL",
+		Tag:            "-LD",
+		Audio:          "DDP5.1",
+		VideoEncode:    "H.264",
+		AudioLanguages: []string{"English"},
+		Release: api.ReleaseInfo{
+			Title:      "Example Movie",
+			Year:       2024,
+			Resolution: "1080p",
+		},
+	}, config.TrackerConfig{})
 	for _, marker := range []string{"REGRADED", "UPSCALE", "iNTERNAL", "DUBBED"} {
 		if strings.Contains(ignored, marker) {
 			t.Fatalf("unexpected marker %s in %q", marker, ignored)

@@ -35,8 +35,12 @@ func TestPrepareUploadStateSkipsTVDBForMovie(t *testing.T) {
 			ExternalMetadata: api.ExternalMetadata{
 				TMDB: &api.TMDBMetadata{Title: "Movie", Year: 2025},
 			},
-			Release: api.ReleaseInfo{Title: "Movie", Year: 2025, Resolution: "1080p"},
-			Type:    "WEBDL",
+			Release: api.ReleaseInfo{
+				Title:      "Movie",
+				Year:       2025,
+				Resolution: "1080p",
+			},
+			Type: "WEBDL",
 		},
 		TrackerConfig: config.TrackerConfig{APIKey: "token"},
 	})
@@ -68,7 +72,11 @@ func TestPrepareUploadStateIncludesTVDBForTV(t *testing.T) {
 			ExternalMetadata: api.ExternalMetadata{
 				TMDB: &api.TMDBMetadata{Title: "Show", Year: 2025},
 			},
-			Release:    api.ReleaseInfo{Title: "Show", Year: 2025, Resolution: "1080p"},
+			Release: api.ReleaseInfo{
+				Title:      "Show",
+				Year:       2025,
+				Resolution: "1080p",
+			},
 			Type:       "WEBDL",
 			SeasonInt:  2,
 			EpisodeInt: 3,
@@ -100,8 +108,12 @@ func TestPrepareUploadStateIncludesTVDBForMediaInfoTV(t *testing.T) {
 			ExternalMetadata: api.ExternalMetadata{
 				TMDB: &api.TMDBMetadata{Title: "Show", Year: 2025},
 			},
-			Release: api.ReleaseInfo{Title: "Show", Year: 2025, Resolution: "1080p"},
-			Type:    "WEBDL",
+			Release: api.ReleaseInfo{
+				Title:      "Show",
+				Year:       2025,
+				Resolution: "1080p",
+			},
+			Type: "WEBDL",
 		},
 		TrackerConfig: config.TrackerConfig{APIKey: "token"},
 	})
@@ -132,7 +144,11 @@ func TestPrepareUploadStateIncludesTVDBForSeasonPackWithoutCategory(t *testing.T
 			ExternalMetadata: api.ExternalMetadata{
 				TMDB: &api.TMDBMetadata{Title: "Show", Year: 2025},
 			},
-			Release:   api.ReleaseInfo{Title: "Show", Year: 2025, Resolution: "1080p"},
+			Release: api.ReleaseInfo{
+				Title:      "Show",
+				Year:       2025,
+				Resolution: "1080p",
+			},
 			Type:      "WEBDL",
 			TVPack:    true,
 			SeasonInt: 2,

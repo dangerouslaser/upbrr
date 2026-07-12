@@ -133,8 +133,18 @@ func arrRenameToken(name string) string {
 // so the extension must only be removed for actual media files — otherwise
 // filepath.Ext would strip that trailing token and hide the "-GROUP" tag.
 var mediaFileExtensions = map[string]struct{}{
-	".mkv": {}, ".mp4": {}, ".avi": {}, ".ts": {}, ".m2ts": {}, ".m4v": {},
-	".mov": {}, ".wmv": {}, ".mpg": {}, ".mpeg": {}, ".vob": {}, ".iso": {},
+	".mkv":  {},
+	".mp4":  {},
+	".avi":  {},
+	".ts":   {},
+	".m2ts": {},
+	".m4v":  {},
+	".mov":  {},
+	".wmv":  {},
+	".mpg":  {},
+	".mpeg": {},
+	".vob":  {},
+	".iso":  {},
 }
 
 // candidateReleaseNames returns the on-disk base names that should carry the

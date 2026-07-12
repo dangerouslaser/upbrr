@@ -18,13 +18,25 @@ import (
 
 var mtvQuoteTagPattern = regexp.MustCompile(`(?i)\[/?quote\]`)
 var mtvCollapseLinesPattern = regexp.MustCompile(`\n{3,}`)
-var mtvNFOBlockPattern = regexp.MustCompile(`(?is)(?:\[(?:center|align=center)\]\s*)?\[(?:spoiler|hide)=(?:Scene|FraMeSToR) NFO:\](?:\[(?:code|pre)\])?.*?(?:\[/(?:code|pre)\])?\[/(?:spoiler|hide)\](?:\s*\[/(?:center|align)\])?`)
+
+var mtvNFOBlockPattern = regexp.MustCompile(
+	`(?is)(?:\[(?:center|align=center)\]\s*)?\[(?:spoiler|hide)=(?:Scene|FraMeSToR) NFO:\](?:\[(?:code|pre)\])?.*?(?:\[/(?:code|pre)\])?\[/(?:spoiler|hide)\](?:\s*\[/(?:center|align)\])?`,
+)
 var mtvURLImagePattern = regexp.MustCompile(`(?is)\[url=[^\]]+\]\s*\[img(?:[^\]]*)?\][^\[]+\[/img\]\s*\[/url\]`)
 var mtvImagePattern = regexp.MustCompile(`(?is)\[img(?:[^\]]*)?\][^\[]+\[/img\]`)
-var mtvSignaturePattern = regexp.MustCompile(`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`)
+
+var mtvSignaturePattern = regexp.MustCompile(
+	`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`,
+)
 var mtvEmptyAlignPattern = regexp.MustCompile(`(?is)\[(?:center|right|left|align=(?:center|right|left))\]\s*\[/(?:center|right|left|align)\]`)
 
-func BuildDescription(ctx context.Context, meta api.PreparedMetadata, appConfig config.Config, keptDescription string, screenshots []api.ScreenshotImage) (string, error) {
+func BuildDescription(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	appConfig config.Config,
+	keptDescription string,
+	screenshots []api.ScreenshotImage,
+) (string, error) {
 	select {
 	case <-ctx.Done():
 		return "", fmt.Errorf("context canceled: %w", ctx.Err())

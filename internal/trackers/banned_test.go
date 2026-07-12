@@ -38,25 +38,50 @@ func newTestBannedPolicyRegistry(t *testing.T) *Registry {
 		"AITHER": {baseURL: "https://aither.cc", policy: BannedGroupPolicy{EndpointPath: "/api/blacklists/releasegroups", RequireAPIKey: true}},
 		"LST":    {baseURL: "https://lst.gg", policy: BannedGroupPolicy{EndpointPath: "/api/bannedReleaseGroups", RequireAPIKey: true}},
 		"LUME":   {baseURL: "https://luminarr.me", policy: BannedGroupPolicy{TRaSHGuideURL: trashGuideBannedGroupsURL}},
-		"SPD":    {policy: BannedGroupPolicy{DefaultEndpoint: "https://speedapp.io/api/torrent/release-group/blacklist", EndpointPath: "/api/torrent/release-group/blacklist", RequireAPIKey: true}},
+		"SPD": {policy: BannedGroupPolicy{
+			DefaultEndpoint: "https://speedapp.io/api/torrent/release-group/blacklist",
+			EndpointPath:    "/api/torrent/release-group/blacklist",
+			RequireAPIKey:   true,
+		}},
 	}
 	for name, item := range policies {
 		policy := item.policy
-		if err := registry.RegisterDescriptor(Descriptor{Name: name, BaseURL: item.baseURL, Definition: stubDefinition{name: name}, BannedPolicy: &policy}); err != nil {
+		if err := registry.RegisterDescriptor(Descriptor{
+			Name:         name,
+			BaseURL:      item.baseURL,
+			Definition:   stubDefinition{name: name},
+			BannedPolicy: &policy,
+		}); err != nil {
 			t.Fatalf("register %s banned policy: %v", name, err)
 		}
 	}
 	static := map[string][]string{
-		"A4K": {"TEKNO3D"}, "BLU": {"TheFarm"}, "CBR": {"YTS.MX"},
-		"DP":  {"FGT", "PSA", "HorribleSubs", "Subsplease", "SyncUp", "Trix"},
-		"GPW": {"MOMOWEB"}, "HHD": {"EVO"}, "LT": {"EVO"}, "MTV": {"PandaRG"},
-		"NBL": {"YakuboEncodes"}, "OE": {"VipapkSudios"}, "OTW": {"Sync0rdi"},
-		"PHD": {"VisionXpert"}, "PTP": {"WORLD"}, "PTT": {"M@RTiNU$"},
-		"RAS": {"INFINITY"}, "RHD": {"MagicX"}, "TOS": {"FL3ER"},
-		"ULCX": {"EDGE2020", "NuBz", "Ralphy"}, "YUS": {"YOLAND"},
+		"A4K":  {"TEKNO3D"},
+		"BLU":  {"TheFarm"},
+		"CBR":  {"YTS.MX"},
+		"DP":   {"FGT", "PSA", "HorribleSubs", "Subsplease", "SyncUp", "Trix"},
+		"GPW":  {"MOMOWEB"},
+		"HHD":  {"EVO"},
+		"LT":   {"EVO"},
+		"MTV":  {"PandaRG"},
+		"NBL":  {"YakuboEncodes"},
+		"OE":   {"VipapkSudios"},
+		"OTW":  {"Sync0rdi"},
+		"PHD":  {"VisionXpert"},
+		"PTP":  {"WORLD"},
+		"PTT":  {"M@RTiNU$"},
+		"RAS":  {"INFINITY"},
+		"RHD":  {"MagicX"},
+		"TOS":  {"FL3ER"},
+		"ULCX": {"EDGE2020", "NuBz", "Ralphy"},
+		"YUS":  {"YOLAND"},
 	}
 	for name, groups := range static {
-		if err := registry.RegisterDescriptor(Descriptor{Name: name, Definition: stubDefinition{name: name}, BannedGroups: groups}); err != nil {
+		if err := registry.RegisterDescriptor(Descriptor{
+			Name:         name,
+			Definition:   stubDefinition{name: name},
+			BannedGroups: groups,
+		}); err != nil {
 			t.Fatalf("register %s static banned groups: %v", name, err)
 		}
 	}

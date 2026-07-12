@@ -79,7 +79,12 @@ func applyImageHostOverrides(tracker string, policy imageHostPolicy, overrides a
 		return newPreferredImageHostPolicy(host), nil
 	}
 	if !hostAllowed(host, policy.allowed) {
-		return imageHostPolicy{}, fmt.Errorf("trackers: %s image host override %q is not allowed (allowed: %s)", strings.TrimSpace(tracker), host, strings.Join(policy.allowed, ", "))
+		return imageHostPolicy{}, fmt.Errorf(
+			"trackers: %s image host override %q is not allowed (allowed: %s)",
+			strings.TrimSpace(tracker),
+			host,
+			strings.Join(policy.allowed, ", "),
+		)
 	}
 	policy.preferred = prependHost(host, policy.preferred)
 	policy.fallbackOK = true
@@ -90,7 +95,12 @@ func resolveImageHostPolicy(tracker string, trackerCfg config.TrackerConfig, ove
 	return resolveImageHostPolicyWithRegistry(nil, tracker, trackerCfg, overrides)
 }
 
-func resolveImageHostPolicyWithRegistry(registry *Registry, tracker string, trackerCfg config.TrackerConfig, overrides api.ImageHostOverrides) (imageHostPolicy, error) {
+func resolveImageHostPolicyWithRegistry(
+	registry *Registry,
+	tracker string,
+	trackerCfg config.TrackerConfig,
+	overrides api.ImageHostOverrides,
+) (imageHostPolicy, error) {
 	policy := policyForTrackerWithRegistry(registry, tracker, trackerCfg)
 	host := strings.ToLower(strings.TrimSpace(trackerCfg.ImageHost))
 	if host == "" {
@@ -113,7 +123,13 @@ func resolveImageHostPolicyWithRegistry(registry *Registry, tracker string, trac
 	return policy, nil
 }
 
-func resolveImageHostPolicyForMetadataWithRegistry(registry *Registry, tracker string, appCfg config.Config, trackerCfg config.TrackerConfig, overrides api.ImageHostOverrides) (imageHostPolicy, error) {
+func resolveImageHostPolicyForMetadataWithRegistry(
+	registry *Registry,
+	tracker string,
+	appCfg config.Config,
+	trackerCfg config.TrackerConfig,
+	overrides api.ImageHostOverrides,
+) (imageHostPolicy, error) {
 	host := strings.ToLower(strings.TrimSpace(trackerCfg.ImageHost))
 	if conditionalHost, enabled := conditionalImageHost(registry, appCfg, tracker, trackerCfg); host == conditionalHost && !enabled {
 		trackerCfg.ImageHost = ""
@@ -139,7 +155,12 @@ func PreferredImageUploadHost(tracker string, trackerCfg config.TrackerConfig, o
 }
 
 // PreferredImageUploadHostWithRegistry resolves a preferred host from the tracker's registered policy.
-func PreferredImageUploadHostWithRegistry(registry *Registry, tracker string, trackerCfg config.TrackerConfig, overrides api.ImageHostOverrides) (string, error) {
+func PreferredImageUploadHostWithRegistry(
+	registry *Registry,
+	tracker string,
+	trackerCfg config.TrackerConfig,
+	overrides api.ImageHostOverrides,
+) (string, error) {
 	policy, err := resolveImageHostPolicyWithRegistry(registry, tracker, trackerCfg, overrides)
 	if err != nil {
 		return "", err
@@ -228,12 +249,23 @@ func NeededImageUploadTargets(appCfg config.Config, trackerNames []string, selec
 }
 
 // NeededImageUploadTargetsForMetadata returns unsatisfied targets after considering metadata images.
-func NeededImageUploadTargetsForMetadata(appCfg config.Config, trackerNames []string, selectedHost string, meta api.PreparedMetadata) ([]ImageUploadTarget, error) {
+func NeededImageUploadTargetsForMetadata(
+	appCfg config.Config,
+	trackerNames []string,
+	selectedHost string,
+	meta api.PreparedMetadata,
+) ([]ImageUploadTarget, error) {
 	return NeededImageUploadTargetsForMetadataWithRegistry(nil, appCfg, trackerNames, selectedHost, meta)
 }
 
 // NeededImageUploadTargetsForMetadataWithRegistry resolves image upload targets from tracker-owned policies.
-func NeededImageUploadTargetsForMetadataWithRegistry(registry *Registry, appCfg config.Config, trackerNames []string, selectedHost string, meta api.PreparedMetadata) ([]ImageUploadTarget, error) {
+func NeededImageUploadTargetsForMetadataWithRegistry(
+	registry *Registry,
+	appCfg config.Config,
+	trackerNames []string,
+	selectedHost string,
+	meta api.PreparedMetadata,
+) ([]ImageUploadTarget, error) {
 	return neededImageUploadTargets(registry, appCfg, trackerNames, selectedHost, nil, &meta)
 }
 
@@ -250,12 +282,25 @@ func NeededImageUploadTargetsExcluding(appCfg config.Config, trackerNames []stri
 }
 
 // NeededImageUploadTargetsForMetadataExcluding combines metadata satisfaction with host exclusions.
-func NeededImageUploadTargetsForMetadataExcluding(appCfg config.Config, trackerNames []string, selectedHost string, excludedHosts []string, meta api.PreparedMetadata) ([]ImageUploadTarget, error) {
+func NeededImageUploadTargetsForMetadataExcluding(
+	appCfg config.Config,
+	trackerNames []string,
+	selectedHost string,
+	excludedHosts []string,
+	meta api.PreparedMetadata,
+) ([]ImageUploadTarget, error) {
 	return NeededImageUploadTargetsForMetadataExcludingWithRegistry(nil, appCfg, trackerNames, selectedHost, excludedHosts, meta)
 }
 
 // NeededImageUploadTargetsForMetadataExcludingWithRegistry resolves fallback targets from tracker-owned policies.
-func NeededImageUploadTargetsForMetadataExcludingWithRegistry(registry *Registry, appCfg config.Config, trackerNames []string, selectedHost string, excludedHosts []string, meta api.PreparedMetadata) ([]ImageUploadTarget, error) {
+func NeededImageUploadTargetsForMetadataExcludingWithRegistry(
+	registry *Registry,
+	appCfg config.Config,
+	trackerNames []string,
+	selectedHost string,
+	excludedHosts []string,
+	meta api.PreparedMetadata,
+) ([]ImageUploadTarget, error) {
 	excluded := make(map[string]struct{}, len(excludedHosts))
 	for _, host := range excludedHosts {
 		normalized := strings.ToLower(strings.TrimSpace(host))
@@ -266,7 +311,14 @@ func NeededImageUploadTargetsForMetadataExcludingWithRegistry(registry *Registry
 	return neededImageUploadTargets(registry, appCfg, trackerNames, selectedHost, excluded, &meta)
 }
 
-func neededImageUploadTargets(registry *Registry, appCfg config.Config, trackerNames []string, selectedHost string, excludedHosts map[string]struct{}, meta *api.PreparedMetadata) ([]ImageUploadTarget, error) {
+func neededImageUploadTargets(
+	registry *Registry,
+	appCfg config.Config,
+	trackerNames []string,
+	selectedHost string,
+	excludedHosts map[string]struct{},
+	meta *api.PreparedMetadata,
+) ([]ImageUploadTarget, error) {
 	selectedHost = strings.ToLower(strings.TrimSpace(selectedHost))
 	userHosts := configuredImageUploadHosts(appCfg)
 	targets := make([]ImageUploadTarget, 0, len(trackerNames)+1)
@@ -313,14 +365,22 @@ func neededImageUploadTargets(registry *Registry, appCfg config.Config, trackerN
 					continue
 				}
 			}
-			flexibleTargets = append(flexibleTargets, imageUploadPolicyTarget{tracker: name, policy: policy, candidates: userHosts})
+			flexibleTargets = append(flexibleTargets, imageUploadPolicyTarget{
+				tracker:    name,
+				policy:     policy,
+				candidates: userHosts,
+			})
 			continue
 		}
 
 		policy := policyForTrackerForTarget(registry, name, appCfg, trackerCfg)
 		candidates := imageUploadCandidatesForTracker(registry, appCfg, name, userHosts)
 		candidates = appendOwnedPolicyUploadHosts(candidates, name, policy)
-		flexibleTargets = append(flexibleTargets, imageUploadPolicyTarget{tracker: name, policy: policy, candidates: candidates})
+		flexibleTargets = append(flexibleTargets, imageUploadPolicyTarget{
+			tracker:    name,
+			policy:     policy,
+			candidates: candidates,
+		})
 	}
 
 	if selectedHost != "" && trackerForOwnedHost(selectedHost) == "" && hostInList(selectedHost, userHosts) {
@@ -353,7 +413,12 @@ func neededImageUploadTargets(registry *Registry, appCfg config.Config, trackerN
 	return targets, nil
 }
 
-func assignFlexibleImageUploadTargets(flexibleTargets []imageUploadPolicyTarget, excludedHosts map[string]struct{}, targets []ImageUploadTarget, addTarget func(string, string)) {
+func assignFlexibleImageUploadTargets(
+	flexibleTargets []imageUploadPolicyTarget,
+	excludedHosts map[string]struct{},
+	targets []ImageUploadTarget,
+	addTarget func(string, string),
+) {
 	unassigned := make([]imageUploadPolicyTarget, 0, len(flexibleTargets))
 	for _, target := range flexibleTargets {
 		if host, ok := existingImageUploadTargetHost(target.tracker, target.policy, target.candidates, targets); ok {
@@ -466,7 +531,13 @@ func candidateImageUploadTargetHosts(tracker string, policy imageHostPolicy, can
 	return hosts
 }
 
-func resolveImageHostPolicyForTarget(registry *Registry, tracker string, appCfg config.Config, trackerCfg config.TrackerConfig, meta *api.PreparedMetadata) (imageHostPolicy, error) {
+func resolveImageHostPolicyForTarget(
+	registry *Registry,
+	tracker string,
+	appCfg config.Config,
+	trackerCfg config.TrackerConfig,
+	meta *api.PreparedMetadata,
+) (imageHostPolicy, error) {
 	if meta == nil {
 		policy, err := resolveImageHostPolicyWithRegistry(registry, tracker, trackerCfg, api.ImageHostOverrides{})
 		if err != nil {

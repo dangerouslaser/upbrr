@@ -551,7 +551,25 @@ func (s *Service) Prepare(ctx context.Context, req api.Request) (meta api.Prepar
 	// resolved IMDb id and the rebuilt release name (both produced after
 	// ResolveExternalIDs), so running it here — before tracker/external-ID
 	// resolution — missed renamed releases entirely.
-	if release.Title != "" || release.Alt != "" || release.Subtitle != "" || release.Artist != "" || release.Year != 0 || release.Month != 0 || release.Day != 0 || release.Source != "" || release.Resolution != "" || release.Ext != "" || release.Site != "" || release.Genre != "" || release.Channels != "" || release.Collection != "" || release.Region != "" || release.Size != "" || release.Group != "" || release.Disc != "" || release.Type != "" || release.Category != "" || len(release.Codec) > 0 || len(release.Audio) > 0 || len(release.HDR) > 0 || len(release.Language) > 0 {
+	if release.Title != "" || release.Alt != "" || release.Subtitle != "" || release.Artist != "" || release.Year != 0 || release.Month != 0 ||
+		release.Day != 0 ||
+		release.Source != "" ||
+		release.Resolution != "" ||
+		release.Ext != "" ||
+		release.Site != "" ||
+		release.Genre != "" ||
+		release.Channels != "" ||
+		release.Collection != "" ||
+		release.Region != "" ||
+		release.Size != "" ||
+		release.Group != "" ||
+		release.Disc != "" ||
+		release.Type != "" ||
+		release.Category != "" ||
+		len(release.Codec) > 0 ||
+		len(release.Audio) > 0 ||
+		len(release.HDR) > 0 ||
+		len(release.Language) > 0 {
 		s.logger.Debugf(
 			"metadata: release parsed category=%q type=%q artist=%q title=%q subtitle=%q alt=%q year=%d month=%d day=%d source=%q resolution=%q codec=%v audio=%v hdr=%v ext=%q language=%v site=%q genre=%q channels=%q collection=%q region=%q size=%q group=%q disc=%q",
 			release.Category,
@@ -936,7 +954,8 @@ func discoverBDMVSummaryCache(tmpDir string) (bdmvSummaryCache, error) {
 			continue
 		}
 		name := entry.Name()
-		if !strings.HasPrefix(name, "BD_SUMMARY_") || strings.HasPrefix(name, "BD_SUMMARY_EXT_") || strings.HasPrefix(name, "BD_SUMMARY_FULL_") || !strings.HasSuffix(name, ".txt") {
+		if !strings.HasPrefix(name, "BD_SUMMARY_") || strings.HasPrefix(name, "BD_SUMMARY_EXT_") || strings.HasPrefix(name, "BD_SUMMARY_FULL_") ||
+			!strings.HasSuffix(name, ".txt") {
 			continue
 		}
 		playlistFromName := paths.BDMVPlaylistKey(strings.TrimSuffix(strings.TrimPrefix(name, "BD_SUMMARY_"), ".txt"))
@@ -963,7 +982,11 @@ func discoverBDMVSummaryCache(tmpDir string) (bdmvSummaryCache, error) {
 		if extPath != "" {
 			cleanTmpDir := filepath.Clean(tmpDir)
 			cleanExtPath := filepath.Clean(extPath)
-			if relPath, err := filepath.Rel(cleanTmpDir, cleanExtPath); err == nil && relPath != ".." && !strings.HasPrefix(relPath, ".."+string(filepath.Separator)) {
+			if relPath, err := filepath.Rel(
+				cleanTmpDir,
+				cleanExtPath,
+			); err == nil && relPath != ".." &&
+				!strings.HasPrefix(relPath, ".."+string(filepath.Separator)) {
 				if rawExt, err := os.ReadFile(cleanExtPath); err == nil {
 					extPayload = string(rawExt)
 				}
@@ -974,7 +997,11 @@ func discoverBDMVSummaryCache(tmpDir string) (bdmvSummaryCache, error) {
 		if fullPath != "" {
 			cleanTmpDir := filepath.Clean(tmpDir)
 			cleanFullPath := filepath.Clean(fullPath)
-			if relPath, err := filepath.Rel(cleanTmpDir, cleanFullPath); err == nil && relPath != ".." && !strings.HasPrefix(relPath, ".."+string(filepath.Separator)) {
+			if relPath, err := filepath.Rel(
+				cleanTmpDir,
+				cleanFullPath,
+			); err == nil && relPath != ".." &&
+				!strings.HasPrefix(relPath, ".."+string(filepath.Separator)) {
 				if rawFull, err := os.ReadFile(cleanFullPath); err == nil {
 					fullPayload = string(rawFull)
 				}
@@ -1025,7 +1052,13 @@ func cachedPlaylistNames(cache bdmvSummaryCache) []string {
 	return names
 }
 
-func (s *Service) resolveOrCreateBDMVSummaries(ctx context.Context, req api.Request, tmpDir string, playlistPath string, selected []string) (string, bool, error) {
+func (s *Service) resolveOrCreateBDMVSummaries(
+	ctx context.Context,
+	req api.Request,
+	tmpDir string,
+	playlistPath string,
+	selected []string,
+) (string, bool, error) {
 	cache, err := discoverBDMVSummaryCache(tmpDir)
 	if err != nil {
 		return "", false, fmt.Errorf("metadata: discover bdmv tmp cache: %w", err)
@@ -1093,7 +1126,8 @@ func metadataFingerprintMatches(primary string, current api.PreparedMetadata, st
 	if current.SourceSize != 0 && stored.SourceSize != 0 && current.SourceSize != stored.SourceSize {
 		return false
 	}
-	if strings.TrimSpace(current.VideoPath) != "" && strings.TrimSpace(stored.VideoPath) != "" && !pathEqualForFingerprint(current.VideoPath, stored.VideoPath) {
+	if strings.TrimSpace(current.VideoPath) != "" && strings.TrimSpace(stored.VideoPath) != "" &&
+		!pathEqualForFingerprint(current.VideoPath, stored.VideoPath) {
 		return false
 	}
 	if len(current.FileList) > 0 && len(stored.FileList) > 0 {
@@ -1199,7 +1233,13 @@ func applySeasonEpisodeMetadata(meta *api.PreparedMetadata, result seasonep.Resu
 	meta.TVPack = result.TVPack
 
 	if logger != nil && (meta.SeasonStr != "" || meta.EpisodeStr != "" || meta.DailyEpisodeDate != "" || meta.TVPack) {
-		logger.Debugf("metadata: parsed season/episode season=%q episode=%q daily_date=%q tv_pack=%t", meta.SeasonStr, meta.EpisodeStr, meta.DailyEpisodeDate, meta.TVPack)
+		logger.Debugf(
+			"metadata: parsed season/episode season=%q episode=%q daily_date=%q tv_pack=%t",
+			meta.SeasonStr,
+			meta.EpisodeStr,
+			meta.DailyEpisodeDate,
+			meta.TVPack,
+		)
 	}
 }
 

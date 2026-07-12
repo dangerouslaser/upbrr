@@ -25,7 +25,10 @@ func (d *Definition) Name() string {
 }
 
 func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
-	return &trackers.TrackerMetadataPolicy{RequireKnownCategory: true, Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeMovie, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDB}}}}
+	return &trackers.TrackerMetadataPolicy{
+		RequireKnownCategory: true,
+		Requirements:         []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeMovie, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDB}}},
+	}
 }
 
 func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
@@ -37,7 +40,13 @@ func (d *Definition) AudioPolicy() *trackers.AudioPolicy {
 }
 
 func (d *Definition) DupePolicy() *trackers.DupePolicy {
-	return &trackers.DupePolicy{MatchAggregateSize: true, NormalizeDDPlusName: true, SDMatchesHD: true, CompareDVDResolution: true, AllowSizeVariance1080: true}
+	return &trackers.DupePolicy{
+		MatchAggregateSize:    true,
+		NormalizeDDPlusName:   true,
+		SDMatchesHD:           true,
+		CompareDVDResolution:  true,
+		AllowSizeVariance1080: true,
+	}
 }
 
 func (d *Definition) BannedGroups() []string {

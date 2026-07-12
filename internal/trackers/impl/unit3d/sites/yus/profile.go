@@ -15,5 +15,12 @@ func Profile() unit3d.Profile {
 	}
 }
 func typeID(meta api.PreparedMetadata) string {
-	return map[string]string{"DISC": "17", "REMUX": "2", "WEBDL": "4", "WEBRIP": "5", "HDTV": "6", "ENCODE": "3"}[unit3d.InferType(meta)]
+	return map[string]string{
+		"DISC":   "17",
+		"REMUX":  "2",
+		"WEBDL":  "4",
+		"WEBRIP": "5",
+		"HDTV":   "6",
+		"ENCODE": "3",
+	}[unit3d.InferType(meta)]
 }

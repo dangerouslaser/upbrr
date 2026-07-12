@@ -12,24 +12,28 @@ import (
 )
 
 var (
-	ptpPTPURLPattern               = regexp.MustCompile(`(?i)(?:\[url(?:=|\])[^\]]*https?://passthepopcorn\.m[^\]]*\]|\bhttps?://passthepopcorn\.m[^\s]+)`)
-	ptpHDBURLPattern               = regexp.MustCompile(`(?i)(\[url[=]]https?://hdbits\.o[^\]]+)([^\[]+)(\[/url\])?`)
-	ptpComparePattern              = regexp.MustCompile(`(?i)\[comparison=[\s\S]*?\[/comparison\]`)
-	ptpHidePattern                 = regexp.MustCompile(`(?i)\[hide[\s\S]*?\[/hide\]`)
-	ptpImgPattern                  = regexp.MustCompile(`(?is)\[img(?:[^\]]*)?\][\s\S]*?\[/img\]`)
-	ptpLooseImg                    = regexp.MustCompile(`(?i)(https?://[^\s\[\]]+\.(?:png|jpg))`)
-	ptpQuotePattern                = regexp.MustCompile(`(?i)\[quote.*?\]`)
-	ptpAlignPattern                = regexp.MustCompile(`(?i)\[align=.*?\]`)
-	ptpURLTagPattern               = regexp.MustCompile(`(?i)(\[url[=]]https?://passthepopcorn\.m[^\]]+])`)
-	ptpHDBTagPattern               = regexp.MustCompile(`(?i)(\[url[=]]https?://hdbits\.o[^\]]+])`)
-	ptpMediaInfoPattern            = regexp.MustCompile(`(?i)\[mediainfo\][\s\S]*?\[/mediainfo\]`)
-	ptpGeneralUniquePattern        = regexp.MustCompile(`(?im)(^general\nunique)(.*?)^$`)
-	ptpGeneralCompletePattern      = regexp.MustCompile(`(?im)(^general\ncomplete)(.*?)^$`)
-	ptpFormatPattern               = regexp.MustCompile(`(?im)(^(Format[\s]{2,}:))(.*?)^$`)
-	ptpTrackIDPattern              = regexp.MustCompile(`(?im)(^(video|audio|text)( #\d+)?\nid)(.*?)^$`)
-	ptpMenuPattern                 = regexp.MustCompile(`(?im)(^(menu)( #\d+)?\n)(.*?)^$`)
-	ptpBoldMediaPattern            = regexp.MustCompile(`(?is)\[b\](.*?)(Matroska|DTS|AVC|x264|Progressive|23\.976 fps|16:9|[0-9]+x[0-9]+|[0-9]+ MiB|[0-9]+ Kbps|[0-9]+ bits|cabac=.*?/ aq=.*?|\d+\.\d+ Mbps)\[/b\]`)
-	ptpMediaTokenPattern           = regexp.MustCompile(`(?is)(Matroska|DTS|AVC|x264|Progressive|23\.976 fps|16:9|[0-9]+x[0-9]+|[0-9]+ MiB|[0-9]+ Kbps|[0-9]+ bits|cabac=.*?/ aq=.*?|\d+\.\d+ Mbps|[0-9]+\s+channels|[0-9]+\.[0-9]+\s+KHz|[0-9]+ KHz|[0-9]+\s+bits)`)
+	ptpPTPURLPattern          = regexp.MustCompile(`(?i)(?:\[url(?:=|\])[^\]]*https?://passthepopcorn\.m[^\]]*\]|\bhttps?://passthepopcorn\.m[^\s]+)`)
+	ptpHDBURLPattern          = regexp.MustCompile(`(?i)(\[url[=]]https?://hdbits\.o[^\]]+)([^\[]+)(\[/url\])?`)
+	ptpComparePattern         = regexp.MustCompile(`(?i)\[comparison=[\s\S]*?\[/comparison\]`)
+	ptpHidePattern            = regexp.MustCompile(`(?i)\[hide[\s\S]*?\[/hide\]`)
+	ptpImgPattern             = regexp.MustCompile(`(?is)\[img(?:[^\]]*)?\][\s\S]*?\[/img\]`)
+	ptpLooseImg               = regexp.MustCompile(`(?i)(https?://[^\s\[\]]+\.(?:png|jpg))`)
+	ptpQuotePattern           = regexp.MustCompile(`(?i)\[quote.*?\]`)
+	ptpAlignPattern           = regexp.MustCompile(`(?i)\[align=.*?\]`)
+	ptpURLTagPattern          = regexp.MustCompile(`(?i)(\[url[=]]https?://passthepopcorn\.m[^\]]+])`)
+	ptpHDBTagPattern          = regexp.MustCompile(`(?i)(\[url[=]]https?://hdbits\.o[^\]]+])`)
+	ptpMediaInfoPattern       = regexp.MustCompile(`(?i)\[mediainfo\][\s\S]*?\[/mediainfo\]`)
+	ptpGeneralUniquePattern   = regexp.MustCompile(`(?im)(^general\nunique)(.*?)^$`)
+	ptpGeneralCompletePattern = regexp.MustCompile(`(?im)(^general\ncomplete)(.*?)^$`)
+	ptpFormatPattern          = regexp.MustCompile(`(?im)(^(Format[\s]{2,}:))(.*?)^$`)
+	ptpTrackIDPattern         = regexp.MustCompile(`(?im)(^(video|audio|text)( #\d+)?\nid)(.*?)^$`)
+	ptpMenuPattern            = regexp.MustCompile(`(?im)(^(menu)( #\d+)?\n)(.*?)^$`)
+	ptpBoldMediaPattern       = regexp.MustCompile(
+		`(?is)\[b\](.*?)(Matroska|DTS|AVC|x264|Progressive|23\.976 fps|16:9|[0-9]+x[0-9]+|[0-9]+ MiB|[0-9]+ Kbps|[0-9]+ bits|cabac=.*?/ aq=.*?|\d+\.\d+ Mbps)\[/b\]`,
+	)
+	ptpMediaTokenPattern = regexp.MustCompile(
+		`(?is)(Matroska|DTS|AVC|x264|Progressive|23\.976 fps|16:9|[0-9]+x[0-9]+|[0-9]+ MiB|[0-9]+ Kbps|[0-9]+ bits|cabac=.*?/ aq=.*?|\d+\.\d+ Mbps|[0-9]+\s+channels|[0-9]+\.[0-9]+\s+KHz|[0-9]+ KHz|[0-9]+\s+bits)`,
+	)
 	ptpUnderlinedFieldPattern      = regexp.MustCompile(`(?i)\[u\](Format|Bitrate|Channels|Sampling Rate|Resolution):\[/u\]\s*\d*.*?`)
 	ptpNumericMediaLinePattern     = regexp.MustCompile(`(?im)^\s*\d+\s*(channels|KHz|bits)\s*$`)
 	ptpWhitespaceLinePattern       = regexp.MustCompile(`(?m)^\s+$`)
@@ -54,7 +58,9 @@ var (
 	ptpSubtitlesSectionPattern     = regexp.MustCompile(`(?i)SUBTITLES:[\s\S]*?(\n\n|$)`)
 	ptpCodecBitratePattern         = regexp.MustCompile(`(?i)Codec\s+Bitrate\s+Description[\s\S]*?(\n\n|$)`)
 	ptpCodecLanguageBitratePattern = regexp.MustCompile(`(?i)Codec\s+Language\s+Bitrate\s+Description[\s\S]*?(\n\n|$)`)
-	ptpBotSignature                = regexp.MustCompile(`(?is)(?:\[(?:center|right|align=right)\]\s*(?:\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\]\s*)?\[b\]?Uploaded\s+Using\s+\[url=https://github\.com/HDInnovations/UNIT3D\]UNIT3D\[/url\]\s+Auto\s+Uploader\[/b\]?(?:\s*\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\])?\s*\[/(?:center|right|align)\])|(?:\[center\]\s*\[url=https://github\.com/z-ink/uploadrr\]\[img=\d+\]https://i\.ibb\.co/2NVWb0c/uploadrr\.webp\[/img\]\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=https://github\.com/edge20200/Only-Uploader\]Powered\s+by\s+Only-Uploader\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=/torrents\?perPage=\d+&name=[^\]]*\]\s*\[/url\]\s*\[/center\])|(?:\[center\]\s*(?:\[b\]\s*(?:\[size=\d+\])?brush(?:\[/size\])?\s*\[/b\]\s*)?This is an internal release which was first released exclusively on Aither\.\s*Cheers to all the Aither(?:\s+users)?\s*\[/center\])|(?:\[(?:center|right|align=right)\]\s*(?:\[url=[^\]]+\]\s*)?(?:\[size=[^\]]+\]\s*)?Created by(?:\s+[^[]*?)?\s*Upload Assistant(?:\s*\[/size\])?(?:\s*\[/url\])?\s*\[/(?:center|right|align)\])`)
+	ptpBotSignature                = regexp.MustCompile(
+		`(?is)(?:\[(?:center|right|align=right)\]\s*(?:\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\]\s*)?\[b\]?Uploaded\s+Using\s+\[url=https://github\.com/HDInnovations/UNIT3D\]UNIT3D\[/url\]\s+Auto\s+Uploader\[/b\]?(?:\s*\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\])?\s*\[/(?:center|right|align)\])|(?:\[center\]\s*\[url=https://github\.com/z-ink/uploadrr\]\[img=\d+\]https://i\.ibb\.co/2NVWb0c/uploadrr\.webp\[/img\]\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=https://github\.com/edge20200/Only-Uploader\]Powered\s+by\s+Only-Uploader\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=/torrents\?perPage=\d+&name=[^\]]*\]\s*\[/url\]\s*\[/center\])|(?:\[center\]\s*(?:\[b\]\s*(?:\[size=\d+\])?brush(?:\[/size\])?\s*\[/b\]\s*)?This is an internal release which was first released exclusively on Aither\.\s*Cheers to all the Aither(?:\s+users)?\s*\[/center\])|(?:\[(?:center|right|align=right)\]\s*(?:\[url=[^\]]+\]\s*)?(?:\[size=[^\]]+\]\s*)?Created by(?:\s+[^[]*?)?\s*Upload Assistant(?:\s*\[/size\])?(?:\s*\[/url\])?\s*\[/(?:center|right|align)\])`,
+	)
 )
 
 // CleanPTPDescription normalizes a PTP-style description and returns extracted images and artifacts.
@@ -172,7 +178,12 @@ func CleanPTPDescription(description string, discType string) Report {
 		}
 		host := imagehost.ExtractHost(imgURL)
 		rawURL := NormalizeImageRawURL(imgURL)
-		imagelist = append(imagelist, Image{ImgURL: imgURL, RawURL: rawURL, WebURL: imgURL, Host: host})
+		imagelist = append(imagelist, Image{
+			ImgURL: imgURL,
+			RawURL: rawURL,
+			WebURL: imgURL,
+			Host:   host,
+		})
 		desc = strings.ReplaceAll(desc, imgURL, "")
 	}
 

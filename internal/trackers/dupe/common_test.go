@@ -12,7 +12,11 @@ import (
 func TestSkipReasonIgnoresWarnings(t *testing.T) {
 	t.Parallel()
 	meta := api.PreparedMetadata{TrackerRuleFailures: map[string][]api.RuleFailure{
-		"PTP": {{Rule: "require_metadata_id", Reason: "IMDb recommended", Severity: api.RuleFailureSeverityWarning}},
+		"PTP": {{
+			Rule:     "require_metadata_id",
+			Reason:   "IMDb recommended",
+			Severity: api.RuleFailureSeverityWarning,
+		}},
 	}}
 	reason, rules := skipReason(meta, "PTP")
 	if reason != "" || len(rules) != 0 {

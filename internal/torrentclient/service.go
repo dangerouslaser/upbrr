@@ -95,7 +95,12 @@ func NewServiceWithRegistry(cfg config.Config, logger api.Logger, registry *trac
 	if registry != nil {
 		priority = registry.Priority()
 	}
-	return &Service{cfg: cfg, logger: logger, trackerPatterns: buildTrackerIDPatterns(registry), trackerPriority: priority}
+	return &Service{
+		cfg:             cfg,
+		logger:          logger,
+		trackerPatterns: buildTrackerIDPatterns(registry),
+		trackerPriority: priority,
+	}
 }
 
 // Inject dispatches a prepared torrent to the configured injection clients.
@@ -125,7 +130,14 @@ func (s *Service) Inject(ctx context.Context, meta api.PreparedMetadata, torrent
 		s.logger.Debugf("clients: skipping injection for %s: no torrent file or URL", meta.SourcePath)
 		return internalerrors.ErrInvalidInput
 	}
-	s.logger.Tracef("clients: injection input source=%s tracker=%s has_file=%t has_url=%t configured_clients=%d", meta.SourcePath, strings.TrimSpace(torrent.Tracker), torrentPath != "", torrentURL != "", len(s.cfg.TorrentClients))
+	s.logger.Tracef(
+		"clients: injection input source=%s tracker=%s has_file=%t has_url=%t configured_clients=%d",
+		meta.SourcePath,
+		strings.TrimSpace(torrent.Tracker),
+		torrentPath != "",
+		torrentURL != "",
+		len(s.cfg.TorrentClients),
+	)
 
 	if len(s.cfg.TorrentClients) == 0 {
 		s.logger.Debugf("clients: no torrent clients configured, skipping injection")
@@ -351,7 +363,14 @@ func (s *Service) injectQbit(ctx context.Context, name string, client config.Tor
 	options.SkipHashCheck = true
 	if staging.Linked {
 		options.SavePath = staging.SavePath
-		s.logger.Debugf("clients: qbit link staging selected client=%s tracker=%s files=%d layout_validated=%t save_path=%s", name, strings.TrimSpace(torrent.Tracker), staging.FileCount, staging.LayoutValidated, staging.SavePath)
+		s.logger.Debugf(
+			"clients: qbit link staging selected client=%s tracker=%s files=%d layout_validated=%t save_path=%s",
+			name,
+			strings.TrimSpace(torrent.Tracker),
+			staging.FileCount,
+			staging.LayoutValidated,
+			staging.SavePath,
+		)
 	} else {
 		// Without link staging, local_path/remote_path still controls where
 		// qBittorrent should save the injected torrent on the client host.
@@ -379,12 +398,23 @@ func (s *Service) injectQbit(ctx context.Context, name string, client config.Tor
 	autoManagement := !staging.Linked && qbitAutomaticManagementEnabled(meta, client.AutomaticManagementPaths)
 	addOptions := options.Prepare()
 	addOptions["autoTMM"] = strconv.FormatBool(autoManagement)
-	s.logger.Debugf("clients: qbit add options ready client=%s auto_tmm=%t skip_hash_check=%t elapsed=%s", name, autoManagement, options.SkipHashCheck, time.Since(optionsStart).Round(time.Millisecond))
+	s.logger.Debugf(
+		"clients: qbit add options ready client=%s auto_tmm=%t skip_hash_check=%t elapsed=%s",
+		name,
+		autoManagement,
+		options.SkipHashCheck,
+		time.Since(optionsStart).Round(time.Millisecond),
+	)
 
 	qbitCtx, cancel := context.WithTimeout(ctx, qbitInjectHTTPTimeout)
 	defer cancel()
 
-	s.logger.Debugf("clients: connecting to qbit %s timeout=%s retries=%d", redaction.RedactValue(host, nil), qbitInjectHTTPTimeout, qbitInjectHTTPRetryAttempts)
+	s.logger.Debugf(
+		"clients: connecting to qbit %s timeout=%s retries=%d",
+		redaction.RedactValue(host, nil),
+		qbitInjectHTTPTimeout,
+		qbitInjectHTTPRetryAttempts,
+	)
 	if !client.UsesQuiProxy() {
 		if err := qbit.LoginCtx(qbitCtx); err != nil {
 			s.cleanupFailedLinkStaging(name, torrent.Tracker, staging)
@@ -402,7 +432,14 @@ func (s *Service) injectQbit(ctx context.Context, name string, client config.Tor
 			return fmt.Errorf("clients: %s qbit add torrent file: %w", name, err)
 		}
 
-		s.logger.Infof("clients: added torrent file to qbit client=%s tracker=%s linked=%t qbit_hash_check=%t source=%s", name, logTracker(torrent.Tracker), staging.Linked, !options.SkipHashCheck, meta.SourcePath)
+		s.logger.Infof(
+			"clients: added torrent file to qbit client=%s tracker=%s linked=%t qbit_hash_check=%t source=%s",
+			name,
+			logTracker(torrent.Tracker),
+			staging.Linked,
+			!options.SkipHashCheck,
+			meta.SourcePath,
+		)
 		return nil
 	}
 
@@ -412,7 +449,14 @@ func (s *Service) injectQbit(ctx context.Context, name string, client config.Tor
 			s.cleanupFailedLinkStaging(name, torrent.Tracker, staging)
 			return fmt.Errorf("clients: %s qbit add torrent URL: %w", name, err)
 		}
-		s.logger.Infof("clients: added tracker torrent URL to qbit client=%s tracker=%s linked=%t qbit_hash_check=%t source=%s", name, logTracker(torrent.Tracker), staging.Linked, !options.SkipHashCheck, meta.SourcePath)
+		s.logger.Infof(
+			"clients: added tracker torrent URL to qbit client=%s tracker=%s linked=%t qbit_hash_check=%t source=%s",
+			name,
+			logTracker(torrent.Tracker),
+			staging.Linked,
+			!options.SkipHashCheck,
+			meta.SourcePath,
+		)
 		return nil
 	}
 

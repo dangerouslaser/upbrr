@@ -32,7 +32,11 @@ func resolveTrackerPolicy(meta api.PreparedMetadata, registry *trackers.Registry
 			continue
 		}
 		maxPieceExp, _ := pieceExpForMiB(artifact.MaxPieceSizeMiB)
-		return &trackerTorrentPolicy{name: strings.ToUpper(strings.TrimSpace(name)), maxPieceExp: maxPieceExp, maxTorrentBytes: artifact.MaxTorrentBytes}
+		return &trackerTorrentPolicy{
+			name:            strings.ToUpper(strings.TrimSpace(name)),
+			maxPieceExp:     maxPieceExp,
+			maxTorrentBytes: artifact.MaxTorrentBytes,
+		}
 	}
 	if hasTracker(meta.Trackers, []string{"PTP"}) {
 		return &trackerTorrentPolicy{

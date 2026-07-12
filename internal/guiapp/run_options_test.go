@@ -376,9 +376,13 @@ func TestTrackerUploadRetryRequestUsesStoredUploadOptions(t *testing.T) {
 	t.Parallel()
 
 	job := &trackerUploadJob{
-		sourcePath:     `C:\Media\Movie.mkv`,
-		uploadOptions:  api.UploadOptions{Screens: 1, SkipAutoTorrent: true},
-		runOptions:     runOptions{Debug: true, NoSeed: true, RunLogLevel: "debug"},
+		sourcePath:    `C:\Media\Movie.mkv`,
+		uploadOptions: api.UploadOptions{Screens: 1, SkipAutoTorrent: true},
+		runOptions: runOptions{
+			Debug:       true,
+			NoSeed:      true,
+			RunLogLevel: "debug",
+		},
 		failedTrackers: []string{"BLU"},
 		ignoreDupesFor: []string{"AITHER"},
 	}
@@ -644,8 +648,17 @@ func TestApplyDupeProgressCountsNewTrackersWithoutInflatingExplicitTotal(t *test
 		updateTotal int
 		wantTotal   int
 	}{
-		{name: "explicit total", startTotal: 2, updateTotal: 2, wantTotal: 2},
-		{name: "total omitted", startTotal: 1, wantTotal: 2},
+		{
+			name:        "explicit total",
+			startTotal:  2,
+			updateTotal: 2,
+			wantTotal:   2,
+		},
+		{
+			name:       "total omitted",
+			startTotal: 1,
+			wantTotal:  2,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -762,14 +775,22 @@ func TestStartDupeCheckFailsOnMetadataPreviewCacheRequestMismatch(t *testing.T) 
 		{
 			name: "path",
 			expected: func(sourcePath string) api.Request {
-				return api.Request{Paths: []string{sourcePath + ".other"}, Mode: api.ModeGUI, Trackers: []string{"AITHER"}}
+				return api.Request{
+					Paths:    []string{sourcePath + ".other"},
+					Mode:     api.ModeGUI,
+					Trackers: []string{"AITHER"},
+				}
 			},
 			wantMessage: "metadata preview cache request paths",
 		},
 		{
 			name: "tracker",
 			expected: func(sourcePath string) api.Request {
-				return api.Request{Paths: []string{sourcePath}, Mode: api.ModeGUI, Trackers: []string{"BLU"}}
+				return api.Request{
+					Paths:    []string{sourcePath},
+					Mode:     api.ModeGUI,
+					Trackers: []string{"BLU"},
+				}
 			},
 			wantMessage: "metadata preview cache request trackers",
 		},
@@ -960,7 +981,11 @@ func newTrackerUploadJobTestJob(coreSvc api.Core, trackers []string) *trackerUpl
 		startedAt:  time.Now().UTC(),
 	}
 	for _, tracker := range trackers {
-		job.states[tracker] = TrackerUploadTrackerState{Tracker: tracker, Status: "queued", Message: "queued"}
+		job.states[tracker] = TrackerUploadTrackerState{
+			Tracker: tracker,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 	return job
 }
@@ -976,7 +1001,11 @@ func newDupeCheckJobTestJob(sourcePath string, trackers []string) *dupeCheckJob 
 		startedAt:  time.Now().UTC(),
 	}
 	for _, tracker := range trackers {
-		job.states[tracker] = DupeCheckTrackerState{Tracker: tracker, Status: "queued", Message: "queued"}
+		job.states[tracker] = DupeCheckTrackerState{
+			Tracker: tracker,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 	return job
 }

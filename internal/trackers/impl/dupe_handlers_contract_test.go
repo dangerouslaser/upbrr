@@ -44,7 +44,11 @@ func TestSiteHandlersSearch(t *testing.T) {
 		{
 			name:    "BT",
 			tracker: "BT",
-			meta:    api.PreparedMetadata{ExternalIDs: api.ExternalIDs{IMDBID: 123}, Release: api.ReleaseInfo{Title: "Movie"}, SourcePath: "x"},
+			meta: api.PreparedMetadata{
+				ExternalIDs: api.ExternalIDs{IMDBID: 123},
+				Release:     api.ReleaseInfo{Title: "Movie"},
+				SourcePath:  "x",
+			},
 			setup: func(t *testing.T, baseURL string, dbPath string) {
 				writeTextCookie(t, dbPath, "BT", hostFromBaseURL(t, baseURL))
 			},
@@ -60,7 +64,11 @@ func TestSiteHandlersSearch(t *testing.T) {
 		{
 			name:    "FL",
 			tracker: "FL",
-			meta:    api.PreparedMetadata{ExternalIDs: api.ExternalIDs{IMDBID: 123}, Release: api.ReleaseInfo{Resolution: "1080p"}, SourcePath: "x"},
+			meta: api.PreparedMetadata{
+				ExternalIDs: api.ExternalIDs{IMDBID: 123},
+				Release:     api.ReleaseInfo{Resolution: "1080p"},
+				SourcePath:  "x",
+			},
 			setup: func(t *testing.T, _ string, dbPath string) {
 				writeJSONCookie(t, dbPath, "FL", `{"sid":"cookie"}`)
 			},
@@ -108,7 +116,11 @@ func TestSiteHandlersSearch(t *testing.T) {
 		{
 			name:    "HDS",
 			tracker: "HDS",
-			meta:    api.PreparedMetadata{ExternalIDs: api.ExternalIDs{IMDBID: 123}, Release: api.ReleaseInfo{Resolution: "1080p"}, SourcePath: "x"},
+			meta: api.PreparedMetadata{
+				ExternalIDs: api.ExternalIDs{IMDBID: 123},
+				Release:     api.ReleaseInfo{Resolution: "1080p"},
+				SourcePath:  "x",
+			},
 			setup: func(t *testing.T, baseURL string, dbPath string) {
 				writeTextCookie(t, dbPath, "HDS", hostFromBaseURL(t, baseURL))
 			},
@@ -124,7 +136,11 @@ func TestSiteHandlersSearch(t *testing.T) {
 		{
 			name:    "HDT",
 			tracker: "HDT",
-			meta:    api.PreparedMetadata{ExternalIDs: api.ExternalIDs{IMDBID: 123}, Release: api.ReleaseInfo{Resolution: "1080p"}, SourcePath: "x"},
+			meta: api.PreparedMetadata{
+				ExternalIDs: api.ExternalIDs{IMDBID: 123},
+				Release:     api.ReleaseInfo{Resolution: "1080p"},
+				SourcePath:  "x",
+			},
 			setup: func(t *testing.T, baseURL string, dbPath string) {
 				writeTextCookie(t, dbPath, "HDT", hostFromBaseURL(t, baseURL))
 			},
@@ -248,7 +264,11 @@ func TestSiteHandlersSearch(t *testing.T) {
 						return
 					}
 					if r.URL.Path == "/takelogin.php" {
-						http.SetCookie(w, &http.Cookie{Name: "session", Value: "cookie", Path: "/"})
+						http.SetCookie(w, &http.Cookie{
+							Name:  "session",
+							Value: "cookie",
+							Path:  "/",
+						})
 						_, _ = w.Write([]byte("ok"))
 						return
 					}
@@ -265,7 +285,11 @@ func TestSiteHandlersSearch(t *testing.T) {
 			cfg := config.Config{
 				MainSettings: config.MainSettingsConfig{DBPath: dbPath},
 				Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{
-					tc.tracker: {URL: server.URL, Username: "user", Password: "pass"},
+					tc.tracker: {
+						URL:      server.URL,
+						Username: "user",
+						Password: "pass",
+					},
 				}},
 			}
 			entries, notes, err := tc.handler(cfg, server.Client()).Search(context.Background(), tc.meta, tc.tracker)

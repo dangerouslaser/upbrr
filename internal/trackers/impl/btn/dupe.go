@@ -23,7 +23,11 @@ type dupeSearcher struct {
 }
 
 func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, endpoint: "https://api.broadcasthe.net/"}
+	return &dupeSearcher{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: "https://api.broadcasthe.net/",
+	}
 }
 
 func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -47,7 +51,12 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	default:
 		return nil, btnSkip("missing btn/imdb/tvdb id and title for BTN dupe search"), nil
 	}
-	payload := map[string]any{"jsonrpc": "2.0", "id": "upbrr-btn-search", "method": "getTorrentsSearch", "params": []any{token, filter, 50}}
+	payload := map[string]any{
+		"jsonrpc": "2.0",
+		"id":      "upbrr-btn-search",
+		"method":  "getTorrentsSearch",
+		"params":  []any{token, filter, 50},
+	}
 	raw, err := json.Marshal(payload)
 	if err != nil {
 		return nil, btnSkip("BTN request failed"), nil
@@ -82,7 +91,13 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 		if !ok {
 			continue
 		}
-		entry := api.DupeEntry{Name: releaseName(id, torrent), ID: strings.TrimSpace(id), Link: torrentLink(id, torrent), Res: btnString(first(torrent, "Resolution", "resolution")), Type: btnString(first(torrent, "Source", "source", "Type", "type"))}
+		entry := api.DupeEntry{
+			Name: releaseName(id, torrent),
+			ID:   strings.TrimSpace(id),
+			Link: torrentLink(id, torrent),
+			Res:  btnString(first(torrent, "Resolution", "resolution")),
+			Type: btnString(first(torrent, "Source", "source", "Type", "type")),
+		}
 		if size := btnInt(first(torrent, "Size", "size")); size > 0 {
 			entry.SizeKnown, entry.SizeBytes = true, size
 		}

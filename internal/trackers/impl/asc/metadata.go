@@ -233,15 +233,39 @@ func resolveSubtitle(meta api.PreparedMetadata) string {
 
 func resolveLanguage(meta api.PreparedMetadata) string {
 	return mapLanguage(resolveOriginalLanguage(meta), map[string]string{
-		"bg": "15", "da": "12", "de": "3", "en": "1", "es": "6", "fi": "14", "fr": "2",
-		"hi": "23", "it": "4", "ja": "5", "ko": "20", "nl": "17", "no": "16", "pl": "19",
-		"pt": "8", "ru": "7", "sv": "13", "th": "21", "tr": "25", "zh": "10",
+		"bg": "15",
+		"da": "12",
+		"de": "3",
+		"en": "1",
+		"es": "6",
+		"fi": "14",
+		"fr": "2",
+		"hi": "23",
+		"it": "4",
+		"ja": "5",
+		"ko": "20",
+		"nl": "17",
+		"no": "16",
+		"pl": "19",
+		"pt": "8",
+		"ru": "7",
+		"sv": "13",
+		"th": "21",
+		"tr": "25",
+		"zh": "10",
 	}, "11")
 }
 
 func resolveAnimeLanguage(meta api.PreparedMetadata) string {
 	return mapLanguage(resolveOriginalLanguage(meta), map[string]string{
-		"de": "3", "en": "4", "es": "1", "ja": "8", "ko": "11", "pt": "5", "ru": "2", "zh": "9",
+		"de": "3",
+		"en": "4",
+		"es": "1",
+		"ja": "8",
+		"ko": "11",
+		"pt": "5",
+		"ru": "2",
+		"zh": "9",
 	}, "6")
 }
 
@@ -262,7 +286,9 @@ func resolveAnimeType(meta api.PreparedMetadata) string {
 func resolveUploadTitle(meta api.PreparedMetadata) string {
 	base := resolveDisplayTitle(meta)
 	if categoryOf(meta) == "TV" {
-		return strings.TrimSpace(base + " - " + metautil.FirstNonEmptyTrimmed(strings.TrimSpace(meta.SeasonStr)+strings.TrimSpace(meta.EpisodeStr), seasonEpisodeText(meta)))
+		return strings.TrimSpace(
+			base + " - " + metautil.FirstNonEmptyTrimmed(strings.TrimSpace(meta.SeasonStr)+strings.TrimSpace(meta.EpisodeStr), seasonEpisodeText(meta)),
+		)
 	}
 	return base
 }

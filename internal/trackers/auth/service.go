@@ -597,7 +597,8 @@ func (s *Service) statusForSpec(ctx context.Context, spec trackerSpec) api.Track
 			status.State = StateLoginRequired
 		}
 	}
-	if !missingBTNAPIKey && spec.cookies && status.CookieCount == 0 && !encryptedStorage && authStatusRequiresEncryptedStorage(spec, hasCredentials, hasAPIKey, hasPasskey) {
+	if !missingBTNAPIKey && spec.cookies && status.CookieCount == 0 && !encryptedStorage &&
+		authStatusRequiresEncryptedStorage(spec, hasCredentials, hasAPIKey, hasPasskey) {
 		status.State = StateEncryptedStorageUnavailable
 	}
 	status.Message = validationMessage(spec, status)
@@ -763,7 +764,10 @@ func (s *Service) specs() []trackerSpec {
 		if strings.TrimSpace(cfg.Username) != "" || strings.TrimSpace(cfg.Password) != "" {
 			if !ok || spec.login {
 				spec.login = true
-				spec.autoLogin = spec.autoLogin || spec.id == "AR" || spec.id == "BTN" || spec.id == "FF" || spec.id == "FL" || spec.id == "MTV" || spec.id == "PTP" || spec.id == "RTF" || spec.id == "THR"
+				spec.autoLogin = spec.autoLogin || spec.id == "AR" || spec.id == "BTN" || spec.id == "FF" || spec.id == "FL" || spec.id == "MTV" ||
+					spec.id == "PTP" ||
+					spec.id == "RTF" ||
+					spec.id == "THR"
 				if spec.authKind == "config" {
 					spec.authKind = "credential_login"
 				}
@@ -785,26 +789,140 @@ func (s *Service) specs() []trackerSpec {
 // api.TrackerAuthLoginRequest.Code.
 func builtInSpecs() []trackerSpec {
 	return []trackerSpec{
-		{id: "AR", authKind: "cookies_login", cookies: true, login: true, autoLogin: true, needsCredentials: true},
-		{id: "BTN", authKind: "api_key_cookies_login_manual_2fa", cookies: true, login: true, autoLogin: true, totp: true, manual2FA: true, apiKey: true, needsCredentials: true, notes: []string{"API key is required for torrent resolution; cookies/login cover upload auth."}},
-		{id: "FF", authKind: "cookies_login", cookies: true, login: true, autoLogin: true, needsCredentials: true},
-		{id: "FL", authKind: "cookies_login", cookies: true, login: true, autoLogin: true, needsCredentials: true},
-		{id: "MTV", authKind: "api_key_cookies_login_manual_2fa", cookies: true, login: true, autoLogin: true, totp: true, manual2FA: true, apiKey: true, needsCredentials: true, notes: []string{"API key covers Torznab/search; cookies/login cover upload authkey."}},
-		{id: "PTP", authKind: "cookies_login_manual_2fa", cookies: true, login: true, autoLogin: true, totp: true, manual2FA: true, needsCredentials: true},
-		{id: "THR", authKind: "credential_login", login: true, autoLogin: true, needsCredentials: true},
-		{id: "RTF", authKind: "api_key_credential_refresh", login: true, autoLogin: true, apiKey: true, needsCredentials: false},
-		{id: "ASC", authKind: "cookies", cookies: true},
-		{id: "AZ", authKind: "cookies", cookies: true},
-		{id: "BJS", authKind: "cookies", cookies: true},
-		{id: "BT", authKind: "cookies", cookies: true},
-		{id: "CZ", authKind: "cookies", cookies: true},
-		{id: "HDB", authKind: "passkey_cookies", cookies: true, passkey: true},
-		{id: "HDS", authKind: "cookies", cookies: true},
-		{id: "HDT", authKind: "cookies", cookies: true},
-		{id: "IS", authKind: "cookies", cookies: true},
-		{id: "PHD", authKind: "cookies", cookies: true},
-		{id: "PTS", authKind: "cookies", cookies: true},
-		{id: "TL", authKind: "cookies", cookies: true},
+		{
+			id:               "AR",
+			authKind:         "cookies_login",
+			cookies:          true,
+			login:            true,
+			autoLogin:        true,
+			needsCredentials: true,
+		},
+		{
+			id:               "BTN",
+			authKind:         "api_key_cookies_login_manual_2fa",
+			cookies:          true,
+			login:            true,
+			autoLogin:        true,
+			totp:             true,
+			manual2FA:        true,
+			apiKey:           true,
+			needsCredentials: true,
+			notes:            []string{"API key is required for torrent resolution; cookies/login cover upload auth."},
+		},
+		{
+			id:               "FF",
+			authKind:         "cookies_login",
+			cookies:          true,
+			login:            true,
+			autoLogin:        true,
+			needsCredentials: true,
+		},
+		{
+			id:               "FL",
+			authKind:         "cookies_login",
+			cookies:          true,
+			login:            true,
+			autoLogin:        true,
+			needsCredentials: true,
+		},
+		{
+			id:               "MTV",
+			authKind:         "api_key_cookies_login_manual_2fa",
+			cookies:          true,
+			login:            true,
+			autoLogin:        true,
+			totp:             true,
+			manual2FA:        true,
+			apiKey:           true,
+			needsCredentials: true,
+			notes:            []string{"API key covers Torznab/search; cookies/login cover upload authkey."},
+		},
+		{
+			id:               "PTP",
+			authKind:         "cookies_login_manual_2fa",
+			cookies:          true,
+			login:            true,
+			autoLogin:        true,
+			totp:             true,
+			manual2FA:        true,
+			needsCredentials: true,
+		},
+		{
+			id:               "THR",
+			authKind:         "credential_login",
+			login:            true,
+			autoLogin:        true,
+			needsCredentials: true,
+		},
+		{
+			id:               "RTF",
+			authKind:         "api_key_credential_refresh",
+			login:            true,
+			autoLogin:        true,
+			apiKey:           true,
+			needsCredentials: false,
+		},
+		{
+			id:       "ASC",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "AZ",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "BJS",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "BT",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "CZ",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "HDB",
+			authKind: "passkey_cookies",
+			cookies:  true,
+			passkey:  true,
+		},
+		{
+			id:       "HDS",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "HDT",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "IS",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "PHD",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "PTS",
+			authKind: "cookies",
+			cookies:  true,
+		},
+		{
+			id:       "TL",
+			authKind: "cookies",
+			cookies:  true,
+		},
 	}
 }
 

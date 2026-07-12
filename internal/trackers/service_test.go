@@ -136,7 +136,11 @@ func TestUploadBannedGroup(t *testing.T) {
 
 	cfg := config.Config{Trackers: config.TrackersConfig{DefaultTrackers: config.CSVList{"TOS"}}}
 	registry := NewRegistry()
-	if err := registry.RegisterDescriptor(Descriptor{Name: "TOS", Definition: trackingUploadDefinition{name: "TOS"}, BannedGroups: []string{"FL3ER"}}); err != nil {
+	if err := registry.RegisterDescriptor(Descriptor{
+		Name:         "TOS",
+		Definition:   trackingUploadDefinition{name: "TOS"},
+		BannedGroups: []string{"FL3ER"},
+	}); err != nil {
 		t.Fatalf("register TOS: %v", err)
 	}
 	svc := NewServiceWithRegistry(cfg, nil, nil, registry)
@@ -157,7 +161,12 @@ func TestUploadSkipsDynamicBannedRefreshForEmptyEffectiveGroup(t *testing.T) {
 	defer server.Close()
 
 	registry := NewRegistry()
-	if err := registry.RegisterDescriptor(Descriptor{Name: "AITHER", BaseURL: "https://aither.cc", Definition: trackingUploadDefinition{name: "AITHER"}, BannedPolicy: &BannedGroupPolicy{EndpointPath: "/api/blacklists/releasegroups", RequireAPIKey: true}}); err != nil {
+	if err := registry.RegisterDescriptor(Descriptor{
+		Name:         "AITHER",
+		BaseURL:      "https://aither.cc",
+		Definition:   trackingUploadDefinition{name: "AITHER"},
+		BannedPolicy: &BannedGroupPolicy{EndpointPath: "/api/blacklists/releasegroups", RequireAPIKey: true},
+	}); err != nil {
 		t.Fatalf("register stub: %v", err)
 	}
 	cfg := config.Config{
@@ -594,8 +603,16 @@ func TestBuildUploadDryRunBlocksWhenImageHostFallbacksFail(t *testing.T) {
 
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	images := &stubImageService{
@@ -625,14 +642,26 @@ func TestBuildPreparationBlocksWhenImageHostFallbacksFail(t *testing.T) {
 	t.Parallel()
 
 	registry := NewRegistry()
-	if err := registry.Register(stubPreparationDefinition{name: "PTP", group: "ptp", description: "saveable description"}); err != nil {
+	if err := registry.Register(stubPreparationDefinition{
+		name:        "PTP",
+		group:       "ptp",
+		description: "saveable description",
+	}); err != nil {
 		t.Fatalf("register stub: %v", err)
 	}
 
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	images := &stubImageService{
@@ -677,7 +706,11 @@ func TestBuildPreparationBlocksWhenUploadedImagesDoNotCoverRHDSlots(t *testing.T
 	t.Parallel()
 
 	registry := NewRegistry()
-	if err := registry.Register(stubPreparationDefinition{name: "RHD", group: "rhd", description: "saveable description"}); err != nil {
+	if err := registry.Register(stubPreparationDefinition{
+		name:        "RHD",
+		group:       "rhd",
+		description: "saveable description",
+	}); err != nil {
 		t.Fatalf("register stub: %v", err)
 	}
 
@@ -796,8 +829,16 @@ func TestBuildPreparationGroupsExactMatchingUnit3DDescriptions(t *testing.T) {
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "AITHER", group: "unit3d", description: "same description"},
-		stubPreparationDefinition{name: "HHD", group: "unit3d", description: "same description"},
+		stubPreparationDefinition{
+			name:        "AITHER",
+			group:       "unit3d",
+			description: "same description",
+		},
+		stubPreparationDefinition{
+			name:        "HHD",
+			group:       "unit3d",
+			description: "same description",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -826,8 +867,16 @@ func TestBuildPreparationSplitsSameGroupWhenDescriptionDiffers(t *testing.T) {
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "AITHER", group: "unit3d", description: "aither description"},
-		stubPreparationDefinition{name: "HHD", group: "unit3d", description: "hhd description"},
+		stubPreparationDefinition{
+			name:        "AITHER",
+			group:       "unit3d",
+			description: "aither description",
+		},
+		stubPreparationDefinition{
+			name:        "HHD",
+			group:       "unit3d",
+			description: "hhd description",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -881,8 +930,16 @@ func TestBuildPreparationGroupsSameFinalDescriptionWhenExtractedDescriptionDiffe
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "AITHER", group: "unit3d", description: "same final description"},
-		stubPreparationDefinition{name: "BLU", group: "unit3d", description: "same final description"},
+		stubPreparationDefinition{
+			name:        "AITHER",
+			group:       "unit3d",
+			description: "same final description",
+		},
+		stubPreparationDefinition{
+			name:        "BLU",
+			group:       "unit3d",
+			description: "same final description",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -918,8 +975,16 @@ func TestBuildPreparationGroupsSameDescriptionWhenImageHostFeedbackDiffers(t *te
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "AITHER", group: "shared", description: "same description"},
-		stubPreparationDefinition{name: "PTP", group: "shared", description: "same description"},
+		stubPreparationDefinition{
+			name:        "AITHER",
+			group:       "shared",
+			description: "same description",
+		},
+		stubPreparationDefinition{
+			name:        "PTP",
+			group:       "shared",
+			description: "same description",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -947,8 +1012,16 @@ func TestBuildPreparationGroupsUnit3DWhenImageHostMessageOnlyDiffers(t *testing.
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "AITHER", group: "unit3d", description: "same description"},
-		stubPreparationDefinition{name: "HHD", group: "unit3d", description: "same description"},
+		stubPreparationDefinition{
+			name:        "AITHER",
+			group:       "unit3d",
+			description: "same description",
+		},
+		stubPreparationDefinition{
+			name:        "HHD",
+			group:       "unit3d",
+			description: "same description",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -1098,10 +1171,18 @@ func TestPreparationDescriptionGroupMergesUnit3DHostVariantsWhenDescriptionMatch
 		RawDescriptionHTML: "<p>raw</p>",
 		Description:        "same description",
 		DescriptionHTML:    "<p>same description</p>",
-		ImageHost:          api.ImageHostFeedback{Status: "reused", SelectedHost: "pixhost", AllowedHosts: []string{"pixhost"}},
+		ImageHost: api.ImageHostFeedback{
+			Status:       "reused",
+			SelectedHost: "pixhost",
+			AllowedHosts: []string{"pixhost"},
+		},
 	}
 	second := first
-	second.ImageHost = api.ImageHostFeedback{Status: "reused", SelectedHost: "imgbb", AllowedHosts: []string{"imgbb"}}
+	second.ImageHost = api.ImageHostFeedback{
+		Status:       "reused",
+		SelectedHost: "imgbb",
+		AllowedHosts: []string{"imgbb"},
+	}
 	second.RawDescriptionHTML = "<div>raw</div>"
 	second.DescriptionHTML = "<div>same description</div>"
 
@@ -1192,8 +1273,16 @@ func TestUploadPreflightsMultipleConfiguredImageHostsOnce(t *testing.T) {
 
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	images := &stubImageService{repo: repo}
@@ -1245,8 +1334,16 @@ func TestUploadPreflightsUnrestrictedTrackerToFirstConfiguredImageHost(t *testin
 
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	images := &blockingImageService{}
@@ -1281,8 +1378,16 @@ func TestUploadPreparesDistinctTrackerArtifactsBeforeConcurrentUploads(t *testin
 	release := make(chan struct{})
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		trackingUploadDefinition{name: "HDB", requests: requests, release: release},
-		trackingUploadDefinition{name: "PTP", requests: requests, release: release},
+		trackingUploadDefinition{
+			name:     "HDB",
+			requests: requests,
+			release:  release,
+		},
+		trackingUploadDefinition{
+			name:     "PTP",
+			requests: requests,
+			release:  release,
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -1361,8 +1466,16 @@ func TestBuildPreparationPreflightsMultipleConfiguredImageHostsConcurrently(t *t
 
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 	}
 	started := make(chan string, 2)
@@ -1446,9 +1559,24 @@ func TestUploadRunsTrackersConcurrentlyWithLimit(t *testing.T) {
 
 	registry := NewRegistry()
 	definitions := []Definition{
-		blockingUploadDefinition{name: "BLU", started: started, release: release, uploaded: 1},
-		blockingUploadDefinition{name: "BHD", started: started, release: release, uploaded: 1},
-		blockingUploadDefinition{name: "AITHER", started: started, release: release, uploaded: 1},
+		blockingUploadDefinition{
+			name:     "BLU",
+			started:  started,
+			release:  release,
+			uploaded: 1,
+		},
+		blockingUploadDefinition{
+			name:     "BHD",
+			started:  started,
+			release:  release,
+			uploaded: 1,
+		},
+		blockingUploadDefinition{
+			name:     "AITHER",
+			started:  started,
+			release:  release,
+			uploaded: 1,
+		},
 	}
 	for _, definition := range definitions {
 		if err := registry.Register(definition); err != nil {
@@ -1517,7 +1645,11 @@ func TestUploadReportsCancellationAfterCompletedTrackerUpload(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	registry := NewRegistry()
-	if err := registry.Register(cancelAfterUploadDefinition{name: "AITHER", cancel: cancel, uploaded: 1}); err != nil {
+	if err := registry.Register(cancelAfterUploadDefinition{
+		name:     "AITHER",
+		cancel:   cancel,
+		uploaded: 1,
+	}); err != nil {
 		t.Fatalf("register AITHER: %v", err)
 	}
 
@@ -1561,7 +1693,11 @@ func TestUploadCancellationKeepsCompletedTrackerOnly(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	registry := NewRegistry()
-	if err := registry.Register(cancelAfterUploadDefinition{name: "AITHER", cancel: cancel, uploaded: 1}); err != nil {
+	if err := registry.Register(cancelAfterUploadDefinition{
+		name:     "AITHER",
+		cancel:   cancel,
+		uploaded: 1,
+	}); err != nil {
 		t.Fatalf("register AITHER: %v", err)
 	}
 	if err := registry.Register(blockingUploadDefinition{name: "BLU", uploaded: 1}); err != nil {
@@ -1605,7 +1741,11 @@ func TestUploadStatusFailureDoesNotCancelCompletedTracker(t *testing.T) {
 		cancel:   cancel,
 		uploaded: 1,
 		uploadedTorrents: []api.UploadedTorrent{
-			{Tracker: "AITHER", TorrentID: "1", DownloadURL: "https://aither.cc/torrent/download/1"},
+			{
+				Tracker:     "AITHER",
+				TorrentID:   "1",
+				DownloadURL: "https://aither.cc/torrent/download/1",
+			},
 		},
 	}); err != nil {
 		t.Fatalf("register AITHER: %v", err)
@@ -1664,7 +1804,11 @@ func TestUploadCancellationFinalizesPendingWithCleanupContext(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	registry := NewRegistry()
-	if err := registry.Register(cancelAfterUploadDefinition{name: "AITHER", cancel: cancel, uploaded: 1}); err != nil {
+	if err := registry.Register(cancelAfterUploadDefinition{
+		name:     "AITHER",
+		cancel:   cancel,
+		uploaded: 1,
+	}); err != nil {
 		t.Fatalf("register AITHER: %v", err)
 	}
 	if err := registry.Register(blockingUploadDefinition{name: "BLU", uploaded: 1}); err != nil {
@@ -1817,7 +1961,11 @@ func TestUploadBestEffortWithFailuresAndRepoReturnsError(t *testing.T) {
 	for _, update := range repo.statusUpdates {
 		finalStatus[update.tracker] = update.status
 	}
-	for tracker, wantStatus := range map[string]string{"BLU": "uploaded", "BHD": "failed", "AITHER": "uploaded"} {
+	for tracker, wantStatus := range map[string]string{
+		"BLU":    "uploaded",
+		"BHD":    "failed",
+		"AITHER": "uploaded",
+	} {
 		if finalStatus[tracker] != wantStatus {
 			t.Fatalf("expected %s status %q, got %q", tracker, wantStatus, finalStatus[tracker])
 		}
@@ -1904,8 +2052,16 @@ func TestBuildPreparationSeparatesScopedImageHostGroups(t *testing.T) {
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "HDB", group: "shared", description: "same description"},
-		stubPreparationDefinition{name: "AITHER", group: "shared", description: "same description"},
+		stubPreparationDefinition{
+			name:        "HDB",
+			group:       "shared",
+			description: "same description",
+		},
+		stubPreparationDefinition{
+			name:        "AITHER",
+			group:       "shared",
+			description: "same description",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -1914,14 +2070,54 @@ func TestBuildPreparationSeparatesScopedImageHostGroups(t *testing.T) {
 
 	repo := &stubRepo{
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/a.png", RawURL: "https://hdb/a.png", WebURL: "https://hdb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://hdb/b.png", RawURL: "https://hdb/b.png", WebURL: "https://hdb/b"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/a.png",
+				RawURL:     "https://hdb/a.png",
+				WebURL:     "https://hdb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "hdb",
+				UsageScope: "tracker:HDB",
+				ImgURL:     "https://hdb/b.png",
+				RawURL:     "https://hdb/b.png",
+				WebURL:     "https://hdb/b",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 	cfg := config.Config{
@@ -2002,8 +2198,24 @@ func TestBuildPreparationRehostsHDBScreenshotsForURLOnlySlots(t *testing.T) {
 	images := &stubImageService{
 		uploads: map[string][]api.UploadedImageLink{
 			"hdb": {
-				{SourcePath: meta.SourcePath, ImagePath: firstPath, Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/51q8jo2.jpg", RawURL: "https://img.hdbits.org/51q8jo2.jpg", WebURL: "https://img.hdbits.org/51q8jo2"},
-				{SourcePath: meta.SourcePath, ImagePath: secondPath, Host: "hdb", UsageScope: "tracker:HDB", ImgURL: "https://t.hdbits.org/w0S7ltI.jpg", RawURL: "https://img.hdbits.org/w0S7ltI.jpg", WebURL: "https://img.hdbits.org/w0S7ltI"},
+				{
+					SourcePath: meta.SourcePath,
+					ImagePath:  firstPath,
+					Host:       "hdb",
+					UsageScope: "tracker:HDB",
+					ImgURL:     "https://t.hdbits.org/51q8jo2.jpg",
+					RawURL:     "https://img.hdbits.org/51q8jo2.jpg",
+					WebURL:     "https://img.hdbits.org/51q8jo2",
+				},
+				{
+					SourcePath: meta.SourcePath,
+					ImagePath:  secondPath,
+					Host:       "hdb",
+					UsageScope: "tracker:HDB",
+					ImgURL:     "https://t.hdbits.org/w0S7ltI.jpg",
+					RawURL:     "https://img.hdbits.org/w0S7ltI.jpg",
+					WebURL:     "https://img.hdbits.org/w0S7ltI",
+				},
 			},
 		},
 	}
@@ -2033,9 +2245,21 @@ func TestBuildPreparationPreloadsDescriptionAssetQueriesOnce(t *testing.T) {
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "HDB", group: "hdb", description: "same description"},
-		stubPreparationDefinition{name: "AITHER", group: "aither", description: "same description"},
-		stubPreparationDefinition{name: "BHD", group: "bhd", description: "same description"},
+		stubPreparationDefinition{
+			name:        "HDB",
+			group:       "hdb",
+			description: "same description",
+		},
+		stubPreparationDefinition{
+			name:        "AITHER",
+			group:       "aither",
+			description: "same description",
+		},
+		stubPreparationDefinition{
+			name:        "BHD",
+			group:       "bhd",
+			description: "same description",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -2048,12 +2272,36 @@ func TestBuildPreparationPreloadsDescriptionAssetQueriesOnce(t *testing.T) {
 			ImageURLs: []string{"https://imgbb.com/a.png", "https://imgbb.com/b.png"},
 		}},
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 
@@ -2081,8 +2329,16 @@ func TestBuildPreparationSkipsBlockedTrackers(t *testing.T) {
 
 	registry := NewRegistry()
 	for _, definition := range []Definition{
-		stubPreparationDefinition{name: "HDB", group: "hdb", description: "hdb"},
-		stubPreparationDefinition{name: "BHD", group: "bhd", description: "bhd"},
+		stubPreparationDefinition{
+			name:        "HDB",
+			group:       "hdb",
+			description: "hdb",
+		},
+		stubPreparationDefinition{
+			name:        "BHD",
+			group:       "bhd",
+			description: "bhd",
+		},
 	} {
 		if err := registry.Register(definition); err != nil {
 			t.Fatalf("register stub: %v", err)
@@ -2176,7 +2432,11 @@ func TestBuildUploadDryRunAnnotatesBannedGroupOnBuilderError(t *testing.T) {
 	t.Parallel()
 
 	registry := NewRegistry()
-	if err := registry.Register(stubDryRunDefinition{name: "ANT", dryRunErr: errors.New("build failed"), bannedGroups: []string{"AFG"}}); err != nil {
+	if err := registry.Register(stubDryRunDefinition{
+		name:         "ANT",
+		dryRunErr:    errors.New("build failed"),
+		bannedGroups: []string{"AFG"},
+	}); err != nil {
 		t.Fatalf("register stub: %v", err)
 	}
 
@@ -2317,12 +2577,36 @@ func TestBuildUploadDryRunPreloadsDescriptionAssetQueriesOnce(t *testing.T) {
 			ImageURLs: []string{"https://imgbb.com/a.png", "https://imgbb.com/b.png"},
 		}},
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Order: 0},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Order: 1},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Order:      0,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Order:      1,
+			},
 		},
 		uploads: []api.UploadedImageLink{
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/a.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/a.png", RawURL: "https://imgbb/a.png", WebURL: "https://imgbb/a"},
-			{SourcePath: "/tmp/source", ImagePath: "/tmp/b.png", Host: "imgbb", UsageScope: "global", ImgURL: "https://imgbb/b.png", RawURL: "https://imgbb/b.png", WebURL: "https://imgbb/b"},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/a.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/a.png",
+				RawURL:     "https://imgbb/a.png",
+				WebURL:     "https://imgbb/a",
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  "/tmp/b.png",
+				Host:       "imgbb",
+				UsageScope: "global",
+				ImgURL:     "https://imgbb/b.png",
+				RawURL:     "https://imgbb/b.png",
+				WebURL:     "https://imgbb/b",
+			},
 		},
 	}
 
@@ -2386,7 +2670,11 @@ func TestFilterTrackersByRuleFailuresExcludesModifiedReleaseAcrossFamilies(t *te
 	failures := map[string][]api.RuleFailure{
 		"PTP": {{Rule: "modified_release", Reason: "source renamed from original release name"}},
 		"LST": {{Rule: "modified_release", Reason: "source renamed from original release name"}},
-		"HDB": {{Rule: "recommended_id", Reason: "recommended ID missing", Severity: api.RuleFailureSeverityWarning}},
+		"HDB": {{
+			Rule:     "recommended_id",
+			Reason:   "recommended ID missing",
+			Severity: api.RuleFailureSeverityWarning,
+		}},
 	}
 	trackers := []string{"PTP", "LST", "HDB"}
 

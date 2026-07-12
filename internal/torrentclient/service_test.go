@@ -672,7 +672,11 @@ func TestInjectQbitClientUsesCrossFieldsForCrossSeedTorrent(t *testing.T) {
 		},
 	}, nil)
 
-	if err := svc.Inject(context.Background(), api.PreparedMetadata{SourcePath: "video.mkv"}, api.TorrentResult{Path: torrentPath, Tracker: "AITHER", CrossSeed: true}); err != nil {
+	if err := svc.Inject(context.Background(), api.PreparedMetadata{SourcePath: "video.mkv"}, api.TorrentResult{
+		Path:      torrentPath,
+		Tracker:   "AITHER",
+		CrossSeed: true,
+	}); err != nil {
 		t.Fatalf("inject: %v", err)
 	}
 
@@ -2348,7 +2352,11 @@ func TestInjectQbitClientPrefersTorrentFileOverURL(t *testing.T) {
 		},
 	}, nil)
 
-	if err := svc.Inject(context.Background(), api.PreparedMetadata{SourcePath: "video.mkv"}, api.TorrentResult{Path: torrentPath, URL: "https://aither.cc/torrent/download/374352.382", Tracker: "AITHER"}); err != nil {
+	if err := svc.Inject(context.Background(), api.PreparedMetadata{SourcePath: "video.mkv"}, api.TorrentResult{
+		Path:    torrentPath,
+		URL:     "https://aither.cc/torrent/download/374352.382",
+		Tracker: "AITHER",
+	}); err != nil {
 		t.Fatalf("inject: %v", err)
 	}
 

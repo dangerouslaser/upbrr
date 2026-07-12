@@ -291,7 +291,16 @@ func buildACMName(meta api.PreparedMetadata) string {
 	return strings.TrimSpace(strings.Join(strings.Fields(name), " ")) + acmSubtitleTag(acmSubtitleCodesFor(meta))
 }
 
-func buildACMDescription(ctx context.Context, meta api.PreparedMetadata, appConfig config.Config, trackerConfig config.TrackerConfig, logger api.Logger, keptDescription string, menuImages []api.ScreenshotImage, screenshots []api.ScreenshotImage) (string, error) {
+func buildACMDescription(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	appConfig config.Config,
+	trackerConfig config.TrackerConfig,
+	logger api.Logger,
+	keptDescription string,
+	menuImages []api.ScreenshotImage,
+	screenshots []api.ScreenshotImage,
+) (string, error) {
 	base := acmSceneNFOPattern.ReplaceAllString(strings.TrimSpace(keptDescription), "")
 	base = strings.ReplaceAll(base, "\r\n", "\n")
 	base = strings.ReplaceAll(base, "[pre]", "[code]")
@@ -496,7 +505,12 @@ func convertACMComparisonToCollapse(value string, maxWidth int) string {
 		if len(row) > 0 {
 			lines = append(lines, strings.Join(row, ""))
 		}
-		return fmt.Sprintf("[spoiler=%s][center]%s[/center]\n%s[/spoiler]", strings.Join(sources, " vs "), strings.Join(sources, " | "), strings.Join(lines, "\n"))
+		return fmt.Sprintf(
+			"[spoiler=%s][center]%s[/center]\n%s[/spoiler]",
+			strings.Join(sources, " vs "),
+			strings.Join(sources, " | "),
+			strings.Join(lines, "\n"),
+		)
 	})
 }
 

@@ -48,7 +48,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	if state.blockedReason != "" {
 		return api.UploadSummary{}, fmt.Errorf("trackers: HDT %s", state.blockedReason)
 	}
-	files := []commonhttp.FileField{{FieldName: "torrent", FileName: filepath.Base(state.torrentPath), Path: state.torrentPath}}
+	files := []commonhttp.FileField{{
+		FieldName: "torrent",
+		FileName:  filepath.Base(state.torrentPath),
+		Path:      state.torrentPath,
+	}}
 	if state.nfo != nil {
 		files = append(files, *state.nfo)
 	}
@@ -73,7 +77,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	if resp.Request != nil && resp.Request.URL != nil {
 		finalURL = resp.Request.URL.String()
 	}
-	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 400, commonhttp.DefaultResponsePreviewBytes)
+	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(
+		resp,
+		resp.StatusCode >= 200 && resp.StatusCode < 400,
+		commonhttp.DefaultResponsePreviewBytes,
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: HDT read upload response: %w", err)
 	}
@@ -132,7 +140,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Description:      state.description,
 		Endpoint:         state.baseURL + "/upload.php",
 		Payload:          cloneFields(state.fields),
-		Files:            []api.TrackerDryRunFile{{Field: "torrent", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "torrent",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -338,7 +350,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 
@@ -386,7 +401,8 @@ func screenshotBlock(images []api.ScreenshotImage) string {
 
 func resolveName(meta api.PreparedMetadata) string {
 	name := strings.TrimSpace(meta.ReleaseName)
-	if strings.EqualFold(strings.TrimSpace(meta.Type), "WEBDL") || strings.EqualFold(strings.TrimSpace(meta.Type), "WEBRIP") || strings.EqualFold(strings.TrimSpace(meta.Type), "ENCODE") {
+	if strings.EqualFold(strings.TrimSpace(meta.Type), "WEBDL") || strings.EqualFold(strings.TrimSpace(meta.Type), "WEBRIP") ||
+		strings.EqualFold(strings.TrimSpace(meta.Type), "ENCODE") {
 		name = strings.Replace(name, meta.Audio, strings.Replace(meta.Audio, " ", "", 1), 1)
 	}
 	name = strings.ReplaceAll(name, " DV ", " DoVi ")
@@ -419,7 +435,11 @@ func resolveNFO(meta api.PreparedMetadata) (commonhttp.FileField, bool) {
 	if err != nil {
 		return commonhttp.FileField{}, false
 	}
-	return commonhttp.FileField{FieldName: "nfos", FileName: filepath.Base(path), Content: payload}, true
+	return commonhttp.FileField{
+		FieldName: "nfos",
+		FileName:  filepath.Base(path),
+		Content:   payload,
+	}, true
 }
 
 func categoryOf(meta api.PreparedMetadata) string {

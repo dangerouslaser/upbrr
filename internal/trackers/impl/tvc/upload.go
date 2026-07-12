@@ -33,8 +33,21 @@ const (
 )
 
 var categoryMap = map[string]string{
-	"comedy": "29", "current affairs": "45", "documentary": "5", "drama": "11", "entertainment": "14",
-	"factual": "19", "foreign": "43", "kids": "32", "movies": "44", "news": "54", "reality": "52", "soaps": "30", "sci-fi": "33", "sport": "42", "holding bin": "53",
+	"comedy":          "29",
+	"current affairs": "45",
+	"documentary":     "5",
+	"drama":           "11",
+	"entertainment":   "14",
+	"factual":         "19",
+	"foreign":         "43",
+	"kids":            "32",
+	"movies":          "44",
+	"news":            "54",
+	"reality":         "52",
+	"soaps":           "30",
+	"sci-fi":          "33",
+	"sport":           "42",
+	"holding bin":     "53",
 }
 
 type uploadState struct {
@@ -62,7 +75,12 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: %w", err)
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, uploadURL+"?api_token="+url.QueryEscape(strings.TrimSpace(req.TrackerConfig.APIKey)), bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		uploadURL+"?api_token="+url.QueryEscape(strings.TrimSpace(req.TrackerConfig.APIKey)),
+		bytes.NewReader(body),
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: TVC build upload request: %s", commonhttp.RedactErrorDetail(err.Error()))
 	}
@@ -105,7 +123,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		}
 	}
 	return api.UploadSummary{Uploaded: 1, UploadedTorrents: []api.UploadedTorrent{{
-		Tracker: "TVC", TorrentID: torrentID, TorrentURL: dataURL, DownloadURL: dataURL, TorrentPath: artifactPath,
+		Tracker:     "TVC",
+		TorrentID:   torrentID,
+		TorrentURL:  dataURL,
+		DownloadURL: dataURL,
+		TorrentPath: artifactPath,
 	}}}, nil
 }
 
@@ -130,7 +152,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
 		Questionnaire:    state.questionnaire,
-		Files:            []api.TrackerDryRunFile{{Field: "torrent", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "torrent",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -220,7 +246,11 @@ func buildQuestionnaire(meta api.PreparedMetadata) *api.TrackerQuestionnaire {
 	return &api.TrackerQuestionnaire{
 		Tracker: "TVC",
 		Fields: []api.TrackerQuestionnaireField{{
-			Key: "name_override", Label: "Upload Name", Kind: "text", Value: resolveName(meta), Required: true,
+			Key:      "name_override",
+			Label:    "Upload Name",
+			Kind:     "text",
+			Value:    resolveName(meta),
+			Required: true,
 		}},
 	}
 }
@@ -289,11 +319,34 @@ func resolveName(meta api.PreparedMetadata) string {
 	var name string
 	switch {
 	case !isTV(meta):
-		name = fmt.Sprintf("%s (%d) [%s %s %s]", metautil.FirstNonEmptyTrimmed(meta.Release.Title, meta.ReleaseName), maxInt(meta.Release.Year, meta.ExternalMetadata.TMDB.Year), meta.Release.Resolution, typeName, videoSuffix(meta.VideoCodec))
+		name = fmt.Sprintf(
+			"%s (%d) [%s %s %s]",
+			metautil.FirstNonEmptyTrimmed(meta.Release.Title, meta.ReleaseName),
+			maxInt(meta.Release.Year, meta.ExternalMetadata.TMDB.Year),
+			meta.Release.Resolution,
+			typeName,
+			videoSuffix(meta.VideoCodec),
+		)
 	case meta.TVPack:
-		name = fmt.Sprintf("%s - Series %d (%d) [%s %s %s]", metautil.FirstNonEmptyTrimmed(meta.Release.Title, meta.ReleaseName), maxInt(meta.SeasonInt, 1), maxInt(meta.Release.Year, meta.ExternalMetadata.TMDB.Year), meta.Release.Resolution, typeName, videoSuffix(meta.VideoCodec))
+		name = fmt.Sprintf(
+			"%s - Series %d (%d) [%s %s %s]",
+			metautil.FirstNonEmptyTrimmed(meta.Release.Title, meta.ReleaseName),
+			maxInt(meta.SeasonInt, 1),
+			maxInt(meta.Release.Year, meta.ExternalMetadata.TMDB.Year),
+			meta.Release.Resolution,
+			typeName,
+			videoSuffix(meta.VideoCodec),
+		)
 	default:
-		name = fmt.Sprintf("%s S%02dE%02d [%s %s %s]", metautil.FirstNonEmptyTrimmed(meta.Release.Title, meta.ReleaseName), maxInt(meta.SeasonInt, 1), maxInt(meta.EpisodeInt, 1), meta.Release.Resolution, typeName, videoSuffix(meta.VideoCodec))
+		name = fmt.Sprintf(
+			"%s S%02dE%02d [%s %s %s]",
+			metautil.FirstNonEmptyTrimmed(meta.Release.Title, meta.ReleaseName),
+			maxInt(meta.SeasonInt, 1),
+			maxInt(meta.EpisodeInt, 1),
+			meta.Release.Resolution,
+			typeName,
+			videoSuffix(meta.VideoCodec),
+		)
 	}
 	if strings.EqualFold(strings.TrimSpace(meta.VideoCodec), "HEVC") {
 		name = strings.Replace(name, "]", " HEVC]", 1)
@@ -302,7 +355,30 @@ func resolveName(meta api.PreparedMetadata) string {
 }
 
 func appendCountryCode(meta api.PreparedMetadata, name string) string {
-	mapping := map[string]string{"AT": "AUT", "AU": "AUS", "BE": "BEL", "CA": "CAN", "CH": "CHE", "CZ": "CZE", "DE": "GER", "DK": "DNK", "EE": "EST", "ES": "SPA", "FI": "FIN", "FR": "FRA", "IE": "IRL", "IS": "ISL", "IT": "ITA", "NL": "NLD", "NO": "NOR", "NZ": "NZL", "PL": "POL", "PT": "POR", "RU": "RUS", "SE": "SWE"}
+	mapping := map[string]string{
+		"AT": "AUT",
+		"AU": "AUS",
+		"BE": "BEL",
+		"CA": "CAN",
+		"CH": "CHE",
+		"CZ": "CZE",
+		"DE": "GER",
+		"DK": "DNK",
+		"EE": "EST",
+		"ES": "SPA",
+		"FI": "FIN",
+		"FR": "FRA",
+		"IE": "IRL",
+		"IS": "ISL",
+		"IT": "ITA",
+		"NL": "NLD",
+		"NO": "NOR",
+		"NZ": "NZL",
+		"PL": "POL",
+		"PT": "POR",
+		"RU": "RUS",
+		"SE": "SWE",
+	}
 	for _, code := range meta.ExternalMetadata.TMDB.OriginCountry {
 		if mapped := mapping[strings.ToUpper(strings.TrimSpace(code))]; mapped != "" {
 			return name + " [" + mapped + "]"

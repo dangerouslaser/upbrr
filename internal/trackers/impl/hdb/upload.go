@@ -420,7 +420,15 @@ func resolveHDBCookies(ctx context.Context, dbPath string) ([]*http.Cookie, erro
 	return wrapTrackerResult(cookiepkg.LoadTrackerHTTPCookies(ctx, dbPath, "HDB", "hdbits.org"))
 }
 
-func downloadPersonalizedTorrent(ctx context.Context, uploadURL string, meta api.PreparedMetadata, torrentPath string, torrentID string, passkey string, cookies []*http.Cookie) error {
+func downloadPersonalizedTorrent(
+	ctx context.Context,
+	uploadURL string,
+	meta api.PreparedMetadata,
+	torrentPath string,
+	torrentID string,
+	passkey string,
+	cookies []*http.Cookie,
+) error {
 	downloadURL := buildHDBDownloadURL(uploadURL, meta, torrentID, passkey)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 	if err != nil {
@@ -464,7 +472,13 @@ func buildHDBDownloadURL(uploadURL string, meta api.PreparedMetadata, torrentID 
 	if filePart == "" || filePart == "." || filePart == string(filepath.Separator) {
 		filePart = "download"
 	}
-	return fmt.Sprintf("%s/download.php/%s?id=%s&passkey=%s", strings.TrimRight(base, "/"), url.PathEscape(filePart), url.QueryEscape(torrentID), url.QueryEscape(passkey))
+	return fmt.Sprintf(
+		"%s/download.php/%s?id=%s&passkey=%s",
+		strings.TrimRight(base, "/"),
+		url.PathEscape(filePart),
+		url.QueryEscape(torrentID),
+		url.QueryEscape(passkey),
+	)
 }
 
 func hdbCategoryID(meta api.PreparedMetadata) int {

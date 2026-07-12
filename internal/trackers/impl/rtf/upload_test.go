@@ -55,7 +55,11 @@ func TestUploadRefreshesExpiredAPIKeyAndPersistsIt(t *testing.T) {
 		t.Fatalf("write torrent: %v", err)
 	}
 	dbPath := filepath.Join(root, "upbrr.db")
-	seedRTFConfig(t, dbPath, config.TrackerConfig{APIKey: "old-token", Username: "user", Password: "pass"})
+	seedRTFConfig(t, dbPath, config.TrackerConfig{
+		APIKey:   "old-token",
+		Username: "user",
+		Password: "pass",
+	})
 
 	var testedToken string
 	var loginCalled bool
@@ -120,7 +124,11 @@ func TestUploadBlockedExpiredAPIKeyDoesNotRefreshOrPersist(t *testing.T) {
 		t.Fatalf("write torrent: %v", err)
 	}
 	dbPath := filepath.Join(root, "upbrr.db")
-	seedRTFConfig(t, dbPath, config.TrackerConfig{APIKey: "old-token", Username: "user", Password: "pass"})
+	seedRTFConfig(t, dbPath, config.TrackerConfig{
+		APIKey:   "old-token",
+		Username: "user",
+		Password: "pass",
+	})
 
 	requests := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

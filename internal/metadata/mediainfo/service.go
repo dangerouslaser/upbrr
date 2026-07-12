@@ -100,7 +100,15 @@ func (s *Service) Export(ctx context.Context, req Request) (Result, error) {
 			if s.logger != nil {
 				s.logger.Debugf("mediainfo: reusing existing artifacts from %s", tmpDir)
 			}
-			return Result{JSONPath: jsonPath, TextPath: textPath, IFOPath: target.IFOPath, VOBPath: target.VOBPath, VOBSet: target.VOBSet, VOBText: vobText, VOBJSON: vobJSON}, nil
+			return Result{
+				JSONPath: jsonPath,
+				TextPath: textPath,
+				IFOPath:  target.IFOPath,
+				VOBPath:  target.VOBPath,
+				VOBSet:   target.VOBSet,
+				VOBText:  vobText,
+				VOBJSON:  vobJSON,
+			}, nil
 		}
 		if s.logger != nil {
 			if err != nil {
@@ -138,7 +146,15 @@ func (s *Service) Export(ctx context.Context, req Request) (Result, error) {
 		return Result{}, err
 	}
 
-	return Result{JSONPath: jsonPath, TextPath: textPath, IFOPath: target.IFOPath, VOBPath: target.VOBPath, VOBSet: target.VOBSet, VOBText: vobText, VOBJSON: vobJSON}, nil
+	return Result{
+		JSONPath: jsonPath,
+		TextPath: textPath,
+		IFOPath:  target.IFOPath,
+		VOBPath:  target.VOBPath,
+		VOBSet:   target.VOBSet,
+		VOBText:  vobText,
+		VOBJSON:  vobJSON,
+	}, nil
 }
 
 func analyzeVOB(ctx context.Context, analyzer Analyzer, vobPath string) (string, string, error) {

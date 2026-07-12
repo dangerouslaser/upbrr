@@ -1,4 +1,4 @@
-.PHONY: help build backend frontend frontend-bundle gui dev dev-frontend test test-go test-frontend e2e e2e-build e2e-web e2e-cli e2e-wails lint lint-json logpolicy pathpolicy precommit prepush fmt fmt-go fmt-frontend gofix gofix-check gofix-changed gofix-check-changed commitmsg-check clean
+.PHONY: help build backend frontend frontend-bundle gui dev dev-frontend test test-go test-frontend e2e e2e-build e2e-web e2e-cli e2e-wails lint lint-json logpolicy pathpolicy literalpolicy literalpolicy-fix precommit prepush fmt fmt-go fmt-frontend gofix gofix-check gofix-changed gofix-check-changed commitmsg-check clean
 
 ifeq ($(OS),Windows_NT)
 EXE := .exe
@@ -126,7 +126,7 @@ e2e-wails:
 	pnpm --dir gui/frontend install --frozen-lockfile
 	pnpm --dir gui/frontend exec playwright test --project=wails-basic
 
-lint: pathpolicy
+lint: pathpolicy literalpolicy
 	golangci-lint run $(GOLANGCI_FLAGS) ./...
 
 lint-json:
@@ -137,6 +137,13 @@ logpolicy:
 
 pathpolicy:
 	go run ./cmd/pathpolicy
+
+literalpolicy:
+	go run ./cmd/literalpolicy
+
+literalpolicy-fix:
+	go run ./cmd/literalpolicy -fix
+	golangci-lint fmt
 
 precommit:
 	lefthook run pre-commit
@@ -152,6 +159,7 @@ prepush:
 fmt: fmt-go fmt-frontend
 
 fmt-go:
+	go run ./cmd/literalpolicy -fix
 	golangci-lint fmt
 
 fmt-frontend:

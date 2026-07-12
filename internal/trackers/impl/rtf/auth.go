@@ -13,5 +13,12 @@ func (d Definition) AuthSessionResolver() trackers.AuthSessionResolver {
 }
 
 func (d Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "RTF", DisplayName: "RTF", AuthKind: "api_key_credential_refresh", SupportsLogin: true, SupportsAutoLogin: true, RequiresAPIKey: true}
+	return api.TrackerAuthCapability{
+		TrackerID:         "RTF",
+		DisplayName:       "RTF",
+		AuthKind:          "api_key_credential_refresh",
+		SupportsLogin:     true,
+		SupportsAutoLogin: true,
+		RequiresAPIKey:    true,
+	}
 }

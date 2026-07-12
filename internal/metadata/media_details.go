@@ -130,7 +130,13 @@ func (s *Service) ApplyMediaDetails(ctx context.Context, meta api.PreparedMetada
 		return api.PreparedMetadata{}, err
 	}
 	if s.logger != nil && meta.ExternalMetadata.Bluray != nil {
-		s.logger.Debugf("metadata: blu-ray.com candidates=%d selected=%q score=%.1f threshold=%.1f", len(meta.ExternalMetadata.Bluray.Candidates), meta.ExternalMetadata.Bluray.SelectedReleaseID, meta.ExternalMetadata.Bluray.BestScore, meta.ExternalMetadata.Bluray.Threshold)
+		s.logger.Debugf(
+			"metadata: blu-ray.com candidates=%d selected=%q score=%.1f threshold=%.1f",
+			len(meta.ExternalMetadata.Bluray.Candidates),
+			meta.ExternalMetadata.Bluray.SelectedReleaseID,
+			meta.ExternalMetadata.Bluray.BestScore,
+			meta.ExternalMetadata.Bluray.Threshold,
+		)
 	}
 
 	meta.Distributor = normalizeDistributor(meta.Distributor)
@@ -145,7 +151,13 @@ func (s *Service) ApplyMediaDetails(ctx context.Context, meta api.PreparedMetada
 		meta.VideoEncode, meta.VideoCodec, meta.HasEncodeSettings, meta.BitDepth = videoEncodeFromMedia(miDoc, meta.Type)
 	}
 	if s.logger != nil {
-		s.logger.Debugf("metadata: media details region=%q video_encode=%q video_codec=%q bit_depth=%q", meta.Region, meta.VideoEncode, meta.VideoCodec, meta.BitDepth)
+		s.logger.Debugf(
+			"metadata: media details region=%q video_encode=%q video_codec=%q bit_depth=%q",
+			meta.Region,
+			meta.VideoEncode,
+			meta.VideoCodec,
+			meta.BitDepth,
+		)
 	}
 
 	meta.Edition, meta.Repack = editionFromMeta(meta, miDoc)
@@ -722,7 +734,11 @@ func applyAudioBloatPolicy(meta *api.PreparedMetadata, candidateTrackers []strin
 	}
 }
 
-func resolveAudioBloatPolicyWithRegistry(meta api.PreparedMetadata, candidateTrackers []string, registry *trackers.Registry) (map[string][]string, map[string][]string) {
+func resolveAudioBloatPolicyWithRegistry(
+	meta api.PreparedMetadata,
+	candidateTrackers []string,
+	registry *trackers.Registry,
+) (map[string][]string, map[string][]string) {
 	original := canonicalAudioLanguage(originalAudioLanguage(meta))
 	if original == "" || original == "unknown" {
 		return nil, nil
@@ -759,7 +775,12 @@ func resolveAudioBloatPolicyWithRegistry(meta api.PreparedMetadata, candidateTra
 	}
 
 	bloatAllowed := map[string]struct{}{
-		"ASC": {}, "BJS": {}, "BT": {}, "DC": {}, "FF": {}, "TL": {},
+		"ASC": {},
+		"BJS": {},
+		"BT":  {},
+		"DC":  {},
+		"FF":  {},
+		"TL":  {},
 	}
 	trackerAllowedLanguages := map[string][]string{
 		"AITHER": {"english"},

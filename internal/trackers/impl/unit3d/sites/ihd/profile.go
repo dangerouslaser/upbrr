@@ -34,7 +34,13 @@ func categoryID(meta api.PreparedMetadata) string {
 }
 
 func resolutionID(meta api.PreparedMetadata) string {
-	if value, ok := map[string]string{"4320p": "1", "2160p": "2", "1440p": "3", "1080p": "3", "1080i": "4"}[unit3d.Resolution(meta)]; ok {
+	if value, ok := map[string]string{
+		"4320p": "1",
+		"2160p": "2",
+		"1440p": "3",
+		"1080p": "3",
+		"1080i": "4",
+	}[unit3d.Resolution(meta)]; ok {
 		return value
 	}
 	return "10"

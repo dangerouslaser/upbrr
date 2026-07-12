@@ -424,7 +424,11 @@ func (s *stubTVmaze) GetEpisodeByDate(_ context.Context, _ int, _ string) (*tvma
 func TestResolveExternalIDsPrecedence(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{metadata: tmdb.MetadataResult{Title: "Example", Year: 2024}}
-	imdbClient := &stubIMDB{info: imdb.Info{IMDbID: "tt0000001", Title: "Example", Year: 2024}}
+	imdbClient := &stubIMDB{info: imdb.Info{
+		IMDbID: "tt0000001",
+		Title:  "Example",
+		Year:   2024,
+	}}
 	tvdbClient := &stubTVDB{}
 	tvmazeClient := &stubTVmaze{}
 
@@ -436,12 +440,16 @@ func TestResolveExternalIDsPrecedence(t *testing.T) {
 	)
 
 	meta := api.PreparedMetadata{
-		SourcePath:        "/media/file.mkv",
-		MediaInfoTMDBID:   999,
-		MediaInfoIMDBID:   888,
-		MediaInfoTVDBID:   777,
-		SceneIMDB:         666,
-		TrackerData:       []api.TrackerMetadata{{TMDBID: 1, IMDBID: 2, TVDBID: 3}},
+		SourcePath:      "/media/file.mkv",
+		MediaInfoTMDBID: 999,
+		MediaInfoIMDBID: 888,
+		MediaInfoTVDBID: 777,
+		SceneIMDB:       666,
+		TrackerData: []api.TrackerMetadata{{
+			TMDBID: 1,
+			IMDBID: 2,
+			TVDBID: 3,
+		}},
 		MediaInfoCategory: "TV",
 	}
 
@@ -493,16 +501,28 @@ func TestResolveExternalIDsAdjustsEpisodeIMDbIDToParentSeries(t *testing.T) {
 	imdbClient := &stubIMDB{
 		infoFn: func(imdbID string) imdb.Info {
 			if imdbID == "tt7654321" {
-				return imdb.Info{IMDbID: imdbID, Title: "Example Episode", Type: "tvEpisode"}
+				return imdb.Info{
+					IMDbID: imdbID,
+					Title:  "Example Episode",
+					Type:   "tvEpisode",
+				}
 			}
-			return imdb.Info{IMDbID: imdbID, Title: "Example Series", Type: "tvSeries"}
+			return imdb.Info{
+				IMDbID: imdbID,
+				Title:  "Example Series",
+				Type:   "tvSeries",
+			}
 		},
 		episodeLookup: imdb.EpisodeLookup{Series: imdb.SeriesInfo{SeriesID: "tt1234567", SeriesTitle: "Example Series"}},
 	}
 	tvmazeClient := &stubTVmaze{result: tvmaze.SearchResult{
 		SelectedID: 55,
 		IMDBID:     1234567,
-		Candidates: []tvmaze.Candidate{{ID: 55, Name: "Example Series", Externals: tvmaze.Externals{IMDB: "tt1234567"}}},
+		Candidates: []tvmaze.Candidate{{
+			ID:        55,
+			Name:      "Example Series",
+			Externals: tvmaze.Externals{IMDB: "tt1234567"},
+		}},
 	}}
 	imdbOverride := 7654321
 	svc := NewService(repo,
@@ -697,7 +717,11 @@ func TestCloneStringMapReturnsDetachedEmptyMapForNil(t *testing.T) {
 func TestResolveExternalIDsSkipAutoTorrentIgnoresTrackerSourcedIDs(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{metadata: tmdb.MetadataResult{Title: "Example", Year: 2024}}
-	imdbClient := &stubIMDB{info: imdb.Info{IMDbID: "tt0000888", Title: "Example", Year: 2024}}
+	imdbClient := &stubIMDB{info: imdb.Info{
+		IMDbID: "tt0000888",
+		Title:  "Example",
+		Year:   2024,
+	}}
 	tvdbClient := &stubTVDB{}
 	tvmazeClient := &stubTVmaze{}
 
@@ -850,8 +874,12 @@ func TestResolveExternalIDsMovieCategoryVetoesEarlierTVCandidate(t *testing.T) {
 	)
 
 	result, err := svc.ResolveExternalIDs(context.Background(), api.PreparedMetadata{
-		SourcePath:  "/media/file.mkv",
-		Release:     api.ReleaseInfo{Category: "MOVIE", Title: "Example", Year: 2024},
+		SourcePath: "/media/file.mkv",
+		Release: api.ReleaseInfo{
+			Category: "MOVIE",
+			Title:    "Example",
+			Year:     2024,
+		},
 		TrackerData: []api.TrackerMetadata{{Category: "TV", TVDBID: 12345}},
 	})
 	if err != nil {
@@ -900,8 +928,12 @@ func TestResolveExternalIDsIgnoresUnsupportedTrackerCategory(t *testing.T) {
 	)
 
 	result, err := svc.ResolveExternalIDs(context.Background(), api.PreparedMetadata{
-		SourcePath:  "/media/file.mkv",
-		Release:     api.ReleaseInfo{Category: "MOVIE", Title: "Example", Year: 2024},
+		SourcePath: "/media/file.mkv",
+		Release: api.ReleaseInfo{
+			Category: "MOVIE",
+			Title:    "Example",
+			Year:     2024,
+		},
 		TrackerData: []api.TrackerMetadata{{Category: "Music"}},
 	})
 	if err != nil {
@@ -926,11 +958,19 @@ func TestResolveExternalIDsSearchAndMetadata(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{
 		searchOutcome: tmdb.SearchOutcome{TMDBID: 42, Category: "MOVIE"},
-		metadata:      tmdb.MetadataResult{Title: "Example", Year: 2024, TMDBType: "Movie"},
+		metadata: tmdb.MetadataResult{
+			Title:    "Example",
+			Year:     2024,
+			TMDBType: "Movie",
+		},
 	}
 	imdbClient := &stubIMDB{searchResult: imdb.SearchResult{IMDbID: 24}, info: imdb.Info{IMDbID: "tt0000024", Title: "Example"}}
 	tvdbClient := &stubTVDB{id: 12, name: "Example"}
-	tvmazeClient := &stubTVmaze{result: tvmaze.SearchResult{SelectedID: 55, IMDBID: 24, TVDBID: 12}}
+	tvmazeClient := &stubTVmaze{result: tvmaze.SearchResult{
+		SelectedID: 55,
+		IMDBID:     24,
+		TVDBID:     12,
+	}}
 
 	svc := NewService(repo,
 		WithTMDBClient(tmdbClient),
@@ -964,7 +1004,11 @@ func TestResolveExternalIDsPassesLogoSettingsToTMDB(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{
 		searchOutcome: tmdb.SearchOutcome{TMDBID: 42, Category: "MOVIE"},
-		metadata:      tmdb.MetadataResult{Title: "Example", Year: 2024, TMDBType: "Movie"},
+		metadata: tmdb.MetadataResult{
+			Title:    "Example",
+			Year:     2024,
+			TMDBType: "Movie",
+		},
 	}
 	svc := NewService(repo,
 		WithConfig(config.Config{Description: config.DescriptionSettingsConfig{AddLogo: true, LogoLanguage: "ja,en"}}),
@@ -1039,9 +1083,17 @@ func TestResolveExternalIDsRefetchesMissingTMDBLogo(t *testing.T) {
 func TestResolveExternalIDsUsesSceneTVmazeToResolveIMDb(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{metadata: tmdb.MetadataResult{Title: "Example Show", Year: 2026}}
-	imdbClient := &stubIMDB{info: imdb.Info{IMDbID: "tt1234567", Title: "Example Show", Year: 2026}}
+	imdbClient := &stubIMDB{info: imdb.Info{
+		IMDbID: "tt1234567",
+		Title:  "Example Show",
+		Year:   2026,
+	}}
 	tvdbClient := &stubTVDB{id: 456789, name: "Example Show"}
-	tvmazeClient := &stubTVmaze{result: tvmaze.SearchResult{SelectedID: 12345, IMDBID: 1234567, TVDBID: 456789}}
+	tvmazeClient := &stubTVmaze{result: tvmaze.SearchResult{
+		SelectedID: 12345,
+		IMDBID:     1234567,
+		TVDBID:     456789,
+	}}
 
 	svc := NewService(repo,
 		WithTMDBClient(tmdbClient),
@@ -1076,8 +1128,17 @@ func TestResolveExternalIDsUsesSceneTVmazeToResolveIMDb(t *testing.T) {
 
 func TestResolveExternalIDsUsesSceneNFOIDs(t *testing.T) {
 	repo := &fakeRepo{}
-	tmdbClient := &stubTMDB{metadata: tmdb.MetadataResult{Title: "Example", Year: 2024, TMDBType: "TV", MALID: 999}}
-	imdbClient := &stubIMDB{info: imdb.Info{IMDbID: "tt0123456", Title: "Example", Year: 2024}}
+	tmdbClient := &stubTMDB{metadata: tmdb.MetadataResult{
+		Title:    "Example",
+		Year:     2024,
+		TMDBType: "TV",
+		MALID:    999,
+	}}
+	imdbClient := &stubIMDB{info: imdb.Info{
+		IMDbID: "tt0123456",
+		Title:  "Example",
+		Year:   2024,
+	}}
 	tvdbClient := &stubTVDB{}
 	tvmazeClient := &stubTVmaze{}
 
@@ -1194,8 +1255,17 @@ func TestResolveExternalIDsPrefersTMDBFromIMDbBeforeSearch(t *testing.T) {
 		findResult:    tmdb.FindResult{TMDBID: 456789, Category: "TV"},
 		metadata:      tmdb.MetadataResult{Title: "Example Quiz", TMDBType: "Scripted"},
 	}
-	imdbClient := &stubIMDB{info: imdb.Info{IMDbID: "tt1234567", Title: "Example Quiz", Type: "tvSeries", Year: 2026}}
-	tvdbClient := &stubTVDB{seriesMetadata: tvdb.SeriesMetadata{TVDBID: 456789, Name: "Example Quiz", FirstAired: "2026-09-10"}}
+	imdbClient := &stubIMDB{info: imdb.Info{
+		IMDbID: "tt1234567",
+		Title:  "Example Quiz",
+		Type:   "tvSeries",
+		Year:   2026,
+	}}
+	tvdbClient := &stubTVDB{seriesMetadata: tvdb.SeriesMetadata{
+		TVDBID:     456789,
+		Name:       "Example Quiz",
+		FirstAired: "2026-09-10",
+	}}
 	tvmazeClient := &stubTVmaze{}
 
 	svc := NewService(repo,
@@ -1208,8 +1278,16 @@ func TestResolveExternalIDsPrefersTMDBFromIMDbBeforeSearch(t *testing.T) {
 	meta := api.PreparedMetadata{
 		SourcePath:        `D:\temp\Example.Quiz.2026.11.10.1080p.WEB-DL.AAC2.0.H.264-GRP.mkv`,
 		MediaInfoCategory: "TV",
-		Release:           api.ReleaseInfo{Title: "Example Quiz", Year: 2026, Type: "episode"},
-		TrackerData:       []api.TrackerMetadata{{IMDBID: 1234567, TVDBID: 456789, Category: "TV"}},
+		Release: api.ReleaseInfo{
+			Title: "Example Quiz",
+			Year:  2026,
+			Type:  "episode",
+		},
+		TrackerData: []api.TrackerMetadata{{
+			IMDBID:   1234567,
+			TVDBID:   456789,
+			Category: "TV",
+		}},
 	}
 
 	result, err := svc.ResolveExternalIDs(context.Background(), meta)
@@ -1253,7 +1331,12 @@ func TestResolveExternalIDsEpisodeTypeForcesTVTMDBSearchCategory(t *testing.T) {
 
 	meta := api.PreparedMetadata{
 		SourcePath: `/media/Example.Show.2025.11.10.1080p.WEB-DL.mkv`,
-		Release:    api.ReleaseInfo{Title: "Example Show", Year: 2025, Category: "TV", Type: "WEB-DL"},
+		Release: api.ReleaseInfo{
+			Title:    "Example Show",
+			Year:     2025,
+			Category: "TV",
+			Type:     "WEB-DL",
+		},
 	}
 
 	result, err := svc.ResolveExternalIDs(context.Background(), meta)
@@ -1310,7 +1393,11 @@ func TestResolveExternalIDsSearchStagesAndUnattendedInteractionMode(t *testing.T
 		SourcePath: "/media/Example.Series.2025.1080p.WEB-DL.mkv",
 		Mode:       api.ModeCLI,
 		Options:    api.UploadOptions{InteractionMode: api.InteractionModeUnattended},
-		Release:    api.ReleaseInfo{Title: "Example Series", Year: 2025, Type: "episode"},
+		Release: api.ReleaseInfo{
+			Title: "Example Series",
+			Year:  2025,
+			Type:  "episode",
+		},
 	}
 
 	result, err := svc.ResolveExternalIDs(context.Background(), meta)
@@ -1364,7 +1451,11 @@ func TestResolveExternalIDsInteractiveCLIDoesNotForceUnattendedSearch(t *testing
 		SourcePath: "/media/Example.Series.2025.1080p.WEB-DL.mkv",
 		Mode:       api.ModeCLI,
 		Options:    api.UploadOptions{InteractionMode: api.InteractionModeInteractive},
-		Release:    api.ReleaseInfo{Title: "Example Series", Year: 2025, Type: "episode"},
+		Release: api.ReleaseInfo{
+			Title: "Example Series",
+			Year:  2025,
+			Type:  "episode",
+		},
 	})
 	if err != nil {
 		t.Fatalf("resolve: %v", err)
@@ -1436,7 +1527,11 @@ func TestResolveExternalIDsFetchesIMDBAfterTMDBResolvesIt(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{
 		searchOutcome: tmdb.SearchOutcome{TMDBID: 224372, Category: "TV"},
-		metadata:      tmdb.MetadataResult{Title: "Example Show", TMDBType: "Scripted", IMDbID: 1234567},
+		metadata: tmdb.MetadataResult{
+			Title:    "Example Show",
+			TMDBType: "Scripted",
+			IMDbID:   1234567,
+		},
 	}
 	imdbClient := &stubIMDB{info: imdb.Info{IMDbID: "tt1234567", Title: "Example Show"}}
 	tvdbClient := &stubTVDB{}
@@ -1511,11 +1606,19 @@ func TestResolveExternalIDsDoesNotApplyTVDBForMovieCategory(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{
 		searchOutcome: tmdb.SearchOutcome{TMDBID: 1234, Category: "Movie"},
-		metadata:      tmdb.MetadataResult{Title: "Example TV Movie", TMDBType: "Movie", TVDBID: 55},
+		metadata: tmdb.MetadataResult{
+			Title:    "Example TV Movie",
+			TMDBType: "Movie",
+			TVDBID:   55,
+		},
 	}
 	imdbClient := &stubIMDB{
 		searchResult: imdb.SearchResult{IMDbID: 9876},
-		info:         imdb.Info{IMDbID: "tt0009876", Title: "Example TV Movie", Type: "tvMovie"},
+		info: imdb.Info{
+			IMDbID: "tt0009876",
+			Title:  "Example TV Movie",
+			Type:   "tvMovie",
+		},
 	}
 	tvdbClient := &stubTVDB{idWhenTVMovie: 55, nameWhenTVMovie: "Example TV Movie"}
 	tvmazeClient := &stubTVmaze{}
@@ -1553,7 +1656,11 @@ func TestResolveExternalIDsTVmazeWaitsForIDThenFallsBack(t *testing.T) {
 	repo := &fakeRepo{}
 	tmdbClient := &stubTMDB{
 		searchOutcome: tmdb.SearchOutcome{TMDBID: 224372, Category: "TV"},
-		metadata:      tmdb.MetadataResult{Title: "Example Show", TMDBType: "Scripted", TVDBID: 433631},
+		metadata: tmdb.MetadataResult{
+			Title:    "Example Show",
+			TMDBType: "Scripted",
+			TVDBID:   433631,
+		},
 	}
 	imdbClient := &stubIMDB{}
 	tvdbClient := &stubTVDB{}
@@ -1609,8 +1716,12 @@ func TestResolveExternalIDsOverride(t *testing.T) {
 	)
 
 	meta := api.PreparedMetadata{
-		SourcePath:  "/media/file.mkv",
-		TrackerData: []api.TrackerMetadata{{TMDBID: 1, IMDBID: 2, TVDBID: 3}},
+		SourcePath: "/media/file.mkv",
+		TrackerData: []api.TrackerMetadata{{
+			TMDBID: 1,
+			IMDBID: 2,
+			TVDBID: 3,
+		}},
 		ExternalIDOverrides: api.ExternalIDOverrides{
 			TMDBID: new(999),
 			IMDBID: new(111),
@@ -1677,7 +1788,11 @@ func TestResolveExternalIDsRefetchesProviderSnapshotsAfterIDOverride(t *testing.
 
 func TestResolveExternalIDsClearIMDBReresolvesFromOverriddenTMDB(t *testing.T) {
 	repo := &fakeRepo{}
-	tmdbClient := &stubTMDB{metadata: tmdb.MetadataResult{IMDbID: 777, TMDBType: "Movie", Title: "Example"}}
+	tmdbClient := &stubTMDB{metadata: tmdb.MetadataResult{
+		IMDbID:   777,
+		TMDBType: "Movie",
+		Title:    "Example",
+	}}
 	imdbClient := &stubIMDB{}
 	tvdbClient := &stubTVDB{}
 	tvmazeClient := &stubTVmaze{}
@@ -2012,10 +2127,26 @@ func TestApplyTVEpisodeMetadataTVDBAliasYearPreservesSource(t *testing.T) {
 		yearSource string
 		confidence string
 	}{
-		{name: "translation name", yearSource: "translation_name", confidence: "high"},
-		{name: "translation alias", yearSource: "translation_alias", confidence: "high"},
-		{name: "extended alias", yearSource: "extended_alias", confidence: "high"},
-		{name: "slug", yearSource: "slug", confidence: "low"},
+		{
+			name:       "translation name",
+			yearSource: "translation_name",
+			confidence: "high",
+		},
+		{
+			name:       "translation alias",
+			yearSource: "translation_alias",
+			confidence: "high",
+		},
+		{
+			name:       "extended alias",
+			yearSource: "extended_alias",
+			confidence: "high",
+		},
+		{
+			name:       "slug",
+			yearSource: "slug",
+			confidence: "low",
+		},
 	}
 
 	for _, tt := range tests {
@@ -2105,7 +2236,11 @@ func TestApplyTVEpisodeMetadataTVDBAliasAppliedForEnglish(t *testing.T) {
 	}
 	external := &api.ExternalMetadata{
 		TMDB: &api.TMDBMetadata{OriginalLanguage: "en"},
-		TVDB: &api.TVDBMetadata{TVDBID: 200, Name: "Native Name", Year: 2015},
+		TVDB: &api.TVDBMetadata{
+			TVDBID: 200,
+			Name:   "Native Name",
+			Year:   2015,
+		},
 	}
 
 	_ = svc.applyTVEpisodeMetadata(context.Background(), meta, ids, external, tmdbClient, tvdbClient, &stubTVmaze{})
@@ -2229,15 +2364,35 @@ func TestApplyTVEpisodeMetadataIMDbMapsSeasonlessAbsoluteThenUsesTVmaze(t *testi
 		SourcePath: "Example.Series.-.03.1080p-GRP.mkv",
 		EpisodeInt: 3,
 	}
-	ids := &api.ExternalIDs{IMDBID: 1234567, TVmazeID: 55, Category: "TV"}
+	ids := &api.ExternalIDs{
+		IMDBID:   1234567,
+		TVmazeID: 55,
+		Category: "TV",
+	}
 	external := &api.ExternalMetadata{IMDB: &api.IMDBMetadata{
 		IMDBID: 1234567,
 		Title:  "Example Series",
 		Type:   "tvSeries",
 		Episodes: []api.IMDBEpisode{
-			{ID: "tt1000001", Title: "Episode One", Season: 1, EpisodeText: "1"},
-			{ID: "tt1000002", Title: "Episode Two", Season: 1, EpisodeText: "2"},
-			{ID: "tt1000003", Title: "IMDb Episode Three", Season: 2, EpisodeText: "1", ReleaseYear: 2026},
+			{
+				ID:          "tt1000001",
+				Title:       "Episode One",
+				Season:      1,
+				EpisodeText: "1",
+			},
+			{
+				ID:          "tt1000002",
+				Title:       "Episode Two",
+				Season:      1,
+				EpisodeText: "2",
+			},
+			{
+				ID:          "tt1000003",
+				Title:       "IMDb Episode Three",
+				Season:      2,
+				EpisodeText: "1",
+				ReleaseYear: 2026,
+			},
 		},
 	}}
 
@@ -2256,13 +2411,21 @@ func TestApplyTVEpisodeMetadataIMDbMapsSeasonlessAbsoluteThenUsesTVmaze(t *testi
 
 func TestApplyTVEpisodeMetadataIMDbTitleFallbackWithoutTVmaze(t *testing.T) {
 	svc := NewService(&fakeRepo{})
-	meta := api.PreparedMetadata{SourcePath: "Example.Series.S01E02.1080p-GRP.mkv", SeasonInt: 1, EpisodeInt: 2}
+	meta := api.PreparedMetadata{
+		SourcePath: "Example.Series.S01E02.1080p-GRP.mkv",
+		SeasonInt:  1,
+		EpisodeInt: 2,
+	}
 	ids := &api.ExternalIDs{IMDBID: 1234567, Category: "TV"}
 	external := &api.ExternalMetadata{IMDB: &api.IMDBMetadata{
 		IMDBID: 1234567,
 		Title:  "Example Series",
 		Episodes: []api.IMDBEpisode{{
-			ID: "tt1000002", Title: "The Example Path", Season: 1, EpisodeText: "2", ReleaseYear: 2026,
+			ID:          "tt1000002",
+			Title:       "The Example Path",
+			Season:      1,
+			EpisodeText: "2",
+			ReleaseYear: 2026,
 		}},
 	}}
 
@@ -2432,14 +2595,46 @@ func TestSanitizeEpisodeTitleSkipsGenericAndPlaceholderTitles(t *testing.T) {
 		input string
 		want  string
 	}{
-		{name: "numeric episode", input: "Episode 1", want: ""},
-		{name: "hash episode", input: "Episode #12", want: ""},
-		{name: "word episode", input: "Episode One", want: ""},
-		{name: "tba", input: "TBA", want: ""},
-		{name: "tbd", input: "TBD", want: ""},
-		{name: "tbc", input: "TBC", want: ""},
-		{name: "tdc", input: "TDC", want: ""},
-		{name: "real title containing episode", input: "The Episode Problem", want: "The Episode Problem"},
+		{
+			name:  "numeric episode",
+			input: "Episode 1",
+			want:  "",
+		},
+		{
+			name:  "hash episode",
+			input: "Episode #12",
+			want:  "",
+		},
+		{
+			name:  "word episode",
+			input: "Episode One",
+			want:  "",
+		},
+		{
+			name:  "tba",
+			input: "TBA",
+			want:  "",
+		},
+		{
+			name:  "tbd",
+			input: "TBD",
+			want:  "",
+		},
+		{
+			name:  "tbc",
+			input: "TBC",
+			want:  "",
+		},
+		{
+			name:  "tdc",
+			input: "TDC",
+			want:  "",
+		},
+		{
+			name:  "real title containing episode",
+			input: "The Episode Problem",
+			want:  "The Episode Problem",
+		},
 	}
 
 	for _, tt := range tests {
@@ -2982,7 +3177,11 @@ func TestResolveExternalIDsMALFallbacksAndClear(t *testing.T) {
 	tmdbID := 101
 	clearMAL := 0
 	svc := NewService(&fakeRepo{},
-		WithTMDBClient(&stubTMDB{metadata: tmdb.MetadataResult{TMDBType: "tv", MALID: 444, Anime: true}}),
+		WithTMDBClient(&stubTMDB{metadata: tmdb.MetadataResult{
+			TMDBType: "tv",
+			MALID:    444,
+			Anime:    true,
+		}}),
 		WithIMDBClient(&stubIMDB{}),
 		WithTVDBClient(&stubTVDB{}),
 		WithTVmazeClient(&stubTVmaze{}),

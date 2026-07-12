@@ -55,8 +55,8 @@
     {
       "label": "format-go",
       "type": "shell",
-      "command": "golangci-lint",
-      "args": ["fmt", "./..."],
+      "command": "make",
+      "args": ["fmt-go"],
       "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
     },
@@ -101,6 +101,25 @@
       "type": "shell",
       "command": "go",
       "args": ["run", "./cmd/pathpolicy"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "problemMatcher": {
+        "owner": "go",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        }
+      }
+    },
+    {
+      "label": "literalpolicy",
+      "type": "shell",
+      "command": "go",
+      "args": ["run", "./cmd/literalpolicy"],
       "options": { "cwd": "${workspaceFolder}" },
       "group": "test",
       "problemMatcher": {
@@ -244,7 +263,8 @@
         "typecheck-frontend",
         "format-check-frontend",
         "logpolicy",
-        "pathpolicy"
+        "pathpolicy",
+        "literalpolicy"
       ],
       "group": "test",
       "problemMatcher": []

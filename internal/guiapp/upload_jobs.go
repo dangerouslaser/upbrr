@@ -167,11 +167,46 @@ func trackerUploadRetryRequestFromJob(job *trackerUploadJob) (trackerUploadRetry
 // returns its job ID. Snapshots preserve partial upload counts returned with
 // later tracker errors or cancellation. The job captures upload options at
 // start time so failed-tracker retries reuse the original option set.
-func (a *App) StartTrackerUpload(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackers []string, ignoreDupesFor []string, questionnaireAnswers map[string]map[string]string, descriptionGroups []api.DescriptionBuilderGroup, debug bool, noSeed bool, runLogLevel string) (string, error) {
-	return a.startTrackerUpload(path, overrides, nameOverrides, trackers, ignoreDupesFor, questionnaireAnswers, descriptionGroups, debug, noSeed, runLogLevel, nil)
+func (a *App) StartTrackerUpload(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackers []string,
+	ignoreDupesFor []string,
+	questionnaireAnswers map[string]map[string]string,
+	descriptionGroups []api.DescriptionBuilderGroup,
+	debug bool,
+	noSeed bool,
+	runLogLevel string,
+) (string, error) {
+	return a.startTrackerUpload(
+		path,
+		overrides,
+		nameOverrides,
+		trackers,
+		ignoreDupesFor,
+		questionnaireAnswers,
+		descriptionGroups,
+		debug,
+		noSeed,
+		runLogLevel,
+		nil,
+	)
 }
 
-func (a *App) startTrackerUpload(path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackers []string, ignoreDupesFor []string, questionnaireAnswers map[string]map[string]string, descriptionGroups []api.DescriptionBuilderGroup, debug bool, noSeed bool, runLogLevel string, uploadOptions *api.UploadOptions) (string, error) {
+func (a *App) startTrackerUpload(
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackers []string,
+	ignoreDupesFor []string,
+	questionnaireAnswers map[string]map[string]string,
+	descriptionGroups []api.DescriptionBuilderGroup,
+	debug bool,
+	noSeed bool,
+	runLogLevel string,
+	uploadOptions *api.UploadOptions,
+) (string, error) {
 	rt, err := a.requireRuntime()
 	if err != nil {
 		return "", err
@@ -233,7 +268,11 @@ func (a *App) startTrackerUpload(path string, overrides api.ExternalIDOverrides,
 		startedAt:            time.Now().UTC(),
 	}
 	for _, tracker := range resolvedTrackers {
-		job.states[tracker] = TrackerUploadTrackerState{Tracker: tracker, Status: "queued", Message: "queued"}
+		job.states[tracker] = TrackerUploadTrackerState{
+			Tracker: tracker,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 
 	jobCtx, cancel := context.WithCancel(baseCtx)
@@ -292,7 +331,19 @@ func (a *App) RetryFailedTrackerUpload(jobID string) (string, error) {
 		return "", err
 	}
 
-	return a.startTrackerUpload(retry.sourcePath, retry.overrides, retry.nameOverrides, retry.failedTrackers, retry.ignoreDupesFor, retry.questionnaireAnswers, retry.descriptionGroups, retry.runOptions.Debug, retry.runOptions.NoSeed, retry.runOptions.RunLogLevel, &retry.uploadOptions)
+	return a.startTrackerUpload(
+		retry.sourcePath,
+		retry.overrides,
+		retry.nameOverrides,
+		retry.failedTrackers,
+		retry.ignoreDupesFor,
+		retry.questionnaireAnswers,
+		retry.descriptionGroups,
+		retry.runOptions.Debug,
+		retry.runOptions.NoSeed,
+		retry.runOptions.RunLogLevel,
+		&retry.uploadOptions,
+	)
 }
 
 // GetTrackerUploadSnapshot returns the current Wails tracker upload job state.
@@ -590,7 +641,11 @@ func buildTrackerUploadSnapshot(job *trackerUploadJob) TrackerUploadSnapshot {
 	for _, tracker := range job.trackers {
 		state, ok := job.states[tracker]
 		if !ok {
-			state = TrackerUploadTrackerState{Tracker: tracker, Status: "queued", Message: "queued"}
+			state = TrackerUploadTrackerState{
+				Tracker: tracker,
+				Status:  "queued",
+				Message: "queued",
+			}
 		}
 		trackers = append(trackers, state)
 	}

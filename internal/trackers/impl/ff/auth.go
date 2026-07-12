@@ -23,7 +23,14 @@ import (
 const ffAuthResponseMaxBytes = 1 << 20
 
 func (Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "FF", DisplayName: "FF", AuthKind: "cookies_login", SupportsCookieFile: true, SupportsLogin: true, SupportsAutoLogin: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          "FF",
+		DisplayName:        "FF",
+		AuthKind:           "cookies_login",
+		SupportsCookieFile: true,
+		SupportsLogin:      true,
+		SupportsAutoLogin:  true,
+	}
 }
 
 func (Definition) AuthSessionResolver() trackers.AuthSessionResolver { return resolveAuthSession }
@@ -48,7 +55,11 @@ func resolveAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath st
 		if loadErr == nil {
 			loadErr = cookies.ErrTrackerCookiesNotFound
 		}
-		return &trackerauth.AuthRequiredError{TrackerID: "FF", Reason: "cookies or username/password missing", Err: fmt.Errorf("trackers: FF cookies unavailable: %w", loadErr)}
+		return &trackerauth.AuthRequiredError{
+			TrackerID: "FF",
+			Reason:    "cookies or username/password missing",
+			Err:       fmt.Errorf("trackers: FF cookies unavailable: %w", loadErr),
+		}
 	}
 	return loginAuthSession(ctx, cfg, dbPath, baseURL)
 }
@@ -66,29 +77,62 @@ func validateAuthCookies(ctx context.Context, baseURL string, values []*http.Coo
 	}
 	resp, err := ffAuthHTTPClient().Do(req)
 	if err != nil {
-		return &trackerauth.ValidationError{TrackerID: "FF", Transient: true, Reason: "remote validation unavailable", Err: fmt.Errorf("trackers: FF session validation request: %w", err)}
+		return &trackerauth.ValidationError{
+			TrackerID: "FF",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       fmt.Errorf("trackers: FF session validation request: %w", err),
+		}
 	}
 	defer resp.Body.Close()
 	body, err := readFFAuthBody(resp)
 	if err != nil {
-		return &trackerauth.ValidationError{TrackerID: "FF", Transient: true, Reason: "remote validation unavailable", Err: err}
+		return &trackerauth.ValidationError{
+			TrackerID: "FF",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       err,
+		}
 	}
 	lower := strings.ToLower(string(body))
 	location := strings.ToLower(resp.Header.Get("Location"))
-	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(location, "login") || strings.Contains(lower, "takelogin.php") || strings.Contains(lower, "name=\"username\"") || strings.Contains(lower, "name=\"password\"") {
-		return &trackerauth.ValidationError{TrackerID: "FF", ConfirmedInvalid: true, Reason: "stored session expired", Err: fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode)}
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(location, "login") ||
+		strings.Contains(lower, "takelogin.php") ||
+		strings.Contains(lower, "name=\"username\"") ||
+		strings.Contains(lower, "name=\"password\"") {
+		return &trackerauth.ValidationError{
+			TrackerID:        "FF",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &trackerauth.ValidationError{TrackerID: "FF", Transient: true, Reason: "remote validation failed", Err: fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode)}
+		return &trackerauth.ValidationError{
+			TrackerID: "FF",
+			Transient: true,
+			Reason:    "remote validation failed",
+			Err:       fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if !strings.Contains(lower, "friends.php") {
-		return &trackerauth.ValidationError{TrackerID: "FF", ConfirmedInvalid: true, Reason: "stored session expired", Err: errors.New("trackers: FF login marker not found")}
+		return &trackerauth.ValidationError{
+			TrackerID:        "FF",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              errors.New("trackers: FF login marker not found"),
+		}
 	}
 	return nil
 }
 
 func loginAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath string, baseURL string) error {
-	data := url.Values{"returnto": {"/index.php"}, "username": {strings.TrimSpace(cfg.Username)}, "password": {strings.TrimSpace(cfg.Password)}, "login": {"Login"}}
+	data := url.Values{
+		"returnto": {"/index.php"},
+		"username": {strings.TrimSpace(cfg.Username)},
+		"password": {strings.TrimSpace(cfg.Password)},
+		"login":    {"Login"},
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+"/takelogin.php", strings.NewReader(data.Encode()))
 	if err != nil {
 		return fmt.Errorf("trackers: FF login request build: %w", err)
@@ -101,7 +145,12 @@ func loginAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath stri
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusFound {
-		return &trackerauth.ValidationError{TrackerID: "FF", ConfirmedInvalid: true, Reason: "login failed", Err: fmt.Errorf("trackers: FF login failed status=%d", resp.StatusCode)}
+		return &trackerauth.ValidationError{
+			TrackerID:        "FF",
+			ConfirmedInvalid: true,
+			Reason:           "login failed",
+			Err:              fmt.Errorf("trackers: FF login failed status=%d", resp.StatusCode),
+		}
 	}
 	loginCookies := usableFFAuthCookies(resp.Cookies())
 	if len(loginCookies) == 0 {

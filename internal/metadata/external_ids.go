@@ -35,17 +35,21 @@ import (
 )
 
 var (
-	searchYearPattern       = regexp.MustCompile(`\b(19\d{2}|20\d{2})\b`)
-	leadingSearchYearTitle  = regexp.MustCompile(`^\s*(19\d{2}|20\d{2})\s*[-:._]\s*(.+?)\s*$`)
-	searchBracketNoise      = regexp.MustCompile(`[\[\(\{][^\]\)\}]*[\]\)\}]`)
-	searchInnerWhitespace   = regexp.MustCompile(`\s+`)
-	tvdbAliasYearPattern    = regexp.MustCompile(`\b(19\d{2}|20\d{2})\b`)
-	tvdbAliasYearCleanup    = regexp.MustCompile(`\s*\(?\b(?:19\d{2}|20\d{2})\b\)?\s*`)
-	tvPathHintPattern       = regexp.MustCompile(`(?i)[\\/](tv|tvshows?|series)[\\/]`)
-	tvNameHintPattern       = regexp.MustCompile(`(?i)\bS\d{1,2}(?:E\d{1,3})?\b|\b\d{1,2}x\d{2,3}\b|\b(?:season|series)\s*\d+\b|\b(19\d{2}|20\d{2})[.-]\d{2}[.-]\d{2}\b`)
-	subsPleaseHintPattern   = regexp.MustCompile(`(?i)subsplease`)
-	animeEpisodeHint        = regexp.MustCompile(`(?i)-\s*\d{1,3}\s*\(1080p\)`)
-	genericEpisodePattern   = regexp.MustCompile(`(?i)^episode\s*#?\s*(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\s*$`)
+	searchYearPattern      = regexp.MustCompile(`\b(19\d{2}|20\d{2})\b`)
+	leadingSearchYearTitle = regexp.MustCompile(`^\s*(19\d{2}|20\d{2})\s*[-:._]\s*(.+?)\s*$`)
+	searchBracketNoise     = regexp.MustCompile(`[\[\(\{][^\]\)\}]*[\]\)\}]`)
+	searchInnerWhitespace  = regexp.MustCompile(`\s+`)
+	tvdbAliasYearPattern   = regexp.MustCompile(`\b(19\d{2}|20\d{2})\b`)
+	tvdbAliasYearCleanup   = regexp.MustCompile(`\s*\(?\b(?:19\d{2}|20\d{2})\b\)?\s*`)
+	tvPathHintPattern      = regexp.MustCompile(`(?i)[\\/](tv|tvshows?|series)[\\/]`)
+	tvNameHintPattern      = regexp.MustCompile(
+		`(?i)\bS\d{1,2}(?:E\d{1,3})?\b|\b\d{1,2}x\d{2,3}\b|\b(?:season|series)\s*\d+\b|\b(19\d{2}|20\d{2})[.-]\d{2}[.-]\d{2}\b`,
+	)
+	subsPleaseHintPattern = regexp.MustCompile(`(?i)subsplease`)
+	animeEpisodeHint      = regexp.MustCompile(`(?i)-\s*\d{1,3}\s*\(1080p\)`)
+	genericEpisodePattern = regexp.MustCompile(
+		`(?i)^episode\s*#?\s*(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\s*$`,
+	)
 	placeholderTitlePattern = regexp.MustCompile(`(?i)^(?:tba|tbd|tbc|tdc)$`)
 )
 
@@ -735,7 +739,8 @@ func (s *Service) ResolveExternalIDs(ctx context.Context, meta api.PreparedMetad
 	// Tracker and media metadata can supply an episode IMDb ID where downstream
 	// providers require the parent series ID. Clear the episode snapshot so the
 	// second fetch pass refreshes series metadata after a successful adjustment.
-	if episodeClient, ok := imdbClient.(imdbEpisodeClient); ok && shouldUseTVDBForCategory(meta, ids) && metadata.IMDB != nil && strings.EqualFold(strings.TrimSpace(metadata.IMDB.Type), "tvEpisode") {
+	if episodeClient, ok := imdbClient.(imdbEpisodeClient); ok && shouldUseTVDBForCategory(meta, ids) && metadata.IMDB != nil &&
+		strings.EqualFold(strings.TrimSpace(metadata.IMDB.Type), "tvEpisode") {
 		lookup, err := episodeClient.GetEpisodeInfo(ctx, formatIMDbID(ids.IMDBID), meta.Options.Debug)
 		if err != nil {
 			if s.logger != nil {
@@ -879,7 +884,8 @@ func (s *Service) ResolveExternalIDs(ctx context.Context, meta api.PreparedMetad
 	if err := s.repo.SaveExternalIDs(ctx, ids); err != nil {
 		return api.PreparedMetadata{}, fmt.Errorf("metadata: save external ids: %w", err)
 	}
-	if metadataChanged || metadata.TMDB != nil || metadata.IMDB != nil || metadata.TVDB != nil || metadata.TVmaze != nil || metadata.AniList != nil || metadata.Bluray != nil {
+	if metadataChanged || metadata.TMDB != nil || metadata.IMDB != nil || metadata.TVDB != nil || metadata.TVmaze != nil || metadata.AniList != nil ||
+		metadata.Bluray != nil {
 		if err := s.repo.SaveExternalMetadata(ctx, metadata); err != nil {
 			return api.PreparedMetadata{}, fmt.Errorf("metadata: save external metadata: %w", err)
 		}
@@ -1789,7 +1795,11 @@ func mapIMDBEpisodes(values []imdb.Episode) []api.IMDBEpisode {
 			ID:          value.ID,
 			Title:       value.Title,
 			ReleaseYear: value.ReleaseYear,
-			ReleaseDate: api.IMDBReleaseDate{Year: value.ReleaseDate.Year, Month: value.ReleaseDate.Month, Day: value.ReleaseDate.Day},
+			ReleaseDate: api.IMDBReleaseDate{
+				Year:  value.ReleaseDate.Year,
+				Month: value.ReleaseDate.Month,
+				Day:   value.ReleaseDate.Day,
+			},
 			Season:      value.Season,
 			EpisodeText: value.EpisodeText,
 		})
@@ -2364,7 +2374,9 @@ func (s *Service) applyTVEpisodeMetadata(
 	meta.SeasonStr = seasonep.FormatSeason(season)
 	meta.EpisodeStr = seasonep.FormatEpisode(episode)
 	meta.EpisodeYear = metautil.FirstInt(episodeYear, meta.EpisodeYear)
-	meta.EpisodeTitle = sanitizeEpisodeTitle(metautil.FirstNonEmptyTrimmed(episodeTitle, tvdbEpisodeTitle, tvmazeEpisodeTitle, tmdbEpisodeTitle, imdbEpisodeTitle))
+	meta.EpisodeTitle = sanitizeEpisodeTitle(
+		metautil.FirstNonEmptyTrimmed(episodeTitle, tvdbEpisodeTitle, tvmazeEpisodeTitle, tmdbEpisodeTitle, imdbEpisodeTitle),
+	)
 	meta.EpisodeOverview = metautil.FirstNonEmptyTrimmed(episodeOverview, tvdbEpisodeOverview, tvmazeEpisodeOverview, tmdbEpisodeOverview)
 
 	if s.logger != nil && (initialSeason != season || initialEpisode != episode || initialSeasonStr != meta.SeasonStr || initialEpisodeStr != meta.EpisodeStr) {
@@ -2379,8 +2391,14 @@ func (s *Service) applyTVEpisodeMetadata(
 		)
 	}
 
-	if tmdbClient != nil && wantsSeasonEpisode && !hasManualSeasonEpisode && !tmdbDateMatch && strings.TrimSpace(meta.DailyEpisodeDate) != "" && ids.TMDBID != 0 && s.logger != nil {
-		s.logger.Warnf("metadata: season/episode naming requested but TMDB season/episode lookup failed for daily_date=%q tmdb_id=%d", strings.TrimSpace(meta.DailyEpisodeDate), ids.TMDBID)
+	if tmdbClient != nil && wantsSeasonEpisode && !hasManualSeasonEpisode && !tmdbDateMatch && strings.TrimSpace(meta.DailyEpisodeDate) != "" &&
+		ids.TMDBID != 0 &&
+		s.logger != nil {
+		s.logger.Warnf(
+			"metadata: season/episode naming requested but TMDB season/episode lookup failed for daily_date=%q tmdb_id=%d",
+			strings.TrimSpace(meta.DailyEpisodeDate),
+			ids.TMDBID,
+		)
 	}
 
 	return meta

@@ -25,7 +25,7 @@ make help                # supported targets
 make backend             # fast CLI build sanity
 make test-go             # full Go race tests
 make test-frontend       # frontend lint/dead-code/type/unit/format
-make lint                # path policy + full Go lint
+make lint                # path/literal policies + full Go lint
 make precommit           # strong local validation before commit; no Go tests
 make prepush             # Lefthook pre-push wrapper
 git diff --check         # whitespace/conflict markers
@@ -41,7 +41,7 @@ Start narrow; expand checks for shared behavior, release, GUI/web parity, or saf
 - Frontend: `pnpm --dir gui/frontend run lint`, `lint:dead`, `typecheck`, `test:unit`, `format:check`; add `lint:style` for CSS and `build` for bundle/runtime issues.
 - E2E/browser: read `gui/frontend/e2e/AGENTS.md`; use embedded web checks, not Vite-only checks, for parity-sensitive UI/runtime changes.
 
-Before commit, also run `git diff --check`, changed-package `make gofix-check-changed`, and the relevant hook commands if desired. If Go files, generated dirs, or scratch paths can affect package discovery, run `make lint` before commit.
+Before commit, also run `git diff --check`, changed-package `make gofix-check-changed`, and the relevant hook commands if desired. `make fmt-go` applies the 160-column formatter and expands keyed composite literals with three or more elements. If Go files, generated dirs, or scratch paths can affect package discovery, run `make lint` before commit.
 
 ## Repo Map
 

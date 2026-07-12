@@ -59,19 +59,71 @@ type migrationExecutor interface {
 //     bridge mapping also changed historically.
 var migrationRegistry = []migrationStep{
 	{id: baselineMigrationID, apply: createBaselineSchema},
-	{id: "2026_04_add_dvd_mediainfo", dependsOn: []string{baselineMigrationID}, apply: migrateAddDVDMediaInfo},
-	{id: "2026_04_add_release_override_use_season_episode", dependsOn: []string{baselineMigrationID}, apply: migrateAddReleaseOverrideUseSeasonEpisode},
-	{id: "2026_04_add_history_indexes", dependsOn: []string{baselineMigrationID}, apply: migrateAddHistoryIndexes},
-	{id: "2026_04_backfill_uploaded_image_usage_scope", dependsOn: []string{"2026_04_add_history_indexes"}, apply: migrateBackfillUploadedImageUsageScope},
-	{id: "2026_04_add_screenshot_slot_tables", dependsOn: []string{"2026_04_backfill_uploaded_image_usage_scope"}, apply: migrateAddScreenshotSlotTables},
-	{id: "2026_04_normalize_description_overrides", dependsOn: []string{"2026_04_add_screenshot_slot_tables"}, apply: migrateNormalizeDescriptionOverrides},
-	{id: "2026_04_add_tracker_cookies", dependsOn: []string{"2026_04_normalize_description_overrides"}, apply: migrateAddTrackerCookies},
-	{id: "2026_04_add_release_category", dependsOn: []string{"2026_04_add_tracker_cookies"}, apply: migrateAddReleaseCategory},
-	{id: "2026_05_add_bluray_external_metadata", dependsOn: []string{"2026_04_add_release_category"}, apply: migrateAddBlurayExternalMetadata},
-	{id: "2026_06_add_tracker_auth_state", dependsOn: []string{"2026_05_add_bluray_external_metadata"}, apply: migrateAddTrackerAuthState},
-	{id: "2026_07_add_external_ids_mal", dependsOn: []string{"2026_06_add_tracker_auth_state"}, apply: migrateAddExternalIDsMAL},
-	{id: "2026_07_add_anilist_external_metadata", dependsOn: []string{"2026_07_add_external_ids_mal"}, apply: migrateAddAniListExternalMetadata},
-	{id: "2026_07_add_tracker_rule_failure_severity", dependsOn: []string{"2026_07_add_anilist_external_metadata"}, apply: migrateAddTrackerRuleFailureSeverity},
+	{
+		id:        "2026_04_add_dvd_mediainfo",
+		dependsOn: []string{baselineMigrationID},
+		apply:     migrateAddDVDMediaInfo,
+	},
+	{
+		id:        "2026_04_add_release_override_use_season_episode",
+		dependsOn: []string{baselineMigrationID},
+		apply:     migrateAddReleaseOverrideUseSeasonEpisode,
+	},
+	{
+		id:        "2026_04_add_history_indexes",
+		dependsOn: []string{baselineMigrationID},
+		apply:     migrateAddHistoryIndexes,
+	},
+	{
+		id:        "2026_04_backfill_uploaded_image_usage_scope",
+		dependsOn: []string{"2026_04_add_history_indexes"},
+		apply:     migrateBackfillUploadedImageUsageScope,
+	},
+	{
+		id:        "2026_04_add_screenshot_slot_tables",
+		dependsOn: []string{"2026_04_backfill_uploaded_image_usage_scope"},
+		apply:     migrateAddScreenshotSlotTables,
+	},
+	{
+		id:        "2026_04_normalize_description_overrides",
+		dependsOn: []string{"2026_04_add_screenshot_slot_tables"},
+		apply:     migrateNormalizeDescriptionOverrides,
+	},
+	{
+		id:        "2026_04_add_tracker_cookies",
+		dependsOn: []string{"2026_04_normalize_description_overrides"},
+		apply:     migrateAddTrackerCookies,
+	},
+	{
+		id:        "2026_04_add_release_category",
+		dependsOn: []string{"2026_04_add_tracker_cookies"},
+		apply:     migrateAddReleaseCategory,
+	},
+	{
+		id:        "2026_05_add_bluray_external_metadata",
+		dependsOn: []string{"2026_04_add_release_category"},
+		apply:     migrateAddBlurayExternalMetadata,
+	},
+	{
+		id:        "2026_06_add_tracker_auth_state",
+		dependsOn: []string{"2026_05_add_bluray_external_metadata"},
+		apply:     migrateAddTrackerAuthState,
+	},
+	{
+		id:        "2026_07_add_external_ids_mal",
+		dependsOn: []string{"2026_06_add_tracker_auth_state"},
+		apply:     migrateAddExternalIDsMAL,
+	},
+	{
+		id:        "2026_07_add_anilist_external_metadata",
+		dependsOn: []string{"2026_07_add_external_ids_mal"},
+		apply:     migrateAddAniListExternalMetadata,
+	},
+	{
+		id:        "2026_07_add_tracker_rule_failure_severity",
+		dependsOn: []string{"2026_07_add_anilist_external_metadata"},
+		apply:     migrateAddTrackerRuleFailureSeverity,
+	},
 }
 
 // migrateAddTrackerRuleFailureSeverity creates the rule-results table when
@@ -120,10 +172,40 @@ var legacyVersionToMigrationIDs = map[int][]string{
 	2: {baselineMigrationID, "2026_04_add_dvd_mediainfo"},
 	3: {baselineMigrationID, "2026_04_add_dvd_mediainfo", "2026_04_add_release_override_use_season_episode"},
 	4: {baselineMigrationID, "2026_04_add_dvd_mediainfo", "2026_04_add_release_override_use_season_episode", "2026_04_add_history_indexes"},
-	5: {baselineMigrationID, "2026_04_add_dvd_mediainfo", "2026_04_add_release_override_use_season_episode", "2026_04_add_history_indexes", "2026_04_backfill_uploaded_image_usage_scope"},
-	6: {baselineMigrationID, "2026_04_add_dvd_mediainfo", "2026_04_add_release_override_use_season_episode", "2026_04_add_history_indexes", "2026_04_backfill_uploaded_image_usage_scope", "2026_04_add_screenshot_slot_tables"},
-	7: {baselineMigrationID, "2026_04_add_dvd_mediainfo", "2026_04_add_release_override_use_season_episode", "2026_04_add_history_indexes", "2026_04_backfill_uploaded_image_usage_scope", "2026_04_add_screenshot_slot_tables", "2026_04_normalize_description_overrides"},
-	8: {baselineMigrationID, "2026_04_add_dvd_mediainfo", "2026_04_add_release_override_use_season_episode", "2026_04_add_history_indexes", "2026_04_backfill_uploaded_image_usage_scope", "2026_04_add_screenshot_slot_tables", "2026_04_normalize_description_overrides", "2026_04_add_tracker_cookies"},
+	5: {
+		baselineMigrationID,
+		"2026_04_add_dvd_mediainfo",
+		"2026_04_add_release_override_use_season_episode",
+		"2026_04_add_history_indexes",
+		"2026_04_backfill_uploaded_image_usage_scope",
+	},
+	6: {
+		baselineMigrationID,
+		"2026_04_add_dvd_mediainfo",
+		"2026_04_add_release_override_use_season_episode",
+		"2026_04_add_history_indexes",
+		"2026_04_backfill_uploaded_image_usage_scope",
+		"2026_04_add_screenshot_slot_tables",
+	},
+	7: {
+		baselineMigrationID,
+		"2026_04_add_dvd_mediainfo",
+		"2026_04_add_release_override_use_season_episode",
+		"2026_04_add_history_indexes",
+		"2026_04_backfill_uploaded_image_usage_scope",
+		"2026_04_add_screenshot_slot_tables",
+		"2026_04_normalize_description_overrides",
+	},
+	8: {
+		baselineMigrationID,
+		"2026_04_add_dvd_mediainfo",
+		"2026_04_add_release_override_use_season_episode",
+		"2026_04_add_history_indexes",
+		"2026_04_backfill_uploaded_image_usage_scope",
+		"2026_04_add_screenshot_slot_tables",
+		"2026_04_normalize_description_overrides",
+		"2026_04_add_tracker_cookies",
+	},
 }
 
 func migrateAddDVDMediaInfo(ctx context.Context, exec migrationExecutor) error {
@@ -276,7 +358,10 @@ func migrateNormalizeDescriptionOverrides(ctx context.Context, exec migrationExe
 		`); err != nil {
 			return fmt.Errorf("db: %w", err)
 		}
-		if _, err := exec.ExecContext(ctx, `CREATE INDEX IF NOT EXISTS idx_description_overrides_source_path ON description_overrides (source_path)`); err != nil {
+		if _, err := exec.ExecContext(
+			ctx,
+			`CREATE INDEX IF NOT EXISTS idx_description_overrides_source_path ON description_overrides (source_path)`,
+		); err != nil {
 			return fmt.Errorf("db: %w", err)
 		}
 		return nil

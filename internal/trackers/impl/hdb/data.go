@@ -25,7 +25,11 @@ type dataLookup struct {
 }
 
 func (d *Definition) NewDataLookup(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DataLookup {
-	return &dataLookup{cfg: cfg, http: httpClient, endpoint: "https://hdbits.org/api/torrents"}
+	return &dataLookup{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: "https://hdbits.org/api/torrents",
+	}
 }
 
 func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest) (datatypes.Result, error) {
@@ -52,7 +56,12 @@ func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest)
 	if err != nil || len(first) == 0 {
 		return datatypes.Result{}, err
 	}
-	result := datatypes.Result{TrackerID: hdbString(first["id"]), IMDBID: hdbNestedInt(first, "imdb", "id"), TVDBID: hdbNestedInt(first, "tvdb", "id"), InfoHash: hdbString(first["hash"])}
+	result := datatypes.Result{
+		TrackerID: hdbString(first["id"]),
+		IMDBID:    hdbNestedInt(first, "imdb", "id"),
+		TVDBID:    hdbNestedInt(first, "tvdb", "id"),
+		InfoHash:  hdbString(first["hash"]),
+	}
 	if result.TrackerID == "" {
 		result.TrackerID = strings.TrimSpace(req.TrackerID)
 	}

@@ -333,7 +333,11 @@ func TestPrepareTrackerUploadTorrentUsesDefaultAnnounce(t *testing.T) {
 	writeTestMetaInfo(t, baseTorrentPath, metainfo.MetaInfo{InfoBytes: testInfoBytes(t, "")})
 
 	registry := NewRegistry()
-	if err := registry.RegisterDescriptor(Descriptor{Name: "AZ", Definition: stubDefinition{name: "AZ"}, UploadArtifact: &UploadArtifactPolicy{Source: "AvistaZ", DefaultAnnounce: "https://tracker.avistaz.to/announce"}}); err != nil {
+	if err := registry.RegisterDescriptor(Descriptor{
+		Name:           "AZ",
+		Definition:     stubDefinition{name: "AZ"},
+		UploadArtifact: &UploadArtifactPolicy{Source: "AvistaZ", DefaultAnnounce: "https://tracker.avistaz.to/announce"},
+	}); err != nil {
 		t.Fatalf("register AZ artifact policy: %v", err)
 	}
 	meta, err := PrepareTrackerUploadTorrentWithRegistry(api.PreparedMetadata{
@@ -427,7 +431,11 @@ func btnArtifactRegistry(t *testing.T) *Registry {
 	t.Helper()
 	registry := NewRegistry()
 	policy := &UploadArtifactPolicy{Source: "BTN", RequireAnnounce: true}
-	if err := registry.RegisterDescriptor(Descriptor{Name: "BTN", Definition: stubDefinition{name: "BTN"}, UploadArtifact: policy}); err != nil {
+	if err := registry.RegisterDescriptor(Descriptor{
+		Name:           "BTN",
+		Definition:     stubDefinition{name: "BTN"},
+		UploadArtifact: policy,
+	}); err != nil {
 		t.Fatalf("register BTN artifact policy: %v", err)
 	}
 	return registry
@@ -437,7 +445,11 @@ func hdbArtifactRegistry(t *testing.T) *Registry {
 	t.Helper()
 	registry := NewRegistry()
 	policy := &UploadArtifactPolicy{Source: "HDBits"}
-	if err := registry.RegisterDescriptor(Descriptor{Name: "HDB", Definition: stubDefinition{name: "HDB"}, UploadArtifact: policy}); err != nil {
+	if err := registry.RegisterDescriptor(Descriptor{
+		Name:           "HDB",
+		Definition:     stubDefinition{name: "HDB"},
+		UploadArtifact: policy,
+	}); err != nil {
 		t.Fatalf("register HDB artifact policy: %v", err)
 	}
 	return registry

@@ -27,7 +27,11 @@ type dupeSearcher struct {
 }
 
 func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, baseURL: "https://beyond-hd.me/api/torrents/"}
+	return &dupeSearcher{
+		cfg:     cfg,
+		http:    httpClient,
+		baseURL: "https://beyond-hd.me/api/torrents/",
+	}
 }
 
 func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {

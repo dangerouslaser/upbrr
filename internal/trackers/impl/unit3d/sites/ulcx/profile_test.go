@@ -9,7 +9,12 @@ import (
 )
 
 func TestBuildNameRemovesHybridFromWebDV(t *testing.T) {
-	meta := api.PreparedMetadata{ReleaseName: "Example Release 2026 Hybrid 1080p WEB-DL DDP5.1 DV H.265-GRP", Type: "WEBDL", Edition: "Hybrid", WebDV: true}
+	meta := api.PreparedMetadata{
+		ReleaseName: "Example Release 2026 Hybrid 1080p WEB-DL DDP5.1 DV H.265-GRP",
+		Type:        "WEBDL",
+		Edition:     "Hybrid",
+		WebDV:       true,
+	}
 	if got := Profile().Site.BuildName(meta, config.TrackerConfig{}); strings.Contains(got, "Hybrid") {
 		t.Fatalf("name = %q", got)
 	}

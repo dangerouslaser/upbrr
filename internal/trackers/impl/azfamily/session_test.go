@@ -142,7 +142,11 @@ func TestLookupMediaCodeReturnsProviderErrorWithoutEarlierExactMatch(t *testing.
 		context.Background(),
 		siteDefinition{Name: "AZ", BaseURL: server.URL},
 		sessionState{client: server.Client()},
-		api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "MOVIE", IMDBID: 123, TMDBID: 456}},
+		api.PreparedMetadata{ExternalIDs: api.ExternalIDs{
+			Category: "MOVIE",
+			IMDBID:   123,
+			TMDBID:   456,
+		}},
 	)
 	if err == nil || !strings.Contains(err.Error(), "media search by tmdb failed") {
 		t.Fatal("expected later provider failure when no earlier exact match exists")

@@ -71,7 +71,13 @@ func (s *Service) persistUnit3DArtifacts(ctx context.Context, meta api.PreparedM
 		return nil
 	}
 	if s.logger != nil {
-		s.logger.Debugf("metadata: unit3d artifacts dir=%s desc=%t images=%d keepImages=%t", artifactDir, strings.TrimSpace(result.Description) != "", len(result.Validated), keepImages)
+		s.logger.Debugf(
+			"metadata: unit3d artifacts dir=%s desc=%t images=%d keepImages=%t",
+			artifactDir,
+			strings.TrimSpace(result.Description) != "",
+			len(result.Validated),
+			keepImages,
+		)
 	}
 
 	if strings.TrimSpace(result.Description) != "" {

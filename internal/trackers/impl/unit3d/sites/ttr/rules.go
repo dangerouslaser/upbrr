@@ -13,7 +13,11 @@ import (
 )
 
 func Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{Language: &ruletypes.LanguageRule{Languages: []string{"spanish", "es", "spa"}, RequireAudio: true, RequireSubs: true}, ExtraCheck: checkSubtitleOnly}
+	return &ruletypes.RuleSet{Language: &ruletypes.LanguageRule{
+		Languages:    []string{"spanish", "es", "spa"},
+		RequireAudio: true,
+		RequireSubs:  true,
+	}, ExtraCheck: checkSubtitleOnly}
 }
 
 func checkSubtitleOnly(ctx context.Context, meta api.PreparedMetadata, _ api.Logger) ruletypes.Result {

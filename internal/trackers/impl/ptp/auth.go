@@ -13,5 +13,14 @@ func (d *Definition) AuthSessionResolver() trackers.AuthSessionResolver {
 }
 
 func (d *Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "PTP", DisplayName: "PTP", AuthKind: "cookies_login_manual_2fa", SupportsCookieFile: true, SupportsLogin: true, SupportsAutoLogin: true, SupportsTOTP: true, SupportsManual2FA: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          "PTP",
+		DisplayName:        "PTP",
+		AuthKind:           "cookies_login_manual_2fa",
+		SupportsCookieFile: true,
+		SupportsLogin:      true,
+		SupportsAutoLogin:  true,
+		SupportsTOTP:       true,
+		SupportsManual2FA:  true,
+	}
 }

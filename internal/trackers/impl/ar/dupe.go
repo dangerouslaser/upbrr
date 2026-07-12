@@ -30,7 +30,11 @@ type dupeSearcher struct {
 }
 
 func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, logger api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, logger: logger}
+	return &dupeSearcher{
+		cfg:    cfg,
+		http:   httpClient,
+		logger: logger,
+	}
 }
 
 func (h dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -104,8 +108,14 @@ func (h dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ s
 			Files:     []string{name},
 			FileCount: result.FileCount,
 			ID:        strconv.FormatInt(result.TorrentID, 10),
-			Link:      "https://alpharatio.cc/torrents.php?id=" + strconv.FormatInt(result.GroupID, 10) + "&torrentid=" + strconv.FormatInt(result.TorrentID, 10),
-			Download:  "https://alpharatio.cc/torrents.php?action=download&id=" + strconv.FormatInt(result.TorrentID, 10),
+			Link: "https://alpharatio.cc/torrents.php?id=" + strconv.FormatInt(
+				result.GroupID,
+				10,
+			) + "&torrentid=" + strconv.FormatInt(
+				result.TorrentID,
+				10,
+			),
+			Download: "https://alpharatio.cc/torrents.php?action=download&id=" + strconv.FormatInt(result.TorrentID, 10),
 		}
 		if result.Size > 0 {
 			entry.SizeKnown = true

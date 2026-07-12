@@ -131,7 +131,11 @@ func TestBTNUploadEndToEndSuccess(t *testing.T) {
 		switch {
 		case r.URL.Path == "/login.php" && r.Method == http.MethodPost:
 			loginCalls.Add(1)
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte("ok"))
 		case r.URL.Path == "/upload.php" && r.Method == http.MethodGet:
@@ -320,7 +324,11 @@ func TestBTNUploadAnnounceURLWritesTorrentArtifact(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/login.php" && r.Method == http.MethodPost:
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte("ok"))
 		case r.URL.Path == "/upload.php" && r.Method == http.MethodGet:
@@ -467,7 +475,11 @@ func TestBTNUploadUsesValidImportedCookiesWithoutCredentials(t *testing.T) {
 			SeasonInt:   1,
 			EpisodeInt:  1,
 			ExternalIDs: api.ExternalIDs{Category: "TV"},
-			Release:     api.ReleaseInfo{Resolution: "1080p", Season: 1, Episode: 1},
+			Release: api.ReleaseInfo{
+				Resolution: "1080p",
+				Season:     1,
+				Episode:    1,
+			},
 		},
 		TrackerConfig: config.TrackerConfig{URL: server.URL},
 		AppConfig: config.Config{
@@ -502,7 +514,11 @@ func TestBTNUploadStoredCookieLoadErrorPreventsLogin(t *testing.T) {
 		switch r.URL.Path {
 		case "/login.php":
 			loginCalls.Add(1)
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte("ok"))
 		case "/upload.php":
 			_, _ = w.Write([]byte(`<form action="/upload.php"><input name="file_input" /></form>`))
@@ -844,7 +860,11 @@ func TestResolveSessionForTrackerAuthLoginDecryptErrorPreventsPersistence(t *tes
 		switch r.URL.Path {
 		case "/login.php":
 			loginCalls.Add(1)
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte("ok"))
 		case "/upload.php":
 			_, _ = w.Write([]byte(`<form action="/upload.php"><input name="file_input" /></form>`))
@@ -901,7 +921,18 @@ func TestBTNPrepareUploadDataFailsOnAutofillFailure(t *testing.T) {
 		client:    server.Client(),
 	}
 
-	req := trackers.UploadRequest{Meta: api.PreparedMetadata{ExternalIDs: api.ExternalIDs{Category: "TV"}, ReleaseName: "Show.S01E01", Type: "WEBDL", Source: "WEB-DL", Container: "MKV", VideoEncode: "x265", VideoCodec: "HEVC", SeasonInt: 1, EpisodeInt: 1, Release: api.ReleaseInfo{Resolution: "1080p"}}}
+	req := trackers.UploadRequest{Meta: api.PreparedMetadata{
+		ExternalIDs: api.ExternalIDs{Category: "TV"},
+		ReleaseName: "Show.S01E01",
+		Type:        "WEBDL",
+		Source:      "WEB-DL",
+		Container:   "MKV",
+		VideoEncode: "x265",
+		VideoCodec:  "HEVC",
+		SeasonInt:   1,
+		EpisodeInt:  1,
+		Release:     api.ReleaseInfo{Resolution: "1080p"},
+	}}
 	_, err := prepareUploadData(context.Background(), req, uploadCtx)
 	if err == nil {
 		t.Fatalf("expected autofill validation error")
@@ -1120,7 +1151,13 @@ func TestBTNPrepareUploadDataUsesSeasonIntForTVDBSeasonPack(t *testing.T) {
 			DescriptionOverride: "Description",
 			ExternalIDs:         api.ExternalIDs{Category: "TV"},
 			ExternalMetadata: api.ExternalMetadata{
-				TVDB: &api.TVDBMetadata{TVDBID: 12345, OriginalLanguage: "en", EpisodeSeason: 5, Genres: "Drama, Science-Fiction", Poster: "https://img.example/tvdb.jpg"},
+				TVDB: &api.TVDBMetadata{
+					TVDBID:           12345,
+					OriginalLanguage: "en",
+					EpisodeSeason:    5,
+					Genres:           "Drama, Science-Fiction",
+					Poster:           "https://img.example/tvdb.jpg",
+				},
 			},
 			Release: api.ReleaseInfo{
 				Resolution: "1080p",
@@ -1217,7 +1254,11 @@ func TestBTNUploadCredentialLoginDoesNotPersistInvalidSession(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/login.php":
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte("ok"))
 		case "/upload.php":
 			_, _ = w.Write([]byte(`<form action="/login.php"><input type="password" name="password" /></form>`))
@@ -1401,7 +1442,11 @@ func TestResolveSessionForTrackerAuthLoginPersistsCookies(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/login.php":
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte("ok"))
 		case "/upload.php":
 			if got := r.Header.Get("Cookie"); !strings.Contains(got, "session=new") {
@@ -1443,7 +1488,11 @@ func TestResolveSessionForTrackerAuthLoginIgnoresIncidentalTwoFactorText(t *test
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/login.php":
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			_, _ = w.Write([]byte(`<html><p>Keep your two-factor recovery codes safe.</p></html>`))
 		case "/upload.php":
 			if got := r.Header.Get("Cookie"); !strings.Contains(got, "session=new") {
@@ -1532,7 +1581,11 @@ func TestBTNUploadFallsBackToAPIResolution(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/login.php" && r.Method == http.MethodPost:
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte("ok"))
 		case r.URL.Path == "/upload.php" && r.Method == http.MethodGet:
@@ -1787,7 +1840,11 @@ func TestBTNUploadFollowsIntermediateDetailPage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/login.php" && r.Method == http.MethodPost:
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte("ok"))
 		case r.URL.Path == "/upload.php" && r.Method == http.MethodGet:
@@ -1864,7 +1921,11 @@ func TestBTNUploadIntermediateFailureFallsBackToAPI(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/login.php" && r.Method == http.MethodPost:
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "new", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "new",
+				Path:  "/",
+			})
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte("ok"))
 		case r.URL.Path == "/upload.php" && r.Method == http.MethodGet:

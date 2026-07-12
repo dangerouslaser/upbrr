@@ -23,7 +23,11 @@ type dupeSearcher struct {
 }
 
 func (Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, endpoint: "https://greatposterwall.com/api.php"}
+	return &dupeSearcher{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: "https://greatposterwall.com/api.php",
+	}
 }
 
 func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -38,7 +42,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	if err != nil {
 		return nil, gpwSkip("GPW search failed"), nil
 	}
-	req.URL.RawQuery = url.Values{"api_key": {apiKey}, "action": {"torrent"}, "imdbID": {"tt" + strconv.Itoa(meta.ExternalIDs.IMDBID)}}.Encode()
+	req.URL.RawQuery = url.Values{
+		"api_key": {apiKey},
+		"action":  {"torrent"},
+		"imdbID":  {"tt" + strconv.Itoa(meta.ExternalIDs.IMDBID)},
+	}.Encode()
 	resp, err := s.http.Do(req)
 	if err != nil {
 		return nil, gpwSkip("GPW search failed"), nil
@@ -59,7 +67,15 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	}
 	entries := make([]api.DupeEntry, 0, len(payload.Response))
 	for _, item := range payload.Response {
-		parts := []string{gpwString(item["Name"]), gpwString(item["Year"]), gpwString(item["Resolution"]), gpwString(item["Source"]), gpwString(item["Processing"]), gpwString(item["RemasterTitle"]), gpwString(item["Codec"])}
+		parts := []string{
+			gpwString(item["Name"]),
+			gpwString(item["Year"]),
+			gpwString(item["Resolution"]),
+			gpwString(item["Source"]),
+			gpwString(item["Processing"]),
+			gpwString(item["RemasterTitle"]),
+			gpwString(item["Codec"]),
+		}
 		entries = append(entries, api.DupeEntry{Name: strings.Join(strings.Fields(strings.Join(parts, " ")), " ")})
 	}
 	return entries, nil, nil

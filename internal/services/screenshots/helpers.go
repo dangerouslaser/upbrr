@@ -134,7 +134,12 @@ func resolveVideoInfo(ctx context.Context, meta api.PreparedMetadata, tmpRoot st
 					logger.Debugf("screenshots: BDMV source selection unavailable err=%s", redaction.RedactValue(err.Error(), nil))
 				}
 			}
-			logger.Tracef("screenshots: BDMV summary applied duration_seconds=%.3f frame_rate=%.3f files=%d", info.DurationSeconds, info.FrameRate, len(bdinfo.Files))
+			logger.Tracef(
+				"screenshots: BDMV summary applied duration_seconds=%.3f frame_rate=%.3f files=%d",
+				info.DurationSeconds,
+				info.FrameRate,
+				len(bdinfo.Files),
+			)
 		} else {
 			logger.Tracef("screenshots: BDMV summary not available")
 		}
@@ -182,7 +187,11 @@ func resolveSegmentTimestamp(info videoInfo, timestamp float64) (string, float64
 // frame from the primary segment.
 func resolveSegmentCandidates(info videoInfo, timestamp float64) []segmentCandidate {
 	if len(info.Segments) == 0 {
-		return []segmentCandidate{{SourcePath: info.SourcePath, Timestamp: timestamp, SegmentIndex: -1}}
+		return []segmentCandidate{{
+			SourcePath:   info.SourcePath,
+			Timestamp:    timestamp,
+			SegmentIndex: -1,
+		}}
 	}
 
 	primaryIndex := 0
@@ -236,7 +245,11 @@ func resolveSegmentCandidates(info videoInfo, timestamp float64) []segmentCandid
 		})
 	}
 	if len(candidates) == 0 {
-		return []segmentCandidate{{SourcePath: info.SourcePath, Timestamp: timestamp, SegmentIndex: -1}}
+		return []segmentCandidate{{
+			SourcePath:   info.SourcePath,
+			Timestamp:    timestamp,
+			SegmentIndex: -1,
+		}}
 	}
 	return candidates
 }
@@ -280,7 +293,11 @@ func resolveVideoSource(ctx context.Context, meta api.PreparedMetadata, tmpRoot 
 			return filePath, nil
 		}
 
-		logger.Tracef("screenshots: video source BDMV summary lookup tmp_root_present=%t playlist=%s", strings.TrimSpace(tmpRoot) != "", paths.PrimaryBDMVPlaylist(meta))
+		logger.Tracef(
+			"screenshots: video source BDMV summary lookup tmp_root_present=%t playlist=%s",
+			strings.TrimSpace(tmpRoot) != "",
+			paths.PrimaryBDMVPlaylist(meta),
+		)
 		bdinfo, err := loadBDInfo(tmpRoot, meta)
 		if err != nil {
 			return "", err

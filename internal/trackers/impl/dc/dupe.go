@@ -23,7 +23,11 @@ type dupeSearcher struct {
 }
 
 func (Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, endpoint: "https://digitalcore.club/api/v1/torrents"}
+	return &dupeSearcher{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: "https://digitalcore.club/api/v1/torrents",
+	}
 }
 
 func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -57,7 +61,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	entries := make([]api.DupeEntry, 0, len(items))
 	for _, item := range items {
 		id := dcString(item["id"])
-		entry := api.DupeEntry{Name: dcString(item["name"]), ID: id, Link: "https://digitalcore.club/torrent/" + id + "/"}
+		entry := api.DupeEntry{
+			Name: dcString(item["name"]),
+			ID:   id,
+			Link: "https://digitalcore.club/torrent/" + id + "/",
+		}
 		if size := dcInt64(item["size"]); size > 0 {
 			entry.SizeKnown, entry.SizeBytes = true, size
 		}

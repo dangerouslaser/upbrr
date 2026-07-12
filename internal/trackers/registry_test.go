@@ -102,7 +102,11 @@ func TestRegistryDiscoversCapabilitiesAndSortsNames(t *testing.T) {
 func TestRegistryRuleCapability(t *testing.T) {
 	registry := NewRegistry()
 	rules := ruletypes.RuleSet{RequireMovieOnly: true}
-	if err := registry.RegisterDescriptor(Descriptor{Name: "BLU", Definition: stubDefinition{name: "BLU"}, Rules: &rules}); err != nil {
+	if err := registry.RegisterDescriptor(Descriptor{
+		Name:       "BLU",
+		Definition: stubDefinition{name: "BLU"},
+		Rules:      &rules,
+	}); err != nil {
 		t.Fatalf("register: %v", err)
 	}
 	got, ok := registry.LookupRules("blu")

@@ -234,7 +234,14 @@ func randomJobID() string {
 // work; after the job is accepted, cancellation is detached and callers must use
 // CancelDupeCheck. When the active core exposes the GUI prepared-metadata cache,
 // the matching preview must exist before a durable job is created.
-func (b *Backend) StartDupeCheck(ctx context.Context, sessionID string, path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackers []string) (string, error) {
+func (b *Backend) StartDupeCheck(
+	ctx context.Context,
+	sessionID string,
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackers []string,
+) (string, error) {
 	rt, err := b.requireRuntime()
 	if err != nil {
 		return "", err
@@ -304,7 +311,11 @@ func (b *Backend) StartDupeCheck(ctx context.Context, sessionID string, path str
 	states := make(map[string]DupeCheckTrackerState, len(resolvedTrackers))
 	for _, tracker := range resolvedTrackers {
 		normalized := strings.ToUpper(strings.TrimSpace(tracker))
-		states[normalized] = DupeCheckTrackerState{Tracker: normalized, Status: "queued", Message: "queued"}
+		states[normalized] = DupeCheckTrackerState{
+			Tracker: normalized,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 	job := &dupeCheckJob{
 		sessionID:     sessionID,
@@ -565,11 +576,49 @@ func trackerUploadRetryRequestFromJob(job *trackerUploadJob) (trackerUploadRetry
 // trackers and returns its job ID. Snapshots preserve partial upload counts
 // returned with later tracker errors or cancellation. The job captures upload
 // options at start time so failed-tracker retries reuse the original option set.
-func (b *Backend) StartTrackerUpload(sessionID string, path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackers []string, ignoreDupesFor []string, questionnaireAnswers map[string]map[string]string, descriptionGroups []api.DescriptionBuilderGroup, debug bool, noSeed bool, runLogLevel string) (string, error) {
-	return b.startTrackerUpload(sessionID, path, overrides, nameOverrides, trackers, ignoreDupesFor, questionnaireAnswers, descriptionGroups, debug, noSeed, runLogLevel, nil)
+func (b *Backend) StartTrackerUpload(
+	sessionID string,
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackers []string,
+	ignoreDupesFor []string,
+	questionnaireAnswers map[string]map[string]string,
+	descriptionGroups []api.DescriptionBuilderGroup,
+	debug bool,
+	noSeed bool,
+	runLogLevel string,
+) (string, error) {
+	return b.startTrackerUpload(
+		sessionID,
+		path,
+		overrides,
+		nameOverrides,
+		trackers,
+		ignoreDupesFor,
+		questionnaireAnswers,
+		descriptionGroups,
+		debug,
+		noSeed,
+		runLogLevel,
+		nil,
+	)
 }
 
-func (b *Backend) startTrackerUpload(sessionID string, path string, overrides api.ExternalIDOverrides, nameOverrides api.ReleaseNameOverrides, trackers []string, ignoreDupesFor []string, questionnaireAnswers map[string]map[string]string, descriptionGroups []api.DescriptionBuilderGroup, debug bool, noSeed bool, runLogLevel string, uploadOptions *api.UploadOptions) (string, error) {
+func (b *Backend) startTrackerUpload(
+	sessionID string,
+	path string,
+	overrides api.ExternalIDOverrides,
+	nameOverrides api.ReleaseNameOverrides,
+	trackers []string,
+	ignoreDupesFor []string,
+	questionnaireAnswers map[string]map[string]string,
+	descriptionGroups []api.DescriptionBuilderGroup,
+	debug bool,
+	noSeed bool,
+	runLogLevel string,
+	uploadOptions *api.UploadOptions,
+) (string, error) {
 	rt, err := b.requireRuntime()
 	if err != nil {
 		return "", err
@@ -632,7 +681,11 @@ func (b *Backend) startTrackerUpload(sessionID string, path string, overrides ap
 		snapshotThrottle:     trackerUploadSnapshotThrottle,
 	}
 	for _, tracker := range resolvedTrackers {
-		job.states[tracker] = TrackerUploadTrackerState{Tracker: tracker, Status: "queued", Message: "queued"}
+		job.states[tracker] = TrackerUploadTrackerState{
+			Tracker: tracker,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 	jobCtx, cancel := context.WithCancel(context.Background())
 	job.cancel = cancel
@@ -680,7 +733,20 @@ func (b *Backend) RetryFailedTrackerUpload(sessionID string, jobID string) (stri
 	if err != nil {
 		return "", err
 	}
-	return b.startTrackerUpload(retry.sessionID, retry.sourcePath, retry.overrides, retry.nameOverrides, retry.failedTrackers, retry.ignoreDupesFor, retry.questionnaireAnswers, retry.descriptionGroups, retry.runOptions.Debug, retry.runOptions.NoSeed, retry.runOptions.RunLogLevel, &retry.uploadOptions)
+	return b.startTrackerUpload(
+		retry.sessionID,
+		retry.sourcePath,
+		retry.overrides,
+		retry.nameOverrides,
+		retry.failedTrackers,
+		retry.ignoreDupesFor,
+		retry.questionnaireAnswers,
+		retry.descriptionGroups,
+		retry.runOptions.Debug,
+		retry.runOptions.NoSeed,
+		retry.runOptions.RunLogLevel,
+		&retry.uploadOptions,
+	)
 }
 
 // GetTrackerUploadSnapshot returns an upload job snapshot only to the session

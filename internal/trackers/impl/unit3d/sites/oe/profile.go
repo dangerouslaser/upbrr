@@ -32,7 +32,8 @@ func buildName(meta api.PreparedMetadata, _ config.TrackerConfig) string {
 	}
 	name = strings.TrimSpace(strings.Join(strings.Fields(name), " "))
 	tag := strings.TrimSpace(strings.TrimPrefix(meta.Tag, "-"))
-	if tag != "" && !strings.EqualFold(tag, "nogrp") && !strings.EqualFold(tag, "nogroup") && !strings.EqualFold(tag, "unknown") && !strings.EqualFold(tag, "-unk-") {
+	if tag != "" && !strings.EqualFold(tag, "nogrp") && !strings.EqualFold(tag, "nogroup") && !strings.EqualFold(tag, "unknown") &&
+		!strings.EqualFold(tag, "-unk-") {
 		return name
 	}
 	if name == "" || strings.HasSuffix(strings.ToUpper(name), "-NOGRP") {

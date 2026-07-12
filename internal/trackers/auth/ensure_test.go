@@ -115,7 +115,11 @@ func TestEnsureSessionDeletesConfirmedInvalidAndLogsIn(t *testing.T) {
 	adapter := &fakeAdapter{
 		capability: api.TrackerAuthCapability{TrackerID: "FAKE", SupportsLogin: true},
 		validate: func() (Session, error) {
-			return Session{}, &ValidationError{TrackerID: "FAKE", ConfirmedInvalid: true, Err: errors.New("expired")}
+			return Session{}, &ValidationError{
+				TrackerID:        "FAKE",
+				ConfirmedInvalid: true,
+				Err:              errors.New("expired"),
+			}
 		},
 		login: func() (Session, error) {
 			return Session{TrackerID: "FAKE", State: SessionStateReady}, nil
@@ -142,7 +146,11 @@ func TestEnsureSessionKeepsCookiesOnTransientValidationFailure(t *testing.T) {
 	adapter := &fakeAdapter{
 		capability: api.TrackerAuthCapability{TrackerID: "FAKE", SupportsLogin: true},
 		validate: func() (Session, error) {
-			return Session{}, &ValidationError{TrackerID: "FAKE", Transient: true, Err: errors.New("timeout")}
+			return Session{}, &ValidationError{
+				TrackerID: "FAKE",
+				Transient: true,
+				Err:       errors.New("timeout"),
+			}
 		},
 	}
 	service := &Service{adapters: map[string]Adapter{"FAKE": adapter}, challenges: NewChallengeManager(defaultChallengeTTL)}
@@ -323,7 +331,11 @@ func TestEnsureSessionCreatesManual2FAChallenge(t *testing.T) {
 	t.Parallel()
 
 	adapter := &fakeAdapter{
-		capability: api.TrackerAuthCapability{TrackerID: "FAKE", SupportsLogin: true, SupportsManual2FA: true},
+		capability: api.TrackerAuthCapability{
+			TrackerID:         "FAKE",
+			SupportsLogin:     true,
+			SupportsManual2FA: true,
+		},
 		validate: func() (Session, error) {
 			return Session{}, &Needs2FAError{TrackerID: "FAKE"}
 		},

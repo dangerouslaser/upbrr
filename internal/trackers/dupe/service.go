@@ -226,7 +226,11 @@ func (s *Service) emitDupeProgress(ctx context.Context, update api.DupeProgressU
 }
 
 func (s *Service) checkTracker(ctx context.Context, meta api.PreparedMetadata, tracker string) (result api.DupeCheckResult) {
-	result = api.DupeCheckResult{Tracker: tracker, CheckedAt: time.Now().UTC(), Status: "completed"}
+	result = api.DupeCheckResult{
+		Tracker:   tracker,
+		CheckedAt: time.Now().UTC(),
+		Status:    "completed",
+	}
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			message := panicFailureMessage(recovered)

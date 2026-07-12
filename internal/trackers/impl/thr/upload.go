@@ -41,8 +41,14 @@ const (
 var ErrLoginFailed = errors.New("trackers: THR login failed")
 
 var (
-	subtitleMap = map[string]string{"croatian": "1", "english": "2", "bosnian": "3", "serbian": "4", "slovenian": "5"}
-	idPattern   = regexp.MustCompile(`id=(\d+)`)
+	subtitleMap = map[string]string{
+		"croatian":  "1",
+		"english":   "2",
+		"bosnian":   "3",
+		"serbian":   "4",
+		"slovenian": "5",
+	}
+	idPattern = regexp.MustCompile(`id=(\d+)`)
 )
 
 type uploadState struct {
@@ -59,8 +65,16 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		return api.UploadSummary{}, err
 	}
 	body, contentType, err := commonhttp.BuildMultipartPayload(state.fields, []commonhttp.FileField{
-		{FieldName: "tfile", FileName: state.releaseName + ".torrent", Path: state.torrentPath},
-		{FieldName: "nfo", FileName: "MEDIAINFO.txt", Content: []byte(commonhttp.ReadOptionalFile(strings.TrimSpace(req.Meta.MediaInfoTextPath)))},
+		{
+			FieldName: "tfile",
+			FileName:  state.releaseName + ".torrent",
+			Path:      state.torrentPath,
+		},
+		{
+			FieldName: "nfo",
+			FileName:  "MEDIAINFO.txt",
+			Content:   []byte(commonhttp.ReadOptionalFile(strings.TrimSpace(req.Meta.MediaInfoTextPath))),
+		},
 	})
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: %w", err)
@@ -99,7 +113,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 			}
 		}
 		return api.UploadSummary{Uploaded: 1, UploadedTorrents: []api.UploadedTorrent{{
-			Tracker: "THR", TorrentID: torrentID, TorrentURL: finalURL, DownloadURL: finalURL, TorrentPath: artifactPath,
+			Tracker:     "THR",
+			TorrentID:   torrentID,
+			TorrentURL:  finalURL,
+			DownloadURL: finalURL,
+			TorrentPath: artifactPath,
 		}}}, nil
 	}
 
@@ -122,7 +140,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
 		Questionnaire:    state.questionnaire,
-		Files:            []api.TrackerDryRunFile{{Field: "tfile", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "tfile",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -361,7 +383,11 @@ func buildQuestionnaire(meta api.PreparedMetadata) *api.TrackerQuestionnaire {
 	return &api.TrackerQuestionnaire{
 		Tracker: "THR",
 		Fields: []api.TrackerQuestionnaireField{{
-			Key: "name_override", Label: "Upload Name", Kind: "text", Value: resolveName(meta), Required: true,
+			Key:      "name_override",
+			Label:    "Upload Name",
+			Kind:     "text",
+			Value:    resolveName(meta),
+			Required: true,
 		}},
 	}
 }

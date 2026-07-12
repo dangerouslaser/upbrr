@@ -26,16 +26,34 @@ const dvdVOBMediaInfoFooter = "[/code][/spoiler]"
 
 var collapseNewlines = regexp.MustCompile(`\n{3,}`)
 var bbcodeImageTag = regexp.MustCompile(`(?is)\[img(?:=[^\]]*)?\](.*?)\[/img\]`)
-var unit3DBotSignatureTag = regexp.MustCompile(`(?is)(?:\[(?:center|right|align=right)\]\s*(?:\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\]\s*)?\[b\]?Uploaded\s+Using\s+\[url=https://github\.com/HDInnovations/UNIT3D\]UNIT3D\[/url\]\s+Auto\s+Uploader\[/b\]?(?:\s*\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\])?\s*\[/(?:center|right|align)\])|(?:\[center\]\s*\[url=https://github\.com/z-ink/uploadrr\]\[img=\d+\]https://i\.ibb\.co/2NVWb0c/uploadrr\.webp\[/img\]\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=https://github\.com/edge20200/Only-Uploader\]Powered\s+by\s+Only-Uploader\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=/torrents\?perPage=\d+&name=[^\]]*\]\s*\[/url\]\s*\[/center\])|(?:\[center\]\s*(?:\[b\]\s*(?:\[size=\d+\])?brush(?:\[/size\])?\s*\[/b\]\s*)?This is an internal release which was first released exclusively on Aither\.\s*Cheers to all the Aither(?:\s+users)?\s*\[/center\])|(?:\[(?:center|right|align=right)\]\s*(?:\[url=[^\]]+\]\s*)?(?:\[size=[^\]]+\]\s*)?Created by(?:\s+[^[]*?)?\s*Upload Assistant(?:\s*\[/size\])?(?:\s*\[/url\])?\s*\[/(?:center|right|align)\])`)
+
+var unit3DBotSignatureTag = regexp.MustCompile(
+	`(?is)(?:\[(?:center|right|align=right)\]\s*(?:\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\]\s*)?\[b\]?Uploaded\s+Using\s+\[url=https://github\.com/HDInnovations/UNIT3D\]UNIT3D\[/url\]\s+Auto\s+Uploader\[/b\]?(?:\s*\[img=\d+\]https://blutopia\.xyz/favicon\.ico\[/img\])?\s*\[/(?:center|right|align)\])|(?:\[center\]\s*\[url=https://github\.com/z-ink/uploadrr\]\[img=\d+\]https://i\.ibb\.co/2NVWb0c/uploadrr\.webp\[/img\]\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=https://github\.com/edge20200/Only-Uploader\]Powered\s+by\s+Only-Uploader\[/url\]\s*\[/center\])|(?:\[center\]\s*\[url=/torrents\?perPage=\d+&name=[^\]]*\]\s*\[/url\]\s*\[/center\])|(?:\[center\]\s*(?:\[b\]\s*(?:\[size=\d+\])?brush(?:\[/size\])?\s*\[/b\]\s*)?This is an internal release which was first released exclusively on Aither\.\s*Cheers to all the Aither(?:\s+users)?\s*\[/center\])|(?:\[(?:center|right|align=right)\]\s*(?:\[url=[^\]]+\]\s*)?(?:\[size=[^\]]+\]\s*)?Created by(?:\s+[^[]*?)?\s*Upload Assistant(?:\s*\[/size\])?(?:\s*\[/url\])?\s*\[/(?:center|right|align)\])`,
+)
 var unit3DEmptyCenterTag = regexp.MustCompile(`(?is)\[center\]\s*\[/center\]`)
 var unit3DAlignBlockTag = regexp.MustCompile(`(?is)\[align=(center|left|right)\](.*?)\[/align\]`)
 var unit3DWrapperBlockTag = regexp.MustCompile(`(?is)\[(center|align=(?:center|left|right))\](.*?)\[/(center|align)\]`)
 var unit3DWidthImageTag = regexp.MustCompile(`(?i)\[img\s+width=(\d+)\]`)
-var unit3DUASignatureTag = regexp.MustCompile(`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`)
-var unit3DNFOBlockTag = regexp.MustCompile(`(?is)\[(?:center|align=center)\]\s*\[spoiler=(?:Scene|FraMeSToR) NFO:\]\[code\].*?\[/code\]\[/spoiler\]\s*\[/(?:center|align)\]`)
+
+var unit3DUASignatureTag = regexp.MustCompile(
+	`(?is)\[(?:right|align=right)\]\s*\[url=https://github\.com/(?:Audionut|autobrr)/upbrr\].*?\[/url\]\s*\[/(?:right|align)\]`,
+)
+
+var unit3DNFOBlockTag = regexp.MustCompile(
+	`(?is)\[(?:center|align=center)\]\s*\[spoiler=(?:Scene|FraMeSToR) NFO:\]\[code\].*?\[/code\]\[/spoiler\]\s*\[/(?:center|align)\]`,
+)
 
 // BuildDescription renders the shared Unit3D upload description from prepared metadata and selected images.
-func BuildDescription(ctx context.Context, meta api.PreparedMetadata, appConfig config.Config, _ config.TrackerConfig, logger api.Logger, keptDescription string, menuImages []api.ScreenshotImage, screenshots []api.ScreenshotImage) (string, error) {
+func BuildDescription(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	appConfig config.Config,
+	_ config.TrackerConfig,
+	logger api.Logger,
+	keptDescription string,
+	menuImages []api.ScreenshotImage,
+	screenshots []api.ScreenshotImage,
+) (string, error) {
 	select {
 	case <-ctx.Done():
 		return "", fmt.Errorf("context canceled: %w", ctx.Err())
@@ -102,7 +120,10 @@ func BuildDescription(ctx context.Context, meta api.PreparedMetadata, appConfig 
 		logger.Tracef("trackers: unit3d desc part=dvd_vob_mediainfo")
 	}
 
-	if tonemapHeader := strings.TrimSpace(appConfig.Description.TonemappedHeader); tonemapHeader != "" && ShouldIncludeTonemappedHeader(meta, appConfig, screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		appConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		ShouldIncludeTonemappedHeader(meta, appConfig, screenshots) {
 		appendUniquePart(tonemapHeader, "tonemap_header")
 		logger.Tracef("trackers: unit3d desc part=tonemap_header len=%d", len(tonemapHeader))
 	}
@@ -124,7 +145,11 @@ func BuildDescription(ctx context.Context, meta api.PreparedMetadata, appConfig 
 	filteredScreenshots := filterScreenshotDuplicates(screenshots, keptDescription, menuImages)
 	logger.Tracef("trackers: unit3d desc screenshots total=%d filtered=%d", len(screenshots), len(filteredScreenshots))
 	screenshotHeader := strings.TrimSpace(appConfig.Description.ScreenshotHeader)
-	screenshotSection := buildScreenshotSection(filteredScreenshots, appConfig.Description.ThumbnailSize, parseScreensPerRow(appConfig.Description.ScreensPerRow))
+	screenshotSection := buildScreenshotSection(
+		filteredScreenshots,
+		appConfig.Description.ThumbnailSize,
+		parseScreensPerRow(appConfig.Description.ScreensPerRow),
+	)
 	if screenshotSection != "" && screenshotHeader != "" {
 		appendUniquePart(screenshotHeader, "screenshot_header")
 		logger.Tracef("trackers: unit3d desc part=screenshot_header len=%d", len(screenshotHeader))

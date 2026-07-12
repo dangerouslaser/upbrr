@@ -43,5 +43,7 @@ func (r Result) HasIDs() bool {
 
 // HasData reports whether the result contains any usable metadata or release identity.
 func (r Result) HasData() bool {
-	return r.HasIDs() || strings.TrimSpace(r.Description) != "" || len(r.Images) > 0 || len(r.Validated) > 0 || strings.TrimSpace(r.InfoHash) != "" || strings.TrimSpace(r.FileName) != "" || strings.TrimSpace(r.Category) != ""
+	return r.HasIDs() || strings.TrimSpace(r.Description) != "" || len(r.Images) > 0 || len(r.Validated) > 0 || strings.TrimSpace(r.InfoHash) != "" ||
+		strings.TrimSpace(r.FileName) != "" ||
+		strings.TrimSpace(r.Category) != ""
 }

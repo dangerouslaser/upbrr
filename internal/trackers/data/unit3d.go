@@ -379,7 +379,16 @@ func (c *Client) lookupUnit3D(ctx context.Context, tracker string, id string, fi
 	result.Description = cleaned
 	result.Images = images
 	result.Validated = validated
-	c.logger.Debugf("unit3d: %s description raw=%d cleaned=%d images=%d validated=%d onlyID=%t keepImages=%t", tracker, len(description), cleanedLen, imageCount, len(validated), onlyID, keepImages)
+	c.logger.Debugf(
+		"unit3d: %s description raw=%d cleaned=%d images=%d validated=%d onlyID=%t keepImages=%t",
+		tracker,
+		len(description),
+		cleanedLen,
+		imageCount,
+		len(validated),
+		onlyID,
+		keepImages,
+	)
 	for _, report := range reports {
 		for _, note := range report.Notes {
 			c.logger.Debugf("unit3d: %s description note kind=%s msg=%s", tracker, note.Kind, note.Message)
@@ -445,7 +454,14 @@ func (c *Client) SearchTorrents(ctx context.Context, tracker string, params url.
 	return entries, "", nil
 }
 
-func (c *Client) searchUnit3DEndpoint(ctx context.Context, tracker string, endpoint unit3dSearchEndpoint, params url.Values, apiKey string, isDisc bool) ([]api.DupeEntry, string, error) {
+func (c *Client) searchUnit3DEndpoint(
+	ctx context.Context,
+	tracker string,
+	endpoint unit3dSearchEndpoint,
+	params url.Values,
+	apiKey string,
+	isDisc bool,
+) ([]api.DupeEntry, string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.url, nil)
 	if err != nil {
 		return nil, "", fmt.Errorf("unit3d: request: %w", err)
@@ -787,7 +803,8 @@ func resolveUnit3DImagePublicAddrs(ctx context.Context, host string) ([]netip.Ad
 
 func isUnit3DImagePublicIP(addr netip.Addr) bool {
 	addr = addr.Unmap()
-	if !addr.IsValid() || !addr.IsGlobalUnicast() || addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast() || addr.IsMulticast() || addr.IsUnspecified() {
+	if !addr.IsValid() || !addr.IsGlobalUnicast() || addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast() || addr.IsMulticast() ||
+		addr.IsUnspecified() {
 		return false
 	}
 	for _, blocked := range unit3DImageBlockedIPRanges {

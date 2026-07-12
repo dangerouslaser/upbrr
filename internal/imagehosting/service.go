@@ -40,7 +40,12 @@ func NewService(cfg config.Config, logger api.Logger, repo api.MetadataRepositor
 		logger = api.NopLogger{}
 	}
 	client := httpclient.New(httpclient.UploadTimeout)
-	service := &Service{cfg: cfg, logger: logger, repo: repo, client: client}
+	service := &Service{
+		cfg:    cfg,
+		logger: logger,
+		repo:   repo,
+		client: client,
+	}
 	service.uploaders = newUploaderRegistry(cfg, client)
 	return service
 }
@@ -119,7 +124,12 @@ func (s *Service) ListCandidates(ctx context.Context, meta api.PreparedMetadata)
 			img.RawURL = uploadInfo.RawURL
 			img.WebURL = uploadInfo.WebURL
 			img.UploadedAt = uploadInfo.UploadedAt
-			s.logger.Tracef("image hosting: found uploaded image file=%s host=%s tracker=%s", filepath.Base(pathValue), uploadInfo.Host, imageHostLogTracker(uploadInfo.Host))
+			s.logger.Tracef(
+				"image hosting: found uploaded image file=%s host=%s tracker=%s",
+				filepath.Base(pathValue),
+				uploadInfo.Host,
+				imageHostLogTracker(uploadInfo.Host),
+			)
 		}
 
 		images = append(images, img)
@@ -161,7 +171,12 @@ func (s *Service) ListCandidates(ctx context.Context, meta api.PreparedMetadata)
 			img.RawURL = uploadInfo.RawURL
 			img.WebURL = uploadInfo.WebURL
 			img.UploadedAt = uploadInfo.UploadedAt
-			s.logger.Tracef("image hosting: found uploaded final selection file=%s host=%s tracker=%s", filepath.Base(pathValue), uploadInfo.Host, imageHostLogTracker(uploadInfo.Host))
+			s.logger.Tracef(
+				"image hosting: found uploaded final selection file=%s host=%s tracker=%s",
+				filepath.Base(pathValue),
+				uploadInfo.Host,
+				imageHostLogTracker(uploadInfo.Host),
+			)
 		}
 
 		images = append(images, img)
@@ -195,7 +210,12 @@ func (s *Service) ListCandidates(ctx context.Context, meta api.PreparedMetadata)
 			UploadedAt: upload.UploadedAt,
 		})
 		seenPaths[pathValue] = struct{}{}
-		s.logger.Tracef("image hosting: found uploaded-only image file=%s host=%s tracker=%s", filepath.Base(pathValue), upload.Host, imageHostLogTracker(upload.Host))
+		s.logger.Tracef(
+			"image hosting: found uploaded-only image file=%s host=%s tracker=%s",
+			filepath.Base(pathValue),
+			upload.Host,
+			imageHostLogTracker(upload.Host),
+		)
 	}
 
 	sort.Slice(images, func(i, j int) bool {
@@ -210,7 +230,13 @@ func (s *Service) ListCandidates(ctx context.Context, meta api.PreparedMetadata)
 // and persists successful links when a repository is configured. Tracker-owned
 // hosts require their matching usage scope; HDB batches keep normal and
 // disc-menu images in separate, non-overlapping galleries.
-func (s *Service) Upload(ctx context.Context, meta api.PreparedMetadata, host string, usageScope string, images []api.ScreenshotImage) ([]api.UploadedImageLink, error) {
+func (s *Service) Upload(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	host string,
+	usageScope string,
+	images []api.ScreenshotImage,
+) ([]api.UploadedImageLink, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, fmt.Errorf("image hosting: upload canceled: %w", err)
 	}
@@ -228,7 +254,13 @@ func (s *Service) Upload(ctx context.Context, meta api.PreparedMetadata, host st
 	if owner := trackers.TrackerForOwnedImageHost(normalizedHost); owner != "" {
 		expectedScope := trackers.TrackerImageUsageScope(owner)
 		if !strings.EqualFold(normalizedScope, expectedScope) {
-			return nil, fmt.Errorf("image hosting: host %q is scoped to tracker %s: expected scope %q, got %q", normalizedHost, owner, expectedScope, normalizedScope)
+			return nil, fmt.Errorf(
+				"image hosting: host %q is scoped to tracker %s: expected scope %q, got %q",
+				normalizedHost,
+				owner,
+				expectedScope,
+				normalizedScope,
+			)
 		}
 	}
 	if len(images) == 0 {
@@ -275,8 +307,18 @@ func (s *Service) Upload(ctx context.Context, meta api.PreparedMetadata, host st
 			return nil, internalerrors.ErrInvalidInput
 		}
 		seen[absPath] = struct{}{}
-		unique = append(unique, imageCandidate{Path: absPath, Purpose: image.Purpose, SizeBytes: info.Size()})
-		s.logger.Tracef("image hosting: queued file=%s host=%s tracker=%s size_kb=%.2f", filepath.Base(absPath), normalizedHost, logTracker, float64(info.Size())/1024.0)
+		unique = append(unique, imageCandidate{
+			Path:      absPath,
+			Purpose:   image.Purpose,
+			SizeBytes: info.Size(),
+		})
+		s.logger.Tracef(
+			"image hosting: queued file=%s host=%s tracker=%s size_kb=%.2f",
+			filepath.Base(absPath),
+			normalizedHost,
+			logTracker,
+			float64(info.Size())/1024.0,
+		)
 	}
 	if len(unique) == 0 {
 		return nil, internalerrors.ErrInvalidInput
@@ -326,14 +368,29 @@ func (s *Service) Upload(ctx context.Context, meta api.PreparedMetadata, host st
 		if s.repo != nil {
 			s.logger.Tracef("image hosting: persisting upload records count=%d host=%s tracker=%s", len(results), normalizedHost, logTracker)
 			if err := s.repo.SaveUploadedImages(ctx, meta.SourcePath, normalizedHost, results); err != nil {
-				s.logger.Errorf("image hosting: failed to save upload records host=%s tracker=%s err=%s", normalizedHost, logTracker, redaction.RedactValue(err.Error(), nil))
+				s.logger.Errorf(
+					"image hosting: failed to save upload records host=%s tracker=%s err=%s",
+					normalizedHost,
+					logTracker,
+					redaction.RedactValue(err.Error(), nil),
+				)
 				return nil, fmt.Errorf("image hosting: %w", err)
 			}
 			summary, err := syncScreenshotSlotVariants(ctx, s.repo, meta.SourcePath, results)
 			if err != nil {
-				s.logger.Warnf("image hosting: failed to sync screenshot slot variants host=%s tracker=%s err=%s", normalizedHost, logTracker, redaction.RedactValue(err.Error(), nil))
+				s.logger.Warnf(
+					"image hosting: failed to sync screenshot slot variants host=%s tracker=%s err=%s",
+					normalizedHost,
+					logTracker,
+					redaction.RedactValue(err.Error(), nil),
+				)
 			} else if summary.FallbackMatched > 0 {
-				s.logger.Debugf("image hosting: applied ordered screenshot slot fallback host=%s tracker=%s matched=%d", normalizedHost, logTracker, summary.FallbackMatched)
+				s.logger.Debugf(
+					"image hosting: applied ordered screenshot slot fallback host=%s tracker=%s matched=%d",
+					normalizedHost,
+					logTracker,
+					summary.FallbackMatched,
+				)
 			}
 		}
 		s.logger.Infof("image hosting: completed batch upload count=%d host=%s tracker=%s", len(results), normalizedHost, logTracker)
@@ -453,26 +510,54 @@ dispatchLoop:
 	totalDuration := time.Since(uploadStart)
 	orderedResults := orderedUploadResults(results)
 	if len(orderedResults) > 0 {
-		s.logger.Infof("image hosting: completed uploads count=%d host=%s tracker=%s duration=%v avg=%v", len(orderedResults), normalizedHost, logTracker, totalDuration, totalDuration/time.Duration(len(orderedResults)))
+		s.logger.Infof(
+			"image hosting: completed uploads count=%d host=%s tracker=%s duration=%v avg=%v",
+			len(orderedResults),
+			normalizedHost,
+			logTracker,
+			totalDuration,
+			totalDuration/time.Duration(len(orderedResults)),
+		)
 	}
 
 	if s.repo != nil && len(orderedResults) > 0 {
 		s.logger.Tracef("image hosting: persisting upload records count=%d host=%s tracker=%s", len(orderedResults), normalizedHost, logTracker)
 		if err := s.repo.SaveUploadedImages(ctx, meta.SourcePath, normalizedHost, orderedResults); err != nil {
-			s.logger.Errorf("image hosting: failed to save upload records host=%s tracker=%s err=%s", normalizedHost, logTracker, redaction.RedactValue(err.Error(), nil))
+			s.logger.Errorf(
+				"image hosting: failed to save upload records host=%s tracker=%s err=%s",
+				normalizedHost,
+				logTracker,
+				redaction.RedactValue(err.Error(), nil),
+			)
 			return nil, fmt.Errorf("image hosting: %w", err)
 		}
 		summary, err := syncScreenshotSlotVariants(ctx, s.repo, meta.SourcePath, orderedResults)
 		if err != nil {
-			s.logger.Warnf("image hosting: failed to sync screenshot slot variants host=%s tracker=%s err=%s", normalizedHost, logTracker, redaction.RedactValue(err.Error(), nil))
+			s.logger.Warnf(
+				"image hosting: failed to sync screenshot slot variants host=%s tracker=%s err=%s",
+				normalizedHost,
+				logTracker,
+				redaction.RedactValue(err.Error(), nil),
+			)
 		} else if summary.FallbackMatched > 0 {
-			s.logger.Debugf("image hosting: applied ordered screenshot slot fallback host=%s tracker=%s matched=%d", normalizedHost, logTracker, summary.FallbackMatched)
+			s.logger.Debugf(
+				"image hosting: applied ordered screenshot slot fallback host=%s tracker=%s matched=%d",
+				normalizedHost,
+				logTracker,
+				summary.FallbackMatched,
+			)
 		}
 		s.logger.Debugf("image hosting: upload records persisted successfully host=%s tracker=%s", normalizedHost, logTracker)
 	}
 
 	if len(failures) > 0 {
-		s.logger.Warnf("image hosting: upload batch completed host=%s tracker=%s failures=%d successes=%d", normalizedHost, logTracker, len(failures), len(orderedResults))
+		s.logger.Warnf(
+			"image hosting: upload batch completed host=%s tracker=%s failures=%d successes=%d",
+			normalizedHost,
+			logTracker,
+			len(failures),
+			len(orderedResults),
+		)
 		return orderedResults, fmt.Errorf("image hosting: %d of %d uploads failed: %s", len(failures), len(unique), strings.Join(failures, "; "))
 	}
 
@@ -625,7 +710,12 @@ func isAllowedImageExt(path string) bool {
 	}
 }
 
-func syncScreenshotSlotVariants(ctx context.Context, repo api.MetadataRepository, sourcePath string, uploaded []api.UploadedImageLink) (trackers.SlotUploadAttachmentResult, error) {
+func syncScreenshotSlotVariants(
+	ctx context.Context,
+	repo api.MetadataRepository,
+	sourcePath string,
+	uploaded []api.UploadedImageLink,
+) (trackers.SlotUploadAttachmentResult, error) {
 	if repo == nil || len(uploaded) == 0 || strings.TrimSpace(sourcePath) == "" {
 		return trackers.SlotUploadAttachmentResult{}, nil
 	}

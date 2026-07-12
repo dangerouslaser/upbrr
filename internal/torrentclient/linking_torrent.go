@@ -227,7 +227,13 @@ func matchSourceLinkCandidate(ctx context.Context, candidates []sourceLinkCandid
 
 // matchSourceLinkCandidateWithCaseFold applies the matcher with explicit case
 // semantics so host-independent tests can prove Windows and non-Windows rules.
-func matchSourceLinkCandidateWithCaseFold(ctx context.Context, candidates []sourceLinkCandidate, torrentRel string, length int64, foldCase bool) (*sourceLinkCandidate, string, error) {
+func matchSourceLinkCandidateWithCaseFold(
+	ctx context.Context,
+	candidates []sourceLinkCandidate,
+	torrentRel string,
+	length int64,
+	foldCase bool,
+) (*sourceLinkCandidate, string, error) {
 	torrentRel = filepath.Clean(torrentRel)
 	torrentName := filepath.Base(torrentRel)
 	checks := []struct {
@@ -365,7 +371,11 @@ func createTorrentLinkPlan(ctx context.Context, trackerDir string, plan torrentL
 			return rollbackTorrentLinkPlan(trackerDir, created, fmt.Errorf("validate staged torrent file: %w", err))
 		}
 		if !info.Mode().IsRegular() || info.Size() != file.length {
-			return rollbackTorrentLinkPlan(trackerDir, created, fmt.Errorf("staged torrent file size mismatch: expected=%d actual=%d", file.length, info.Size()))
+			return rollbackTorrentLinkPlan(
+				trackerDir,
+				created,
+				fmt.Errorf("staged torrent file size mismatch: expected=%d actual=%d", file.length, info.Size()),
+			)
 		}
 	}
 	return nil

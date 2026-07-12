@@ -128,7 +128,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		_ = os.WriteFile(failurePath, redactedBody, 0o600)
 	}
 	if failurePath != "" {
-		return api.UploadSummary{}, fmt.Errorf("%w failure=%s", commonhttp.UploadHTTPErrorWithURL("AR", resp.StatusCode, finalURL, responsePreview), failurePath)
+		return api.UploadSummary{}, fmt.Errorf(
+			"%w failure=%s",
+			commonhttp.UploadHTTPErrorWithURL("AR", resp.StatusCode, finalURL, responsePreview),
+			failurePath,
+		)
 	}
 	return api.UploadSummary{}, commonhttp.UploadHTTPErrorWithURL("AR", resp.StatusCode, finalURL, responsePreview)
 }
@@ -836,7 +840,10 @@ func writeAuthKey(ctx context.Context, dbPath string, authKey string) error {
 	if legacyPath := authPath(dbPath); legacyPath != "" {
 		if err := os.Remove(legacyPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 			if rollbackErr := restoreEncryptedAuthKey(context.WithoutCancel(ctx), dbPath, previous); rollbackErr != nil {
-				return errors.Join(fmt.Errorf("trackers: AR remove legacy auth key: %w", err), fmt.Errorf("trackers: AR rollback encrypted auth key: %w", rollbackErr))
+				return errors.Join(
+					fmt.Errorf("trackers: AR remove legacy auth key: %w", err),
+					fmt.Errorf("trackers: AR rollback encrypted auth key: %w", rollbackErr),
+				)
 			}
 			return fmt.Errorf("trackers: AR remove legacy auth key: %w", err)
 		}
@@ -854,7 +861,11 @@ type encryptedAuthKeySnapshot struct {
 func snapshotEncryptedAuthKey(ctx context.Context, dbPath string) (encryptedAuthKeySnapshot, error) {
 	value, err := trackerauth.LoadAuthState(ctx, dbPath, "AR", arAuthKeyKey)
 	if err == nil {
-		return encryptedAuthKeySnapshot{value: value, existed: true, available: true}, nil
+		return encryptedAuthKeySnapshot{
+			value:     value,
+			existed:   true,
+			available: true,
+		}, nil
 	}
 	if errors.Is(err, trackerauth.ErrAuthStateNotFound) {
 		return encryptedAuthKeySnapshot{available: true}, nil

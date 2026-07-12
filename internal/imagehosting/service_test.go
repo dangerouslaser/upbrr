@@ -289,7 +289,11 @@ func TestUploadImagesSuccess(t *testing.T) {
 		t.Fatalf("abs path: %v", err)
 	}
 
-	uploaderStub := &fakeUploader{result: uploadResult{ImgURL: "https://img", RawURL: "https://raw", WebURL: "https://web"}}
+	uploaderStub := &fakeUploader{result: uploadResult{
+		ImgURL: "https://img",
+		RawURL: "https://raw",
+		WebURL: "https://web",
+	}}
 	repo := &recordingRepo{}
 	service := &Service{
 		cfg:       config.Config{ScreenshotHandling: config.ScreenshotHandlingConfig{MaxConcurrentUploads: 2}},
@@ -381,8 +385,18 @@ func TestListCandidatesPopulatesGeneratedAndManualMenuPurpose(t *testing.T) {
 			Purpose:    api.ScreenshotPurposeMenu,
 		}},
 		selections: []api.ScreenshotFinalSelection{
-			{SourcePath: "/tmp/source", ImagePath: generatedPath, Order: 0, Source: api.ScreenshotSelectionSourceDVDMenu},
-			{SourcePath: "/tmp/source", ImagePath: manualPath, Order: 1, Source: api.ScreenshotSelectionSourceMenu},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  generatedPath,
+				Order:      0,
+				Source:     api.ScreenshotSelectionSourceDVDMenu,
+			},
+			{
+				SourcePath: "/tmp/source",
+				ImagePath:  manualPath,
+				Order:      1,
+				Source:     api.ScreenshotSelectionSourceMenu,
+			},
 		},
 	}
 	service := &Service{logger: api.NopLogger{}, repo: repo}
@@ -434,7 +448,11 @@ func TestUploadImagesRejectsTrackerOwnedHostOutsideOwnerScope(t *testing.T) {
 }
 
 func TestUploadImagesMissingFile(t *testing.T) {
-	uploaderStub := &fakeUploader{result: uploadResult{ImgURL: "https://img", RawURL: "https://raw", WebURL: "https://web"}}
+	uploaderStub := &fakeUploader{result: uploadResult{
+		ImgURL: "https://img",
+		RawURL: "https://raw",
+		WebURL: "https://web",
+	}}
 	service := &Service{logger: api.NopLogger{}, uploaders: map[string]uploader{"test": uploaderStub}}
 	meta := api.PreparedMetadata{SourcePath: "source"}
 	_, err := service.Upload(context.Background(), meta, "test", "global", []api.ScreenshotImage{{Path: "missing.png"}})
@@ -585,7 +603,11 @@ func TestUploadImagesPersistsSuccessfulConcurrentUploadsOnPartialFailure(t *test
 
 	uploaderStub := &selectiveUploader{
 		results: map[string]uploadResult{
-			firstPath: {ImgURL: "https://img/1", RawURL: "https://raw/1", WebURL: "https://web/1"},
+			firstPath: {
+				ImgURL: "https://img/1",
+				RawURL: "https://raw/1",
+				WebURL: "https://web/1",
+			},
 		},
 		errs: map[string]error{
 			secondPath: errors.New("temporary network failure"),

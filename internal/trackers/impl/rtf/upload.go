@@ -125,7 +125,14 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	}
 
 	_, _ = commonhttp.WriteFailureArtifact(req.Meta, req.AppConfig.MainSettings.DBPath, "RTF", "upload_failure", responseBody, ".json")
-	return api.UploadSummary{}, fmt.Errorf("trackers: RTF %s", metautil.FirstNonEmptyTrimmed(commonhttp.ExtractHTTPErrorDetail(responseBody), commonhttp.RedactErrorDetail(decoded.Message), fmt.Sprintf("upload failed with status %d", resp.StatusCode)))
+	return api.UploadSummary{}, fmt.Errorf(
+		"trackers: RTF %s",
+		metautil.FirstNonEmptyTrimmed(
+			commonhttp.ExtractHTTPErrorDetail(responseBody),
+			commonhttp.RedactErrorDetail(decoded.Message),
+			fmt.Sprintf("upload failed with status %d", resp.StatusCode),
+		),
+	)
 }
 
 func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.TrackerDryRunEntry, error) {
@@ -156,12 +163,17 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Description:      state.description,
 		Endpoint:         endpoint,
 		Payload:          payload,
-		Files:            []api.TrackerDryRunFile{{Field: "file", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "file",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
 func prepareUploadState(ctx context.Context, req trackers.UploadRequest) (uploadState, error) {
-	if strings.TrimSpace(req.TrackerConfig.APIKey) == "" && (strings.TrimSpace(req.TrackerConfig.Username) == "" || strings.TrimSpace(req.TrackerConfig.Password) == "") {
+	if strings.TrimSpace(req.TrackerConfig.APIKey) == "" &&
+		(strings.TrimSpace(req.TrackerConfig.Username) == "" || strings.TrimSpace(req.TrackerConfig.Password) == "") {
 		return uploadState{}, errors.New("trackers: RTF missing api_key or username/password")
 	}
 	torrentPath, err := trackers.ResolveUploadTorrentPath(req.Meta, req.AppConfig.MainSettings.DBPath)

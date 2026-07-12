@@ -325,7 +325,11 @@ func addRegionalGenericCandidate(candidates map[string]localizedTitleCandidate, 
 	if currentOK && current.priority < priority {
 		return
 	}
-	candidates[language] = localizedTitleCandidate{title: title, regionalKey: regionalKey, priority: priority}
+	candidates[language] = localizedTitleCandidate{
+		title:       title,
+		regionalKey: regionalKey,
+		priority:    priority,
+	}
 }
 
 // defaultRegionalTitleKey returns the language's conventional same-region tag

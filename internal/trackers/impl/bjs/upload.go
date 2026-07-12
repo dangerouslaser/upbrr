@@ -43,8 +43,10 @@ var (
 	authPattern                   = regexp.MustCompile(`name="auth"\s+value="([^"]+)"`)
 	idPattern                     = regexp.MustCompile(`action=download&id=(\d+)|torrentid=(\d+)`)
 	mediaInfoDurationLinePattern  = regexp.MustCompile(`(?im)^\s*duration(?:\s*/\s*string[123]?)?\s*:\s*(.+)$`)
-	mediaInfoDurationTokenPattern = regexp.MustCompile(`(?i)(\d+(?:\.\d+)?)\s*(milliseconds?|msecs?|ms|hours?|hrs?|hr|h|minutes?|mins?|min|mn|m|seconds?|secs?|sec|s)\b`)
-	isoDurationPattern            = regexp.MustCompile(`(?i)^pt(?:(\d+(?:\.\d+)?)h)?(?:(\d+(?:\.\d+)?)m)?(?:(\d+(?:\.\d+)?)s)?$`)
+	mediaInfoDurationTokenPattern = regexp.MustCompile(
+		`(?i)(\d+(?:\.\d+)?)\s*(milliseconds?|msecs?|ms|hours?|hrs?|hr|h|minutes?|mins?|min|mn|m|seconds?|secs?|sec|s)\b`,
+	)
+	isoDurationPattern = regexp.MustCompile(`(?i)^pt(?:(\d+(?:\.\d+)?)h)?(?:(\d+(?:\.\d+)?)m)?(?:(\d+(?:\.\d+)?)s)?$`)
 )
 
 type uploadState struct {
@@ -90,7 +92,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	if resp.Request != nil && resp.Request.URL != nil {
 		finalURL = resp.Request.URL.String()
 	}
-	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 400, commonhttp.DefaultResponsePreviewBytes)
+	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(
+		resp,
+		resp.StatusCode >= 200 && resp.StatusCode < 400,
+		commonhttp.DefaultResponsePreviewBytes,
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: BJS read upload response: %w", err)
 	}
@@ -144,7 +150,11 @@ func buildUploadDryRun(ctx context.Context, req trackers.UploadRequest) (api.Tra
 		Endpoint:         uploadURL,
 		Payload:          cloneFields(state.fields),
 		Questionnaire:    state.questionnaire,
-		Files:            []api.TrackerDryRunFile{{Field: "file_input", Path: state.torrentPath, Present: strings.TrimSpace(state.torrentPath) != ""}},
+		Files: []api.TrackerDryRunFile{{
+			Field:   "file_input",
+			Path:    state.torrentPath,
+			Present: strings.TrimSpace(state.torrentPath) != "",
+		}},
 	}, nil
 }
 
@@ -285,10 +295,22 @@ func buildQuestionnaire(meta api.PreparedMetadata, fields map[string]string) *ap
 	current := questionnaireAnswers(meta)
 	var items []api.TrackerQuestionnaireField
 	if strings.TrimSpace(fields["sinopse"]) == "" {
-		items = append(items, api.TrackerQuestionnaireField{Key: "overview", Label: "Overview", Kind: "textarea", Value: current["overview"], Required: true})
+		items = append(items, api.TrackerQuestionnaireField{
+			Key:      "overview",
+			Label:    "Overview",
+			Kind:     "textarea",
+			Value:    current["overview"],
+			Required: true,
+		})
 	}
 	if strings.TrimSpace(fields["tags"]) == "" {
-		items = append(items, api.TrackerQuestionnaireField{Key: "tags", Label: "Tags", Kind: "text", Value: current["tags"], Required: true})
+		items = append(items, api.TrackerQuestionnaireField{
+			Key:      "tags",
+			Label:    "Tags",
+			Kind:     "text",
+			Value:    current["tags"],
+			Required: true,
+		})
 	}
 	if len(items) == 0 {
 		return nil
@@ -371,7 +393,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 

@@ -24,7 +24,11 @@ type dupeSearcher struct {
 }
 
 func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, endpoint: ptpBaseURL + ptpTorrentPath}
+	return &dupeSearcher{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: ptpBaseURL + ptpTorrentPath,
+	}
 }
 
 func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {
@@ -111,7 +115,11 @@ func ptpDupeEntries(payload map[string]any, resolution string) []api.DupeEntry {
 			continue
 		}
 		id := ptpString(item["Id"])
-		entries = append(entries, api.DupeEntry{Name: strings.TrimSpace("[" + ptpString(item["Resolution"]) + "] " + ptpString(item["ReleaseName"])), ID: id, Link: ptpBaseURL + ptpTorrentPath + "?torrentid=" + id})
+		entries = append(entries, api.DupeEntry{
+			Name: strings.TrimSpace("[" + ptpString(item["Resolution"]) + "] " + ptpString(item["ReleaseName"])),
+			ID:   id,
+			Link: ptpBaseURL + ptpTorrentPath + "?torrentid=" + id,
+		})
 	}
 	return entries
 }

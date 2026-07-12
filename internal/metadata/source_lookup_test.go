@@ -13,7 +13,12 @@ import (
 func sourceLookupRegistry(t *testing.T) *trackers.Registry {
 	t.Helper()
 	registry := trackers.NewRegistry()
-	if err := registry.RegisterDescriptor(trackers.Descriptor{Name: "AITHER", Kind: trackers.KindUnit3D, BaseURL: "https://aither.cc", Definition: aitherRuleDefinition{}}); err != nil {
+	if err := registry.RegisterDescriptor(trackers.Descriptor{
+		Name:       "AITHER",
+		Kind:       trackers.KindUnit3D,
+		BaseURL:    "https://aither.cc",
+		Definition: aitherRuleDefinition{},
+	}); err != nil {
 		t.Fatalf("register source tracker: %v", err)
 	}
 	return registry
@@ -42,12 +47,42 @@ func TestResolveSourceLookupURLMedia(t *testing.T) {
 		provider string
 		id       int
 	}{
-		{name: "imdb", url: "https://www.imdb.com/title/tt1234567/", provider: "imdb", id: 1234567},
-		{name: "tmdb", url: "https://www.themoviedb.org/movie/765432-example-movie", provider: "tmdb", id: 765432},
-		{name: "tvmaze", url: "https://www.tvmaze.com/shows/12345/example-show", provider: "tvmaze", id: 12345},
-		{name: "tvdb", url: "https://thetvdb.com/series/456789", provider: "tvdb", id: 456789},
-		{name: "tvdb query", url: "https://www.thetvdb.com/?tab=series&id=456790", provider: "tvdb", id: 456790},
-		{name: "mal anime", url: "https://myanimelist.net/anime/54321/example-anime", provider: "mal", id: 54321},
+		{
+			name:     "imdb",
+			url:      "https://www.imdb.com/title/tt1234567/",
+			provider: "imdb",
+			id:       1234567,
+		},
+		{
+			name:     "tmdb",
+			url:      "https://www.themoviedb.org/movie/765432-example-movie",
+			provider: "tmdb",
+			id:       765432,
+		},
+		{
+			name:     "tvmaze",
+			url:      "https://www.tvmaze.com/shows/12345/example-show",
+			provider: "tvmaze",
+			id:       12345,
+		},
+		{
+			name:     "tvdb",
+			url:      "https://thetvdb.com/series/456789",
+			provider: "tvdb",
+			id:       456789,
+		},
+		{
+			name:     "tvdb query",
+			url:      "https://www.thetvdb.com/?tab=series&id=456790",
+			provider: "tvdb",
+			id:       456790,
+		},
+		{
+			name:     "mal anime",
+			url:      "https://myanimelist.net/anime/54321/example-anime",
+			provider: "mal",
+			id:       54321,
+		},
 	}
 
 	for _, tc := range cases {

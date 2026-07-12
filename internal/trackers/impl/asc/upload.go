@@ -113,7 +113,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		_ = os.WriteFile(failurePath, redactedBody, 0o600)
 	}
 	if failurePath != "" {
-		return api.UploadSummary{}, fmt.Errorf("%w failure=%s", commonhttp.UploadHTTPErrorWithURL("ASC", resp.StatusCode, finalURL, responsePreview), failurePath)
+		return api.UploadSummary{}, fmt.Errorf(
+			"%w failure=%s",
+			commonhttp.UploadHTTPErrorWithURL("ASC", resp.StatusCode, finalURL, responsePreview),
+			failurePath,
+		)
 	}
 	return api.UploadSummary{}, commonhttp.UploadHTTPErrorWithURL("ASC", resp.StatusCode, finalURL, responsePreview)
 }
@@ -186,7 +190,12 @@ func prepareUploadState(ctx context.Context, req trackers.UploadRequest, dryRun 
 	return state, cookies, nil
 }
 
-func buildPayload(meta api.PreparedMetadata, trackerCfg config.TrackerConfig, assets trackers.DescriptionAssets, description string) (map[string]string, string) {
+func buildPayload(
+	meta api.PreparedMetadata,
+	trackerCfg config.TrackerConfig,
+	assets trackers.DescriptionAssets,
+	description string,
+) (map[string]string, string) {
 	answers := questionnaireAnswers(meta)
 	releaseName := resolveUploadTitle(meta)
 	fields := map[string]string{
@@ -221,7 +230,8 @@ func buildPayload(meta api.PreparedMetadata, trackerCfg config.TrackerConfig, as
 			continue
 		}
 		lower := strings.ToLower(raw)
-		if strings.Contains(lower, "amigos-share.club") || strings.Contains(lower, "tmdb.org") || strings.Contains(lower, "imdb.com") || strings.Contains(lower, "themoviedb.org") {
+		if strings.Contains(lower, "amigos-share.club") || strings.Contains(lower, "tmdb.org") || strings.Contains(lower, "imdb.com") ||
+			strings.Contains(lower, "themoviedb.org") {
 			continue
 		}
 		fields[fmt.Sprintf("screens%d", count)] = raw
@@ -240,12 +250,21 @@ func buildQuestionnaire(meta api.PreparedMetadata) *api.TrackerQuestionnaire {
 	fields := make([]api.TrackerQuestionnaireField, 0, 2)
 	if strings.TrimSpace(resolveOverview(meta, answers)) == "" {
 		fields = append(fields, api.TrackerQuestionnaireField{
-			Key: "overview", Label: "Sinopse", Kind: "textarea", Value: strings.TrimSpace(answers["overview"]), Required: true,
+			Key:      "overview",
+			Label:    "Sinopse",
+			Kind:     "textarea",
+			Value:    strings.TrimSpace(answers["overview"]),
+			Required: true,
 		})
 	}
 	if strings.TrimSpace(resolveGenres(meta, answers)) == "" {
 		fields = append(fields, api.TrackerQuestionnaireField{
-			Key: "genre", Label: "Gêneros", Kind: "text", Value: strings.TrimSpace(answers["genre"]), Placeholder: "Drama, Action", Required: true,
+			Key:         "genre",
+			Label:       "Gêneros",
+			Kind:        "text",
+			Value:       strings.TrimSpace(answers["genre"]),
+			Placeholder: "Drama, Action",
+			Required:    true,
 		})
 	}
 	if len(fields) == 0 {
@@ -358,7 +377,15 @@ func maybeAutoApprove(ctx context.Context, client *http.Client, cookies []*http.
 	}
 }
 
-func maybeSetInternal(ctx context.Context, client *http.Client, cookies []*http.Cookie, cfg config.TrackerConfig, meta api.PreparedMetadata, torrentID string, logger api.Logger) {
+func maybeSetInternal(
+	ctx context.Context,
+	client *http.Client,
+	cookies []*http.Cookie,
+	cfg config.TrackerConfig,
+	meta api.PreparedMetadata,
+	torrentID string,
+	logger api.Logger,
+) {
 	if client == nil || !cfg.Internal || strings.TrimSpace(torrentID) == "" {
 		logger.Debugf("trackers: ASC internal flag skipped: %v", "client is nil or internal is false or torrentID is empty")
 		return

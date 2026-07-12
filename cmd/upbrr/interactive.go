@@ -41,17 +41,47 @@ func runInteractiveCLIPath(ctx context.Context, coreSvc api.Core, opts cliOption
 
 // runInteractiveCLIPathWithLogger runs one interactive CLI upload path and
 // sends CLI-only tracker auth decisions to logger.
-func runInteractiveCLIPathWithLogger(ctx context.Context, coreSvc api.Core, baseArgs []string, opts cliOptions, visited map[string]bool, sourcePath string, screens int, cfg config.Config, logger api.Logger) error {
+func runInteractiveCLIPathWithLogger(
+	ctx context.Context,
+	coreSvc api.Core,
+	baseArgs []string,
+	opts cliOptions,
+	visited map[string]bool,
+	sourcePath string,
+	screens int,
+	cfg config.Config,
+	logger api.Logger,
+) error {
 	return runInteractiveCLIPathWithInputAndLogger(ctx, coreSvc, baseArgs, opts, visited, sourcePath, screens, cfg, os.Stdin, logger)
 }
 
-func runInteractiveCLIPathWithInput(ctx context.Context, coreSvc api.Core, opts cliOptions, visited map[string]bool, sourcePath string, screens int, cfg config.Config, stdin io.Reader) error {
+func runInteractiveCLIPathWithInput(
+	ctx context.Context,
+	coreSvc api.Core,
+	opts cliOptions,
+	visited map[string]bool,
+	sourcePath string,
+	screens int,
+	cfg config.Config,
+	stdin io.Reader,
+) error {
 	return runInteractiveCLIPathWithInputAndLogger(ctx, coreSvc, nil, opts, visited, sourcePath, screens, cfg, stdin, api.NopLogger{})
 }
 
 // runInteractiveCLIPathWithInputAndLogger is the injectable form of
 // runInteractiveCLIPathWithLogger used when tests need controlled stdin.
-func runInteractiveCLIPathWithInputAndLogger(ctx context.Context, coreSvc api.Core, baseArgs []string, opts cliOptions, visited map[string]bool, sourcePath string, screens int, cfg config.Config, stdin io.Reader, logger api.Logger) error {
+func runInteractiveCLIPathWithInputAndLogger(
+	ctx context.Context,
+	coreSvc api.Core,
+	baseArgs []string,
+	opts cliOptions,
+	visited map[string]bool,
+	sourcePath string,
+	screens int,
+	cfg config.Config,
+	stdin io.Reader,
+	logger api.Logger,
+) error {
 	logger = cliAuthLogger(logger)
 	reader := bufio.NewReader(stdin)
 	currentArgs := append([]string(nil), baseArgs...)
@@ -68,7 +98,14 @@ func runInteractiveCLIPathWithInputAndLogger(ctx context.Context, coreSvc api.Co
 		if err != nil {
 			var rescanErr *api.BDMVRescanRequiredError
 			if errors.As(err, &rescanErr) && currentOpts.interactionMode() != api.InteractionModeUnattended {
-				confirm, promptErr := promptYesNo(reader, fmt.Sprintf("Cached BDMV summaries exist, but selected playlist(s) %s require a rescan. Rescan now? [Y/n]: ", strings.Join(rescanErr.MissingPlaylists, ", ")), true)
+				confirm, promptErr := promptYesNo(
+					reader,
+					fmt.Sprintf(
+						"Cached BDMV summaries exist, but selected playlist(s) %s require a rescan. Rescan now? [Y/n]: ",
+						strings.Join(rescanErr.MissingPlaylists, ", "),
+					),
+					true,
+				)
 				if promptErr != nil {
 					return promptErr
 				}
@@ -331,7 +368,15 @@ func removeUnreadyCLIAuthTrackers(candidateTrackers []string, readyTrackers []st
 
 // ensureCLITrackerAuthBeforeDupeCheckWithLogger validates tracker auth using a
 // service that shares the CLI logger for service-level and CLI decision logs.
-func ensureCLITrackerAuthBeforeDupeCheckWithLogger(ctx context.Context, reader *bufio.Reader, cfg config.Config, req api.Request, trackerNames []string, preview api.MetadataPreview, logger api.Logger) ([]string, error) {
+func ensureCLITrackerAuthBeforeDupeCheckWithLogger(
+	ctx context.Context,
+	reader *bufio.Reader,
+	cfg config.Config,
+	req api.Request,
+	trackerNames []string,
+	preview api.MetadataPreview,
+	logger api.Logger,
+) ([]string, error) {
 	if len(trackerNames) == 0 {
 		return trackerNames, nil
 	}
@@ -341,7 +386,13 @@ func ensureCLITrackerAuthBeforeDupeCheckWithLogger(ctx context.Context, reader *
 
 // ensureCLITrackerAuthBeforeDupeCheckWithService is the injectable form of
 // ensureCLITrackerAuthBeforeDupeCheck used by tests.
-func ensureCLITrackerAuthBeforeDupeCheckWithService(ctx context.Context, reader *bufio.Reader, authSvc cliTrackerAuthService, req api.Request, trackerNames []string) ([]string, error) {
+func ensureCLITrackerAuthBeforeDupeCheckWithService(
+	ctx context.Context,
+	reader *bufio.Reader,
+	authSvc cliTrackerAuthService,
+	req api.Request,
+	trackerNames []string,
+) ([]string, error) {
 	return ensureCLITrackerAuthBeforeDupeCheckWithServiceAndLogger(ctx, reader, authSvc, req, trackerNames, api.MetadataPreview{}, api.NopLogger{})
 }
 
@@ -350,7 +401,15 @@ func ensureCLITrackerAuthBeforeDupeCheckWithService(ctx context.Context, reader 
 // Preview rule failures suppress managed-auth checks only after capability
 // classification and leave those managed trackers out of the ready result, so
 // static API-key/passkey trackers stay quiet here.
-func ensureCLITrackerAuthBeforeDupeCheckWithServiceAndLogger(ctx context.Context, reader *bufio.Reader, authSvc cliTrackerAuthService, req api.Request, trackerNames []string, preview api.MetadataPreview, logger api.Logger) ([]string, error) {
+func ensureCLITrackerAuthBeforeDupeCheckWithServiceAndLogger(
+	ctx context.Context,
+	reader *bufio.Reader,
+	authSvc cliTrackerAuthService,
+	req api.Request,
+	trackerNames []string,
+	preview api.MetadataPreview,
+	logger api.Logger,
+) ([]string, error) {
 	logger = cliAuthLogger(logger)
 
 	capabilities, err := authSvc.Capabilities(ctx)
@@ -444,7 +503,15 @@ func cliTrackerAuthApplies(capability api.TrackerAuthCapability) bool {
 
 // handleCLITrackerAuthStatusWithLogger converts one auth status into a CLI
 // decision and logs blocked, prompt, and skip outcomes without secret material.
-func handleCLITrackerAuthStatusWithLogger(ctx context.Context, reader *bufio.Reader, authSvc cliTrackerAuthService, capability api.TrackerAuthCapability, status api.TrackerAuthStatus, req api.Request, logger api.Logger) (api.TrackerAuthStatus, bool, error) {
+func handleCLITrackerAuthStatusWithLogger(
+	ctx context.Context,
+	reader *bufio.Reader,
+	authSvc cliTrackerAuthService,
+	capability api.TrackerAuthCapability,
+	status api.TrackerAuthStatus,
+	req api.Request,
+	logger api.Logger,
+) (api.TrackerAuthStatus, bool, error) {
 	logger = cliAuthLogger(logger)
 	if cliTrackerAuthReady(status) {
 		return status, true, nil
@@ -457,7 +524,10 @@ func handleCLITrackerAuthStatusWithLogger(ctx context.Context, reader *bufio.Rea
 	if status.Needs2FA && strings.TrimSpace(status.ChallengeID) != "" {
 		if isUnattendedNoConfirm(req) {
 			logger.Warnf("cli auth: tracker=%s decision=blocked reason=2fa_required unattended=true", trackerID)
-			return status, false, fmt.Errorf("upbrr: unattended no-prompt tracker auth %s requires manual 2FA code before dupe check; run without --unattended or use --unattended_confirm to enter 2FA", trackerID)
+			return status, false, fmt.Errorf(
+				"upbrr: unattended no-prompt tracker auth %s requires manual 2FA code before dupe check; run without --unattended or use --unattended_confirm to enter 2FA",
+				trackerID,
+			)
 		}
 		logger.Infof("cli auth: tracker=%s decision=prompt_2fa", trackerID)
 		return promptCLITrackerAuth2FAWithLogger(ctx, reader, authSvc, trackerID, status, logger)
@@ -474,7 +544,14 @@ func handleCLITrackerAuthStatusWithLogger(ctx context.Context, reader *bufio.Rea
 
 // promptCLITrackerAuth2FAWithLogger prompts for manual 2FA and logs only the
 // submitted outcome; it never logs codes or challenge identifiers.
-func promptCLITrackerAuth2FAWithLogger(ctx context.Context, reader *bufio.Reader, authSvc cliTrackerAuthService, trackerID string, status api.TrackerAuthStatus, logger api.Logger) (api.TrackerAuthStatus, bool, error) {
+func promptCLITrackerAuth2FAWithLogger(
+	ctx context.Context,
+	reader *bufio.Reader,
+	authSvc cliTrackerAuthService,
+	trackerID string,
+	status api.TrackerAuthStatus,
+	logger api.Logger,
+) (api.TrackerAuthStatus, bool, error) {
 	logger = cliAuthLogger(logger)
 	for {
 		fmt.Printf("\n[%s Auth]\n%s\n", trackerID, cliTrackerAuthStatusMessage(status))
@@ -697,7 +774,13 @@ func runCLIDupeCheck(ctx context.Context, coreSvc api.Core, req api.Request) (ap
 	return summary, nil
 }
 
-func promptTrackerDupeReview(reader *bufio.Reader, summary api.DupeCheckSummary, req api.Request, trackers []string, namePreview map[string]api.TrackerDryRunEntry) ([]string, []string, []string, error) {
+func promptTrackerDupeReview(
+	reader *bufio.Reader,
+	summary api.DupeCheckSummary,
+	req api.Request,
+	trackers []string,
+	namePreview map[string]api.TrackerDryRunEntry,
+) ([]string, []string, []string, error) {
 	resultByTracker := mapDupeResultsByTracker(summary)
 	approved := make([]string, 0, len(trackers))
 	ignoreDupesFor := make([]string, 0)
@@ -1114,11 +1197,19 @@ func promptTrackerQuestionnaires(reader *bufio.Reader, review api.UploadReview, 
 			if opts.Unattended && !opts.UnattendedConfirm {
 				if field.Required && defaultValue == "" {
 					if opts.Debug {
-						fmt.Printf("Debug mode: %s questionnaire value missing for %s; continuing without prompt.\n", questionnaireFieldLabel(field), tracker.Tracker)
+						fmt.Printf(
+							"Debug mode: %s questionnaire value missing for %s; continuing without prompt.\n",
+							questionnaireFieldLabel(field),
+							tracker.Tracker,
+						)
 						values[field.Key] = ""
 						continue
 					}
-					return nil, false, fmt.Errorf("upbrr: unattended upload requires %s questionnaire value for %s", questionnaireFieldLabel(field), tracker.Tracker)
+					return nil, false, fmt.Errorf(
+						"upbrr: unattended upload requires %s questionnaire value for %s",
+						questionnaireFieldLabel(field),
+						tracker.Tracker,
+					)
 				}
 				values[field.Key] = defaultValue
 				continue
@@ -1475,7 +1566,10 @@ func writeDryRunSummary(w io.Writer, entry api.TrackerDryRunEntry) {
 	} else if entry.ReleaseName != "" {
 		fmt.Fprintf(w, "Tracker release name: %s\n", entry.ReleaseName)
 	}
-	if imageMessage := strings.TrimSpace(entry.ImageHost.Message); imageMessage != "" && (entry.ImageHost.Reuploaded || strings.EqualFold(entry.ImageHost.Status, "warning")) {
+	if imageMessage := strings.TrimSpace(
+		entry.ImageHost.Message,
+	); imageMessage != "" &&
+		(entry.ImageHost.Reuploaded || strings.EqualFold(entry.ImageHost.Status, "warning")) {
 		fmt.Fprintf(w, "Images: %s\n", imageMessage)
 	}
 	for _, warning := range entry.ImageHost.Warnings {
@@ -1747,7 +1841,19 @@ func payloadIncludesDescription(payload map[string]string) bool {
 
 func isDryRunBodyPayloadField(key string) bool {
 	switch normalizedDryRunPayloadKey(key) {
-	case "description", "desc", "descr", "release_desc", "album_desc", "mediainfo", "mediainfo[]", "media_info", "bdinfo", "bd_info", "techinfo", "technical_info", "technicaldetails":
+	case "description",
+		"desc",
+		"descr",
+		"release_desc",
+		"album_desc",
+		"mediainfo",
+		"mediainfo[]",
+		"media_info",
+		"bdinfo",
+		"bd_info",
+		"techinfo",
+		"technical_info",
+		"technicaldetails":
 		return true
 	default:
 		return false

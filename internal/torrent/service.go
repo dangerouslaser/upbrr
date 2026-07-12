@@ -42,7 +42,11 @@ func NewServiceWithRegistry(logger api.Logger, tmpRoot string, registry *tracker
 	if logger == nil {
 		logger = api.NopLogger{}
 	}
-	return &Service{logger: logger, tmpRoot: strings.TrimSpace(tmpRoot), registry: registry}
+	return &Service{
+		logger:   logger,
+		tmpRoot:  strings.TrimSpace(tmpRoot),
+		registry: registry,
+	}
 }
 
 func (s *Service) Create(ctx context.Context, meta api.PreparedMetadata) (api.TorrentResult, error) {
@@ -151,7 +155,13 @@ func (s *Service) Create(ctx context.Context, meta api.PreparedMetadata) (api.To
 	if err != nil {
 		return api.TorrentResult{}, err
 	}
-	s.logger.Debugf("torrent: create spec path=%s name=%q include_patterns=%d staged=%t", createSpec.path, createSpec.name, len(createSpec.includePatterns), createSpec.cleanupPath != "")
+	s.logger.Debugf(
+		"torrent: create spec path=%s name=%q include_patterns=%d staged=%t",
+		createSpec.path,
+		createSpec.name,
+		len(createSpec.includePatterns),
+		createSpec.cleanupPath != "",
+	)
 	if createSpec.cleanupPath != "" {
 		defer func() {
 			if err := os.RemoveAll(createSpec.cleanupPath); err != nil {

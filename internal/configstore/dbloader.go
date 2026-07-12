@@ -208,7 +208,12 @@ func Bootstrap(ctx context.Context, configPath string, configProvided, persistYA
 // so environment-only fixes cannot write a config that fails after env removal.
 // Without a hook, provided YAML/JSON is merged with stored DB config when
 // present and persisted only if the persisted candidate validates.
-func BootstrapWithValidator(ctx context.Context, configPath string, configProvided, persistYAML bool, validateBeforePersist func(*config.Config) error) (config.Config, string, error) {
+func BootstrapWithValidator(
+	ctx context.Context,
+	configPath string,
+	configProvided, persistYAML bool,
+	validateBeforePersist func(*config.Config) error,
+) (config.Config, string, error) {
 	if configProvided {
 		resolved, err := ResolveYAMLPath(configPath, configProvided)
 		if err != nil {
@@ -333,7 +338,13 @@ func validatePersistableConfig(cfg *config.Config, dbPath string, validate func(
 // prepareProvidedConfigForSave decides whether a provided config should replace
 // or merge with stored DB config. It uses the already-read providedData for
 // native YAML/JSON overlays so validation and persistence share one input.
-func prepareProvidedConfigForSave(ctx context.Context, configPath string, providedData []byte, imported *config.Config, dbPath string) (*config.Config, *config.Config, bool, error) {
+func prepareProvidedConfigForSave(
+	ctx context.Context,
+	configPath string,
+	providedData []byte,
+	imported *config.Config,
+	dbPath string,
+) (*config.Config, *config.Config, bool, error) {
 	stored, err := loadStoredConfigForProvidedMerge(ctx, dbPath)
 	storedLoaded := err == nil
 	if err != nil && !errors.Is(err, internalerrors.ErrNotFound) {
@@ -369,7 +380,8 @@ func prepareProvidedConfigForSave(ctx context.Context, configPath string, provid
 // disabled only in the returned copy so an invalid provided config cannot mutate
 // the database during validation.
 func loadStoredConfigForProvidedMerge(ctx context.Context, dbPath string) (*config.Config, error) {
-	if _, err := os.Stat(dbPath); err != nil { //nolint:gosec // Existence probe for resolved DB path avoids creating SQLite DB before provided config validates.
+	//nolint:gosec // Existence probe for resolved DB path avoids creating SQLite DB before provided config validates.
+	if _, err := os.Stat(dbPath); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, internalerrors.ErrNotFound
 		}

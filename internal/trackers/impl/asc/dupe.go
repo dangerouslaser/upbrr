@@ -27,7 +27,11 @@ type dupeSearcher struct {
 }
 
 func (d *Definition) NewDupeSearcher(cfg config.Config, httpClient *http.Client, logger api.Logger) trackers.DupeSearcher {
-	return &dupeSearcher{cfg: cfg, http: httpClient, logger: logger}
+	return &dupeSearcher{
+		cfg:    cfg,
+		http:   httpClient,
+		logger: logger,
+	}
 }
 
 func (h dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ string) ([]api.DupeEntry, []string, error) {

@@ -42,7 +42,11 @@ func TestBuildDescriptionUsesPreparedDiscMenuAssets(t *testing.T) {
 	}
 	assertDescriptionTokensInOrder(t, result.Description, "Body token", "Disc menu token", "menu-thumb.png", "Screenshots token", "normal-thumb.png")
 
-	final := trackers.DescriptionAssets{Description: " Authoritative final token ", Final: true, MenuImages: assets.MenuImages}
+	final := trackers.DescriptionAssets{
+		Description: " Authoritative final token ",
+		Final:       true,
+		MenuImages:  assets.MenuImages,
+	}
 	result, err = (Definition{}).BuildDescription(context.Background(), trackers.DescriptionRequest{Tracker: "HDS", Assets: &final})
 	if err != nil {
 		t.Fatalf("build final description: %v", err)

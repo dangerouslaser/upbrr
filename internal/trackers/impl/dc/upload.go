@@ -77,7 +77,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 	}
 	defer resp.Body.Close()
 
-	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 300, commonhttp.DefaultResponsePreviewBytes)
+	responseBody, responsePreview, err := commonhttp.ReadUploadResponseBody(
+		resp,
+		resp.StatusCode >= 200 && resp.StatusCode < 300,
+		commonhttp.DefaultResponsePreviewBytes,
+	)
 	if err != nil {
 		return api.UploadSummary{}, fmt.Errorf("trackers: DC read upload response: %w", err)
 	}
@@ -116,10 +120,23 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		}, nil
 	}
 
-	if _, artifactErr := commonhttp.WriteFailureArtifact(req.Meta, req.AppConfig.MainSettings.DBPath, "DC", "upload_failure", responsePreview, ".json"); artifactErr != nil && req.Logger != nil {
+	if _, artifactErr := commonhttp.WriteFailureArtifact(
+		req.Meta,
+		req.AppConfig.MainSettings.DBPath,
+		"DC",
+		"upload_failure",
+		responsePreview,
+		".json",
+	); artifactErr != nil &&
+		req.Logger != nil {
 		req.Logger.Warnf("trackers: DC failure artifact write failed: %v", artifactErr)
 	}
-	message := metautil.FirstNonEmptyTrimmed(commonhttp.ExtractHTTPErrorDetail(responsePreview), commonhttp.RedactErrorDetail(decoded.Message), commonhttp.RedactErrorDetail(string(responsePreview)), "upload failed")
+	message := metautil.FirstNonEmptyTrimmed(
+		commonhttp.ExtractHTTPErrorDetail(responsePreview),
+		commonhttp.RedactErrorDetail(decoded.Message),
+		commonhttp.RedactErrorDetail(string(responsePreview)),
+		"upload failed",
+	)
 	return api.UploadSummary{}, fmt.Errorf("trackers: DC %s", message)
 }
 
@@ -229,7 +246,10 @@ func buildDescription(req trackers.UploadRequest, assets trackers.DescriptionAss
 	}
 
 	// Tonemapped Header
-	if tonemapHeader := strings.TrimSpace(req.AppConfig.Description.TonemappedHeader); tonemapHeader != "" && descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
+	if tonemapHeader := strings.TrimSpace(
+		req.AppConfig.Description.TonemappedHeader,
+	); tonemapHeader != "" &&
+		descriptionunit3d.ShouldIncludeTonemappedHeader(meta, req.AppConfig, assets.Screenshots) {
 		parts = append(parts, tonemapHeader)
 	}
 
@@ -300,7 +320,12 @@ func resolveCategoryID(meta api.PreparedMetadata) int {
 }
 
 func resolveUploadName(meta api.PreparedMetadata) string {
-	name := metautil.FirstNonEmptyTrimmed(strings.TrimSpace(meta.SceneName), strings.TrimSpace(meta.ReleaseNameClean), strings.TrimSpace(meta.ReleaseName), strings.TrimSpace(meta.Filename))
+	name := metautil.FirstNonEmptyTrimmed(
+		strings.TrimSpace(meta.SceneName),
+		strings.TrimSpace(meta.ReleaseNameClean),
+		strings.TrimSpace(meta.ReleaseName),
+		strings.TrimSpace(meta.Filename),
+	)
 	if name == "" {
 		name = "release"
 	}

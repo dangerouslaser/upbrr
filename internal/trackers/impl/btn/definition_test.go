@@ -850,7 +850,11 @@ func TestBuildAlbumDescFallsBackToIMDBEpisodeMetadata(t *testing.T) {
 					Title:       "IMDb Episode",
 					Season:      2,
 					EpisodeText: "7",
-					ReleaseDate: api.IMDBReleaseDate{Year: 2026, Month: 3, Day: 4},
+					ReleaseDate: api.IMDBReleaseDate{
+						Year:  2026,
+						Month: 3,
+						Day:   4,
+					},
 				}},
 			},
 		},

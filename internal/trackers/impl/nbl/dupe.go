@@ -39,7 +39,12 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	default:
 		searchTerm["series"] = strings.TrimSpace(meta.Release.Title)
 	}
-	raw, err := json.Marshal(map[string]any{"jsonrpc": "2.0", "id": 1, "method": "getTorrents", "params": []any{apiKey, searchTerm}})
+	raw, err := json.Marshal(map[string]any{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "getTorrents",
+		"params":  []any{apiKey, searchTerm},
+	})
 	if err != nil {
 		return nil, nblSkip("NBL search failed"), nil
 	}
@@ -68,7 +73,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	}
 	entries := make([]api.DupeEntry, 0, len(payload.Result.Items))
 	for _, item := range payload.Result.Items {
-		entry := api.DupeEntry{Name: nblString(item["rls_name"]), Link: "https://nebulance.io/torrents.php?id=" + nblString(item["group_id"]), Download: nblString(item["download"])}
+		entry := api.DupeEntry{
+			Name:     nblString(item["rls_name"]),
+			Link:     "https://nebulance.io/torrents.php?id=" + nblString(item["group_id"]),
+			Download: nblString(item["download"]),
+		}
 		if size := nblInt64(item["size"]); size > 0 {
 			entry.SizeKnown, entry.SizeBytes = true, size
 		}

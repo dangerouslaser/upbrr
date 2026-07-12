@@ -61,7 +61,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	entries := make([]api.DupeEntry, 0, len(payload.Torrents))
 	for _, item := range payload.Torrents {
 		id := tlString(item["fid"])
-		entry := api.DupeEntry{Name: tlString(item["name"]), ID: id, Link: "https://www.torrentleech.org/torrent/" + id}
+		entry := api.DupeEntry{
+			Name: tlString(item["name"]),
+			ID:   id,
+			Link: "https://www.torrentleech.org/torrent/" + id,
+		}
 		if size := tlInt64(item["size"]); size > 0 {
 			entry.SizeKnown, entry.SizeBytes = true, size
 		}

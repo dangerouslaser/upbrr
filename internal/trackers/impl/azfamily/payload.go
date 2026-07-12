@@ -24,7 +24,16 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
-func buildFinalPayload(ctx context.Context, site siteDefinition, state sessionState, req trackers.UploadRequest, mediaCode string, task taskInfo, fileInfo string, screenshotIDs []string) (url.Values, error) {
+func buildFinalPayload(
+	ctx context.Context,
+	site siteDefinition,
+	state sessionState,
+	req trackers.UploadRequest,
+	mediaCode string,
+	task taskInfo,
+	fileInfo string,
+	screenshotIDs []string,
+) (url.Values, error) {
 	langs := languageValues(req.Meta)
 	tags, err := resolveTags(ctx, site, state, req)
 	if err != nil {

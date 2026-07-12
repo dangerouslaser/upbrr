@@ -12,7 +12,17 @@ import (
 	"github.com/autobrr/upbrr/pkg/api"
 )
 
-func buildUnit3DDescription(ctx context.Context, tracker string, meta api.PreparedMetadata, appConfig config.Config, trackerConfig config.TrackerConfig, logger api.Logger, keptDescription string, menuImages []api.ScreenshotImage, screenshots []api.ScreenshotImage) (string, error) {
+func buildUnit3DDescription(
+	ctx context.Context,
+	tracker string,
+	meta api.PreparedMetadata,
+	appConfig config.Config,
+	trackerConfig config.TrackerConfig,
+	logger api.Logger,
+	keptDescription string,
+	menuImages []api.ScreenshotImage,
+	screenshots []api.ScreenshotImage,
+) (string, error) {
 	if profile, ok := unit3DSiteProfileFor(tracker); ok && profile.BuildDescription != nil {
 		return profile.BuildDescription(ctx, meta, appConfig, trackerConfig, logger, keptDescription, menuImages, screenshots)
 	}

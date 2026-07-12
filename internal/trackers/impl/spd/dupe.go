@@ -63,7 +63,11 @@ func (s *dupeSearcher) Search(ctx context.Context, meta api.PreparedMetadata, _ 
 	entries := make([]api.DupeEntry, 0, len(items))
 	for _, item := range items {
 		id := spdString(item["id"])
-		entry := api.DupeEntry{Name: spdString(item["name"]), ID: id, Link: "https://speedapp.io/browse/" + id + "/"}
+		entry := api.DupeEntry{
+			Name: spdString(item["name"]),
+			ID:   id,
+			Link: "https://speedapp.io/browse/" + id + "/",
+		}
 		if size := spdInt64(item["size"]); size > 0 {
 			entry.SizeKnown, entry.SizeBytes = true, size
 		}

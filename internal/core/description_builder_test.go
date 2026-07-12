@@ -39,7 +39,11 @@ func (s *stubDescriptionBuilderTrackers) BuildPreparation(_ context.Context, met
 	}
 	if len(s.preview.Descriptions) == 0 {
 		s.preview.Descriptions = []api.PreparationDescription{
-			{Trackers: trackers, RawDescription: meta.DescriptionTemplate, RawDescriptionHTML: "<p>ok</p>"},
+			{
+				Trackers:           trackers,
+				RawDescription:     meta.DescriptionTemplate,
+				RawDescriptionHTML: "<p>ok</p>",
+			},
 		}
 	}
 	return s.preview, nil
@@ -97,7 +101,11 @@ func (s *stubDescriptionRepo) DeleteDescriptionOverride(_ context.Context, path 
 func TestFetchDescriptionBuilderPreviewUsesOverride(t *testing.T) {
 	t.Parallel()
 
-	repo := &stubDescriptionRepo{override: db.DescriptionOverride{SourcePath: "/tmp/source", GroupKey: "aither", Description: "override desc"}}
+	repo := &stubDescriptionRepo{override: db.DescriptionOverride{
+		SourcePath:  "/tmp/source",
+		GroupKey:    "aither",
+		Description: "override desc",
+	}}
 	trackerSvc := &stubPreparationTrackers{}
 	core := &Core{
 		cfg:    config.Config{ScreenshotHandling: config.ScreenshotHandlingConfig{Screens: 1}},
@@ -136,7 +144,12 @@ func TestFetchDescriptionBuilderPreviewDoesNotApplyLegacyDefaultOverrideAcrossGr
 		preview: api.PreparationPreview{
 			SourcePath: "/tmp/source",
 			Descriptions: []api.PreparationDescription{
-				{GroupKey: "hdb", Trackers: []string{"HDB"}, RawDescription: "generated raw", RawDescriptionHTML: "<p>generated raw</p>"},
+				{
+					GroupKey:           "hdb",
+					Trackers:           []string{"HDB"},
+					RawDescription:     "generated raw",
+					RawDescriptionHTML: "<p>generated raw</p>",
+				},
 			},
 		},
 	}
@@ -495,7 +508,11 @@ func TestFetchDescriptionBuilderPreviewDocumentsRefreshAndPreparedCacheLineage(t
 	refreshed.ExternalMetadata.TMDB = &api.TMDBMetadata{
 		TMDBID: 42,
 		Localized: map[string]api.TMDBLocalizedData{
-			"pt-BR": {Title: "Titulo", Overview: "Resumo", Genres: "Drama"},
+			"pt-BR": {
+				Title:    "Titulo",
+				Overview: "Resumo",
+				Genres:   "Drama",
+			},
 		},
 	}
 
@@ -663,7 +680,12 @@ func TestSaveDescriptionOverrideDeleteRefreshesLocalizedPTBRMetadata(t *testing.
 		preview: api.PreparationPreview{
 			SourcePath: "/tmp/source",
 			Descriptions: []api.PreparationDescription{
-				{GroupKey: "asc", Trackers: []string{"ASC"}, RawDescription: "generated raw", RawDescriptionHTML: "<p>generated raw</p>"},
+				{
+					GroupKey:           "asc",
+					Trackers:           []string{"ASC"},
+					RawDescription:     "generated raw",
+					RawDescriptionHTML: "<p>generated raw</p>",
+				},
 			},
 		},
 	}
@@ -734,7 +756,12 @@ func TestSaveDescriptionOverrideDeletesOnEmpty(t *testing.T) {
 		preview: api.PreparationPreview{
 			SourcePath: "/tmp/source",
 			Descriptions: []api.PreparationDescription{
-				{GroupKey: "blu", Trackers: []string{"BLU"}, RawDescription: "generated raw", RawDescriptionHTML: "<p>generated raw</p>"},
+				{
+					GroupKey:           "blu",
+					Trackers:           []string{"BLU"},
+					RawDescription:     "generated raw",
+					RawDescriptionHTML: "<p>generated raw</p>",
+				},
 			},
 		},
 	}
@@ -844,8 +871,16 @@ func TestFetchDescriptionBuilderPreviewSkipsEmptyPreparationPlaceholder(t *testi
 		preview: api.PreparationPreview{
 			SourcePath: "/tmp/source",
 			Descriptions: []api.PreparationDescription{
-				{Trackers: []string{"BTN"}, RawDescription: "", RawDescriptionHTML: ""},
-				{Trackers: []string{"BLU"}, RawDescription: "final description", RawDescriptionHTML: "<p>final description</p>"},
+				{
+					Trackers:           []string{"BTN"},
+					RawDescription:     "",
+					RawDescriptionHTML: "",
+				},
+				{
+					Trackers:           []string{"BLU"},
+					RawDescription:     "final description",
+					RawDescriptionHTML: "<p>final description</p>",
+				},
 			},
 		},
 	}
@@ -937,8 +972,16 @@ func TestFetchDescriptionBuilderPreviewAppliesIgnoredDupesToCachedMeta(t *testin
 		preview: api.PreparationPreview{
 			SourcePath: "/tmp/source",
 			Descriptions: []api.PreparationDescription{
-				{GroupKey: "hdb", Trackers: []string{"HDB"}, Description: "hdb body"},
-				{GroupKey: "bhd", Trackers: []string{"BHD"}, Description: "bhd body"},
+				{
+					GroupKey:    "hdb",
+					Trackers:    []string{"HDB"},
+					Description: "hdb body",
+				},
+				{
+					GroupKey:    "bhd",
+					Trackers:    []string{"BHD"},
+					Description: "bhd body",
+				},
 			},
 		},
 	}
@@ -984,7 +1027,11 @@ func TestFetchDescriptionBuilderPreviewUsesIgnoredMatchedTracker(t *testing.T) {
 		preview: api.PreparationPreview{
 			SourcePath: "/tmp/source",
 			Descriptions: []api.PreparationDescription{
-				{GroupKey: "aither", Trackers: []string{"AITHER"}, Description: "aither body"},
+				{
+					GroupKey:    "aither",
+					Trackers:    []string{"AITHER"},
+					Description: "aither body",
+				},
 			},
 		},
 	}
@@ -1039,8 +1086,16 @@ func TestFetchDescriptionBuilderGroupPreviewAppliesIgnoredFailuresToRefreshedCac
 		preview: api.PreparationPreview{
 			SourcePath: "/tmp/source",
 			Descriptions: []api.PreparationDescription{
-				{GroupKey: "hdb", Trackers: []string{"HDB"}, Description: "hdb body"},
-				{GroupKey: "bhd", Trackers: []string{"BHD"}, Description: "bhd body"},
+				{
+					GroupKey:    "hdb",
+					Trackers:    []string{"HDB"},
+					Description: "hdb body",
+				},
+				{
+					GroupKey:    "bhd",
+					Trackers:    []string{"BHD"},
+					Description: "bhd body",
+				},
 			},
 		},
 	}

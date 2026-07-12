@@ -26,7 +26,11 @@ func (d *Definition) Name() string {
 }
 
 func (d *Definition) MetadataPolicy() *trackers.TrackerMetadataPolicy {
-	return &trackers.TrackerMetadataPolicy{Requirements: []trackers.MetadataRequirement{{Scope: trackers.MetadataScopeAny, AnyOf: []trackers.MetadataField{trackers.MetadataFieldIMDBIDOnly}, Severity: api.RuleFailureSeverityWarning}}}
+	return &trackers.TrackerMetadataPolicy{Requirements: []trackers.MetadataRequirement{{
+		Scope:    trackers.MetadataScopeAny,
+		AnyOf:    []trackers.MetadataField{trackers.MetadataFieldIMDBIDOnly},
+		Severity: api.RuleFailureSeverityWarning,
+	}}}
 }
 
 func (d *Definition) UploadArtifactPolicy() *trackers.UploadArtifactPolicy {
@@ -47,7 +51,41 @@ func (d *Definition) DataLookupPolicy() *trackers.DataLookupPolicy {
 }
 
 func (d *Definition) BannedGroups() []string {
-	return []string{"aXXo", "BMDru", "BRrip", "CM8", "CrEwSaDe", "CTFOH", "d3g", "DNL", "FaNGDiNG0", "HD2DVD", "HDT", "HDTime", "ION10", "iPlanet", "KiNGDOM", "mHD", "mSD", "nHD", "nikt0", "nSD", "NhaNc3", "OFT", "PRODJi", "SANTi", "SPiRiT", "STUTTERSHIT", "ViSION", "VXT", "WAF", "x0r", "YIFY", "LAMA", "WORLD"}
+	return []string{
+		"aXXo",
+		"BMDru",
+		"BRrip",
+		"CM8",
+		"CrEwSaDe",
+		"CTFOH",
+		"d3g",
+		"DNL",
+		"FaNGDiNG0",
+		"HD2DVD",
+		"HDT",
+		"HDTime",
+		"ION10",
+		"iPlanet",
+		"KiNGDOM",
+		"mHD",
+		"mSD",
+		"nHD",
+		"nikt0",
+		"nSD",
+		"NhaNc3",
+		"OFT",
+		"PRODJi",
+		"SANTi",
+		"SPiRiT",
+		"STUTTERSHIT",
+		"ViSION",
+		"VXT",
+		"WAF",
+		"x0r",
+		"YIFY",
+		"LAMA",
+		"WORLD",
+	}
 }
 
 func (d *Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {

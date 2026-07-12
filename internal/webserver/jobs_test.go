@@ -322,14 +322,22 @@ func TestStartDupeCheckFailsOnMetadataPreviewCacheRequestMismatch(t *testing.T) 
 		{
 			name: "path",
 			expected: func(sourcePath string) api.Request {
-				return api.Request{Paths: []string{sourcePath + ".other"}, Mode: api.ModeGUI, Trackers: []string{"AITHER"}}
+				return api.Request{
+					Paths:    []string{sourcePath + ".other"},
+					Mode:     api.ModeGUI,
+					Trackers: []string{"AITHER"},
+				}
 			},
 			wantMessage: "metadata preview cache request paths",
 		},
 		{
 			name: "tracker",
 			expected: func(sourcePath string) api.Request {
-				return api.Request{Paths: []string{sourcePath}, Mode: api.ModeGUI, Trackers: []string{"BLU"}}
+				return api.Request{
+					Paths:    []string{sourcePath},
+					Mode:     api.ModeGUI,
+					Trackers: []string{"BLU"},
+				}
 			},
 			wantMessage: "metadata preview cache request trackers",
 		},
@@ -505,10 +513,14 @@ func TestTrackerUploadJobAccessRequiresOwningSession(t *testing.T) {
 
 func TestTrackerUploadRetryRequestUsesStoredUploadOptions(t *testing.T) {
 	job := &trackerUploadJob{
-		sessionID:      "session-a",
-		sourcePath:     `C:\Media\Movie.mkv`,
-		uploadOptions:  api.UploadOptions{Screens: 1, SkipAutoTorrent: true},
-		runOptions:     runOptions{Debug: true, NoSeed: true, RunLogLevel: "debug"},
+		sessionID:     "session-a",
+		sourcePath:    `C:\Media\Movie.mkv`,
+		uploadOptions: api.UploadOptions{Screens: 1, SkipAutoTorrent: true},
+		runOptions: runOptions{
+			Debug:       true,
+			NoSeed:      true,
+			RunLogLevel: "debug",
+		},
 		failedTrackers: []string{"BLU"},
 		ignoreDupesFor: []string{"AITHER"},
 	}
@@ -623,10 +635,29 @@ func TestApplyDupeProgressCountsNewTrackersWithoutInflatingExplicitTotal(t *test
 		updateTotal int
 		wantTotal   int
 	}{
-		{name: "explicit total", startTotal: 2, updateTotal: 2, wantTotal: 2},
-		{name: "total omitted", startTotal: 1, wantTotal: 2},
-		{name: "explicit total lower than current", startTotal: 3, updateTotal: 2, wantTotal: 3},
-		{name: "explicit total higher than current", startTotal: 2, updateTotal: 3, wantTotal: 3},
+		{
+			name:        "explicit total",
+			startTotal:  2,
+			updateTotal: 2,
+			wantTotal:   2,
+		},
+		{
+			name:       "total omitted",
+			startTotal: 1,
+			wantTotal:  2,
+		},
+		{
+			name:        "explicit total lower than current",
+			startTotal:  3,
+			updateTotal: 2,
+			wantTotal:   3,
+		},
+		{
+			name:        "explicit total higher than current",
+			startTotal:  2,
+			updateTotal: 3,
+			wantTotal:   3,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -913,8 +944,16 @@ func TestApplyTrackerUploadProgressUpdatesOnlyNamedTrackerForMultiTrackerJobs(t 
 		id:        "job",
 		trackers:  []string{"BLU", "AITHER"},
 		states: map[string]TrackerUploadTrackerState{
-			"BLU":    {Tracker: "BLU", Status: "running", Message: "queued"},
-			"AITHER": {Tracker: "AITHER", Status: "running", Message: "queued"},
+			"BLU": {
+				Tracker: "BLU",
+				Status:  "running",
+				Message: "queued",
+			},
+			"AITHER": {
+				Tracker: "AITHER",
+				Status:  "running",
+				Message: "queued",
+			},
 		},
 		startedAt: time.Now().UTC(),
 	}
@@ -947,7 +986,11 @@ func newTrackerUploadProgressTestJob() *trackerUploadJob {
 		id:        "job",
 		trackers:  []string{"BLU"},
 		states: map[string]TrackerUploadTrackerState{
-			"BLU": {Tracker: "BLU", Status: "running", Message: "uploading"},
+			"BLU": {
+				Tracker: "BLU",
+				Status:  "running",
+				Message: "uploading",
+			},
 		},
 		startedAt: time.Now().UTC(),
 	}
@@ -965,7 +1008,11 @@ func newTrackerUploadJobTestJob(coreSvc api.Core, trackers []string) *trackerUpl
 		startedAt:  time.Now().UTC(),
 	}
 	for _, tracker := range trackers {
-		job.states[tracker] = TrackerUploadTrackerState{Tracker: tracker, Status: "queued", Message: "queued"}
+		job.states[tracker] = TrackerUploadTrackerState{
+			Tracker: tracker,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 	return job
 }
@@ -982,7 +1029,11 @@ func newDupeCheckJobTestJob(sessionID string, sourcePath string, trackers []stri
 		startedAt:  time.Now().UTC(),
 	}
 	for _, tracker := range trackers {
-		job.states[tracker] = DupeCheckTrackerState{Tracker: tracker, Status: "queued", Message: "queued"}
+		job.states[tracker] = DupeCheckTrackerState{
+			Tracker: tracker,
+			Status:  "queued",
+			Message: "queued",
+		}
 	}
 	return job
 }

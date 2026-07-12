@@ -168,6 +168,16 @@ func ParseSizeBytes(value string) (int64, bool) {
 	if err != nil {
 		return 0, false
 	}
-	multipliers := map[string]float64{"b": 1, "kb": 1e3, "mb": 1e6, "gb": 1e9, "tb": 1e12, "kib": 1024, "mib": 1024 * 1024, "gib": 1024 * 1024 * 1024, "tib": 1024 * 1024 * 1024 * 1024}
+	multipliers := map[string]float64{
+		"b":   1,
+		"kb":  1e3,
+		"mb":  1e6,
+		"gb":  1e9,
+		"tb":  1e12,
+		"kib": 1024,
+		"mib": 1024 * 1024,
+		"gib": 1024 * 1024 * 1024,
+		"tib": 1024 * 1024 * 1024 * 1024,
+	}
 	return int64(math.Round(amount * multipliers[strings.ToLower(match[2])])), true
 }

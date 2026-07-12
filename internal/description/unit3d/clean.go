@@ -19,12 +19,14 @@ var (
 	unit3dURLToken         = regexp.MustCompile(`(?i)https?://[^\s\[\]]+`)
 	unit3dWrapperTag       = regexp.MustCompile(`(?is)\[(?:center|align=[^\]]+)\][\s\S]*?\[/(?:center|align)\]`)
 	unit3dParagraphSplit   = regexp.MustCompile(`\n\s*\n+`)
-	unit3dTonemapOnlyBlock = regexp.MustCompile(`(?is)\[(?:center|align=[^\]]+)\]\s*\[code\]\s*Screenshots have been tonemapped for reference\s*\[/code\]\s*\[/(?:center|align)\]`)
-	unit3dEmptySpoilerTag  = regexp.MustCompile(`(?is)\[spoiler(?:=[^\]]*)?\]\s*\[/spoiler\]`)
-	unit3dWrapperOpenTag   = regexp.MustCompile(`(?is)\[(?:center|align=[^\]]+)\]`)
-	unit3dWrapperCloseTag  = regexp.MustCompile(`(?is)\[/(?:center|align)\]`)
-	unit3dHostAliasCache   sync.Map
-	unit3dSiteLinkCache    sync.Map
+	unit3dTonemapOnlyBlock = regexp.MustCompile(
+		`(?is)\[(?:center|align=[^\]]+)\]\s*\[code\]\s*Screenshots have been tonemapped for reference\s*\[/code\]\s*\[/(?:center|align)\]`,
+	)
+	unit3dEmptySpoilerTag = regexp.MustCompile(`(?is)\[spoiler(?:=[^\]]*)?\]\s*\[/spoiler\]`)
+	unit3dWrapperOpenTag  = regexp.MustCompile(`(?is)\[(?:center|align=[^\]]+)\]`)
+	unit3dWrapperCloseTag = regexp.MustCompile(`(?is)\[/(?:center|align)\]`)
+	unit3dHostAliasCache  sync.Map
+	unit3dSiteLinkCache   sync.Map
 )
 
 // CleanDescription normalizes a Unit3D description and extracts its image blocks.
@@ -167,7 +169,12 @@ func extractUnit3DImages(value string) []Image {
 			if host == "" {
 				host = imagehost.ExtractHost(imgURL)
 			}
-			images = append(images, Image{ImgURL: imgURL, RawURL: rawURL, WebURL: webURL, Host: host})
+			images = append(images, Image{
+				ImgURL: imgURL,
+				RawURL: rawURL,
+				WebURL: webURL,
+				Host:   host,
+			})
 		}
 		return ""
 	})
@@ -181,7 +188,12 @@ func extractUnit3DImages(value string) []Image {
 		if imgURL != "" && !containsImage(images, imgURL) {
 			host := imagehost.ExtractHost(imgURL)
 			rawURL := normalizeRawImageURL(imgURL)
-			images = append(images, Image{ImgURL: imgURL, RawURL: rawURL, WebURL: imgURL, Host: host})
+			images = append(images, Image{
+				ImgURL: imgURL,
+				RawURL: rawURL,
+				WebURL: imgURL,
+				Host:   host,
+			})
 		}
 		return ""
 	})

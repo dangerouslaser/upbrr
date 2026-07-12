@@ -270,7 +270,17 @@ func (c *Core) RunUploadPrepared(ctx context.Context, req api.Request) (result a
 		singleReq.Options = options
 		singleReq.ExternalIDOverrides = mergeExternalIDOverrides(req.ExternalIDOverrides, resolveExternalIDSelection(req.ExternalIDSelections, path))
 
-		signature := overrideSignature(singleReq.ExternalIDOverrides, singleReq.ReleaseNameOverrides, singleReq.MetadataOverrides, singleReq.TrackerConfigOverrides, singleReq.TrackerSiteOverrides, singleReq.ClientOverrides, singleReq.TorrentOverrides, singleReq.ImageHostOverrides, singleReq.ScreenshotOverrides)
+		signature := overrideSignature(
+			singleReq.ExternalIDOverrides,
+			singleReq.ReleaseNameOverrides,
+			singleReq.MetadataOverrides,
+			singleReq.TrackerConfigOverrides,
+			singleReq.TrackerSiteOverrides,
+			singleReq.ClientOverrides,
+			singleReq.TorrentOverrides,
+			singleReq.ImageHostOverrides,
+			singleReq.ScreenshotOverrides,
+		)
 		meta, ok := c.getDupeCache(path, signature)
 		if req.Mode == api.ModeGUI {
 			meta, ok = c.getGUICachedMeta(path, signature, singleReq.ExternalIDOverrides)
@@ -304,7 +314,15 @@ func (c *Core) executePreparedUpload(ctx context.Context, req api.Request, meta 
 	if err != nil {
 		return 0, err
 	}
-	resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, trackerResolutionRemoveForRequest(meta, req), c.logger, c.registry, false, false)
+	resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(
+		c.cfg,
+		req.Trackers,
+		trackerResolutionRemoveForRequest(meta, req),
+		c.logger,
+		c.registry,
+		false,
+		false,
+	)
 	if explicitEmpty {
 		c.logger.Debugf("core: upload prepared explicit trackers resolved empty source=%s", meta.SourcePath)
 		return 0, nil
@@ -575,7 +593,22 @@ func (c *Core) CheckDupes(ctx context.Context, req api.Request) (summary api.Dup
 				summary = appendPathedDupeResults(summary, matchedTrackers)
 			}
 			applyDupeSummaryToPreparedMeta(&cached, summary)
-			c.storeRefreshedDupeCacheWithDupeSummary(cached.SourcePath, overrideSignature(cached.ExternalIDOverrides, cached.ReleaseNameOverrides, cached.MetadataOverrides, cached.TrackerConfigOverrides, cached.TrackerSiteOverrides, cached.ClientOverrides, cached.TorrentOverrides, cached.ImageHostOverrides, cached.ScreenshotOverrides), cached, summary)
+			c.storeRefreshedDupeCacheWithDupeSummary(
+				cached.SourcePath,
+				overrideSignature(
+					cached.ExternalIDOverrides,
+					cached.ReleaseNameOverrides,
+					cached.MetadataOverrides,
+					cached.TrackerConfigOverrides,
+					cached.TrackerSiteOverrides,
+					cached.ClientOverrides,
+					cached.TorrentOverrides,
+					cached.ImageHostOverrides,
+					cached.ScreenshotOverrides,
+				),
+				cached,
+				summary,
+			)
 			return summary, nil
 		}
 		if req.Mode == api.ModeGUI {
@@ -689,7 +722,21 @@ func (c *Core) CheckDupes(ctx context.Context, req api.Request) (summary api.Dup
 		return api.DupeCheckSummary{}, fmt.Errorf("core: %w", err)
 	}
 
-	c.storeRefreshedDupeCache(meta.SourcePath, overrideSignature(meta.ExternalIDOverrides, meta.ReleaseNameOverrides, meta.MetadataOverrides, meta.TrackerConfigOverrides, meta.TrackerSiteOverrides, meta.ClientOverrides, meta.TorrentOverrides, meta.ImageHostOverrides, meta.ScreenshotOverrides), meta)
+	c.storeRefreshedDupeCache(
+		meta.SourcePath,
+		overrideSignature(
+			meta.ExternalIDOverrides,
+			meta.ReleaseNameOverrides,
+			meta.MetadataOverrides,
+			meta.TrackerConfigOverrides,
+			meta.TrackerSiteOverrides,
+			meta.ClientOverrides,
+			meta.TorrentOverrides,
+			meta.ImageHostOverrides,
+			meta.ScreenshotOverrides,
+		),
+		meta,
+	)
 
 	matchedTrackers := mergeTrackerRemovals(nil, meta.MatchedTrackers)
 	removeTrackers := mergeTrackerRemovals(nil, req.TrackersRemove)
@@ -708,7 +755,22 @@ func (c *Core) CheckDupes(ctx context.Context, req api.Request) (summary api.Dup
 		summary = appendPathedDupeResults(summary, matchedTrackers)
 	}
 	applyDupeSummaryToPreparedMeta(&meta, summary)
-	c.storeRefreshedDupeCacheWithDupeSummary(meta.SourcePath, overrideSignature(meta.ExternalIDOverrides, meta.ReleaseNameOverrides, meta.MetadataOverrides, meta.TrackerConfigOverrides, meta.TrackerSiteOverrides, meta.ClientOverrides, meta.TorrentOverrides, meta.ImageHostOverrides, meta.ScreenshotOverrides), meta, summary)
+	c.storeRefreshedDupeCacheWithDupeSummary(
+		meta.SourcePath,
+		overrideSignature(
+			meta.ExternalIDOverrides,
+			meta.ReleaseNameOverrides,
+			meta.MetadataOverrides,
+			meta.TrackerConfigOverrides,
+			meta.TrackerSiteOverrides,
+			meta.ClientOverrides,
+			meta.TorrentOverrides,
+			meta.ImageHostOverrides,
+			meta.ScreenshotOverrides,
+		),
+		meta,
+		summary,
+	)
 	return summary, nil
 }
 
@@ -763,7 +825,12 @@ func (c *Core) FetchScreenshotPlan(ctx context.Context, req api.Request) (api.Sc
 	return wrapCoreResult(c.services.Screenshots.Plan(ctx, meta, options.Screens))
 }
 
-func (c *Core) GenerateScreenshots(ctx context.Context, req api.Request, selections []api.ScreenshotSelection, purpose api.ScreenshotPurpose) (api.ScreenshotResult, error) {
+func (c *Core) GenerateScreenshots(
+	ctx context.Context,
+	req api.Request,
+	selections []api.ScreenshotSelection,
+	purpose api.ScreenshotPurpose,
+) (api.ScreenshotResult, error) {
 	if len(req.Paths) == 0 {
 		return api.ScreenshotResult{}, internalerrors.ErrInvalidInput
 	}
@@ -1390,7 +1457,10 @@ func (c *Core) resolveImageUploadTargets(req api.Request, meta api.PreparedMetad
 		normalized = append(normalized, target)
 	}
 	if len(normalized) == 0 {
-		return nil, fmt.Errorf("core: image host %q resolved image upload targets were filtered out after tracker eligibility and normalization", normalizedHost)
+		return nil, fmt.Errorf(
+			"core: image host %q resolved image upload targets were filtered out after tracker eligibility and normalization",
+			normalizedHost,
+		)
 	}
 	return normalized, nil
 }
@@ -1409,7 +1479,13 @@ func (c *Core) filterImageUploadTrackers(trackerNames []string, meta api.Prepare
 		existingMatch := matchedTrackerForUpload(meta.MatchedTrackers, name)
 		if len(blockedReasons) > 0 || (!meta.IgnoreTrackerRuleFailures && api.HasBlockingRuleFailures(ruleFailures)) || existingMatch {
 			if c.logger != nil {
-				c.logger.Debugf("core: excluding blocked image upload tracker tracker=%s blocked_reasons=%v rule_failures=%d existing_match=%t", name, blockedReasons, len(ruleFailures), existingMatch)
+				c.logger.Debugf(
+					"core: excluding blocked image upload tracker tracker=%s blocked_reasons=%v rule_failures=%d existing_match=%t",
+					name,
+					blockedReasons,
+					len(ruleFailures),
+					existingMatch,
+				)
 			}
 			continue
 		}
@@ -1468,7 +1544,12 @@ func ruleFailuresForTracker(failures map[string][]api.RuleFailure, tracker strin
 	return nil
 }
 
-func (c *Core) resolveFallbackImageUploadTargets(host string, trackerNames []string, excludedHosts []string, meta api.PreparedMetadata) ([]trackers.ImageUploadTarget, error) {
+func (c *Core) resolveFallbackImageUploadTargets(
+	host string,
+	trackerNames []string,
+	excludedHosts []string,
+	meta api.PreparedMetadata,
+) ([]trackers.ImageUploadTarget, error) {
 	normalizedHost := strings.ToLower(strings.TrimSpace(host))
 	if normalizedHost == "" || len(trackerNames) == 0 {
 		return nil, nil
@@ -1488,7 +1569,13 @@ func (c *Core) resolveFallbackImageUploadTargets(host string, trackerNames []str
 	return normalized, nil
 }
 
-func (c *Core) uploadImagesToTargetsWithFallback(ctx context.Context, meta api.PreparedMetadata, host string, targets []trackers.ImageUploadTarget, images []api.ScreenshotImage) (api.UploadImagesResult, error) {
+func (c *Core) uploadImagesToTargetsWithFallback(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	host string,
+	targets []trackers.ImageUploadTarget,
+	images []api.ScreenshotImage,
+) (api.UploadImagesResult, error) {
 	allLinks := make([]api.UploadedImageLink, 0, len(images)*len(targets))
 	failedHosts := make(map[string]struct{}, len(targets))
 	currentTargets := targets
@@ -1532,7 +1619,12 @@ func (c *Core) uploadImagesToTargetsWithFallback(ctx context.Context, meta api.P
 			return api.UploadImagesResult{Links: allLinks, Failures: failures}, nil
 		}
 
-		c.logger.Warnf("core: retrying image uploads after host failures failed_hosts=%s fallback_hosts=%s trackers=%v", strings.Join(sortedMapKeys(failedHosts), ","), strings.Join(uploadTargetHosts(nextTargets), ","), uploadTargetTrackers(nextTargets))
+		c.logger.Warnf(
+			"core: retrying image uploads after host failures failed_hosts=%s fallback_hosts=%s trackers=%v",
+			strings.Join(sortedMapKeys(failedHosts), ","),
+			strings.Join(uploadTargetHosts(nextTargets), ","),
+			uploadTargetTrackers(nextTargets),
+		)
 		currentTargets = nextTargets
 	}
 
@@ -1647,7 +1739,12 @@ func sortedMapKeys(values map[string]struct{}) []string {
 	return keys
 }
 
-func (c *Core) uploadImagesToTargets(ctx context.Context, meta api.PreparedMetadata, targets []trackers.ImageUploadTarget, images []api.ScreenshotImage) api.UploadImagesResult {
+func (c *Core) uploadImagesToTargets(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	targets []trackers.ImageUploadTarget,
+	images []api.ScreenshotImage,
+) api.UploadImagesResult {
 	type uploadResult struct {
 		index  int
 		target trackers.ImageUploadTarget
@@ -1704,7 +1801,12 @@ func (c *Core) uploadImagesToTargets(ctx context.Context, meta api.PreparedMetad
 	}
 	result := api.UploadImagesResult{Links: results, Failures: failures}
 	if len(results) > 0 {
-		c.logger.Warnf("core: image uploads completed with %d host failures and %d successful links: %s", len(failures), len(results), strings.Join(failureMessages, "; "))
+		c.logger.Warnf(
+			"core: image uploads completed with %d host failures and %d successful links: %s",
+			len(failures),
+			len(results),
+			strings.Join(failureMessages, "; "),
+		)
 		return result
 	}
 	c.logger.Warnf("core: image uploads failed for all hosts: %s", strings.Join(failureMessages, "; "))
@@ -1733,11 +1835,23 @@ func appendUniqueNormalizedTracker(trackersList []string, tracker string) []stri
 	return append(trackersList, name)
 }
 
-func (c *Core) uploadImagesToTarget(ctx context.Context, meta api.PreparedMetadata, target trackers.ImageUploadTarget, images []api.ScreenshotImage) ([]api.UploadedImageLink, error) {
+func (c *Core) uploadImagesToTarget(
+	ctx context.Context,
+	meta api.PreparedMetadata,
+	target trackers.ImageUploadTarget,
+	images []api.ScreenshotImage,
+) ([]api.UploadedImageLink, error) {
 	target.Host = strings.ToLower(strings.TrimSpace(target.Host))
 	target.UsageScope = normalizeImageUploadUsageScope(target.UsageScope)
 	if c.repo == nil {
-		c.logger.Tracef("core: uploading images host=%s tracker=%s scope=%s trackers=%v count=%d", target.Host, imageHostOwnerLogValue(target.Host), target.UsageScope, target.Trackers, len(images))
+		c.logger.Tracef(
+			"core: uploading images host=%s tracker=%s scope=%s trackers=%v count=%d",
+			target.Host,
+			imageHostOwnerLogValue(target.Host),
+			target.UsageScope,
+			target.Trackers,
+			len(images),
+		)
 		return wrapCoreResult(c.services.Images.Upload(ctx, meta, target.Host, target.UsageScope, images))
 	}
 
@@ -1761,11 +1875,26 @@ func (c *Core) uploadImagesToTarget(ctx context.Context, meta api.PreparedMetada
 		missing = append(missing, image)
 	}
 	if len(missing) == 0 {
-		c.logger.Tracef("core: reusing uploaded images host=%s tracker=%s scope=%s trackers=%v count=%d", target.Host, imageHostOwnerLogValue(target.Host), target.UsageScope, target.Trackers, len(results))
+		c.logger.Tracef(
+			"core: reusing uploaded images host=%s tracker=%s scope=%s trackers=%v count=%d",
+			target.Host,
+			imageHostOwnerLogValue(target.Host),
+			target.UsageScope,
+			target.Trackers,
+			len(results),
+		)
 		return results, nil
 	}
 
-	c.logger.Debugf("core: uploading missing images host=%s tracker=%s scope=%s trackers=%v missing=%d reused=%d", target.Host, imageHostOwnerLogValue(target.Host), target.UsageScope, target.Trackers, len(missing), len(results))
+	c.logger.Debugf(
+		"core: uploading missing images host=%s tracker=%s scope=%s trackers=%v missing=%d reused=%d",
+		target.Host,
+		imageHostOwnerLogValue(target.Host),
+		target.UsageScope,
+		target.Trackers,
+		len(missing),
+		len(results),
+	)
 	uploaded, err := c.services.Images.Upload(ctx, meta, target.Host, target.UsageScope, missing)
 	results = append(results, uploaded...)
 	if err != nil {
@@ -2090,7 +2219,21 @@ func (c *Core) FetchMetadataPreview(ctx context.Context, req api.Request) (previ
 		return api.MetadataPreview{}, err
 	}
 
-	c.storeRefreshedDupeCache(meta.SourcePath, overrideSignature(meta.ExternalIDOverrides, meta.ReleaseNameOverrides, meta.MetadataOverrides, meta.TrackerConfigOverrides, meta.TrackerSiteOverrides, meta.ClientOverrides, meta.TorrentOverrides, meta.ImageHostOverrides, meta.ScreenshotOverrides), meta)
+	c.storeRefreshedDupeCache(
+		meta.SourcePath,
+		overrideSignature(
+			meta.ExternalIDOverrides,
+			meta.ReleaseNameOverrides,
+			meta.MetadataOverrides,
+			meta.TrackerConfigOverrides,
+			meta.TrackerSiteOverrides,
+			meta.ClientOverrides,
+			meta.TorrentOverrides,
+			meta.ImageHostOverrides,
+			meta.ScreenshotOverrides,
+		),
+		meta,
+	)
 
 	emitProgress("complete", "completed", "Metadata preview ready")
 
@@ -2146,7 +2289,15 @@ func (c *Core) FetchPreparationPreview(ctx context.Context, req api.Request) (pr
 		if cached, ok, err := c.resolveGUICachedPreparedMeta(ctx, req, uniquePaths[0]); err != nil {
 			return api.PreparationPreview{}, err
 		} else if ok {
-			resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, requestPreparedMetaTrackersRemove(cached, req), c.logger, c.registry, false, false)
+			resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(
+				c.cfg,
+				req.Trackers,
+				requestPreparedMetaTrackersRemove(cached, req),
+				c.logger,
+				c.registry,
+				false,
+				false,
+			)
 			if explicitEmpty {
 				c.logger.Debugf("core: preparation explicit trackers resolved empty source=%s", cached.SourcePath)
 				return api.PreparationPreview{SourcePath: cached.SourcePath}, nil
@@ -2179,7 +2330,21 @@ func (c *Core) FetchPreparationPreview(ctx context.Context, req api.Request) (pr
 		return api.PreparationPreview{SourcePath: meta.SourcePath}, nil
 	}
 	if req.Mode == api.ModeGUI {
-		c.storeDupeCache(meta.SourcePath, overrideSignature(meta.ExternalIDOverrides, meta.ReleaseNameOverrides, meta.MetadataOverrides, meta.TrackerConfigOverrides, meta.TrackerSiteOverrides, meta.ClientOverrides, meta.TorrentOverrides, meta.ImageHostOverrides, meta.ScreenshotOverrides), meta)
+		c.storeDupeCache(
+			meta.SourcePath,
+			overrideSignature(
+				meta.ExternalIDOverrides,
+				meta.ReleaseNameOverrides,
+				meta.MetadataOverrides,
+				meta.TrackerConfigOverrides,
+				meta.TrackerSiteOverrides,
+				meta.ClientOverrides,
+				meta.TorrentOverrides,
+				meta.ImageHostOverrides,
+				meta.ScreenshotOverrides,
+			),
+			meta,
+		)
 	}
 	c.logger.Debugf("core: preparation resolved trackers %v", resolvedTrackers)
 	return wrapCoreResult(c.services.Trackers.BuildPreparation(ctx, meta, resolvedTrackers))
@@ -2245,20 +2410,45 @@ func (c *Core) FetchTrackerDryRunPreview(ctx context.Context, req api.Request) (
 		return api.TrackerDryRunPreview{}, err
 	}
 	options.DryRun = true
-	c.logger.Debugf("core: tracker dry-run options resolved path=%s debug=%t dry_run=%t no_seed=%t run_log_level=%s", uniquePaths[0], options.Debug, options.DryRun, options.NoSeed, options.RunLogLevel)
+	c.logger.Debugf(
+		"core: tracker dry-run options resolved path=%s debug=%t dry_run=%t no_seed=%t run_log_level=%s",
+		uniquePaths[0],
+		options.Debug,
+		options.DryRun,
+		options.NoSeed,
+		options.RunLogLevel,
+	)
 
 	singleReq := req
 	singleReq.Paths = []string{uniquePaths[0]}
 	singleReq.Options = options
 	singleReq.ExternalIDOverrides = mergeExternalIDOverrides(req.ExternalIDOverrides, resolveExternalIDSelection(req.ExternalIDSelections, uniquePaths[0]))
 
-	signature := overrideSignature(singleReq.ExternalIDOverrides, singleReq.ReleaseNameOverrides, singleReq.MetadataOverrides, singleReq.TrackerConfigOverrides, singleReq.TrackerSiteOverrides, singleReq.ClientOverrides, singleReq.TorrentOverrides, singleReq.ImageHostOverrides, singleReq.ScreenshotOverrides)
+	signature := overrideSignature(
+		singleReq.ExternalIDOverrides,
+		singleReq.ReleaseNameOverrides,
+		singleReq.MetadataOverrides,
+		singleReq.TrackerConfigOverrides,
+		singleReq.TrackerSiteOverrides,
+		singleReq.ClientOverrides,
+		singleReq.TorrentOverrides,
+		singleReq.ImageHostOverrides,
+		singleReq.ScreenshotOverrides,
+	)
 	meta, ok := c.getDupeCache(uniquePaths[0], signature)
 	if req.Mode == api.ModeGUI {
 		entry, _, found := c.lookupGUICachedMetaEntry(singleReq, uniquePaths[0])
 		if found {
 			ok = true
-			if _, explicitEmpty := resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, requestPreparedMetaTrackersRemove(entry.meta, singleReq), c.logger, c.registry, false, false); explicitEmpty {
+			if _, explicitEmpty := resolveTrackersPreservingExplicitEmpty(
+				c.cfg,
+				req.Trackers,
+				requestPreparedMetaTrackersRemove(entry.meta, singleReq),
+				c.logger,
+				c.registry,
+				false,
+				false,
+			); explicitEmpty {
 				c.logger.Debugf("core: tracker dry-run explicit trackers resolved empty source=%s", entry.meta.SourcePath)
 				return api.TrackerDryRunPreview{SourcePath: entry.meta.SourcePath, Trackers: []api.TrackerDryRunEntry{}}, nil
 			}
@@ -2275,7 +2465,15 @@ func (c *Core) FetchTrackerDryRunPreview(ctx context.Context, req api.Request) (
 		if !ok {
 			return api.TrackerDryRunPreview{}, fmt.Errorf("core: tracker dry-run requires prepared metadata for %s", uniquePaths[0])
 		}
-		if _, explicitEmpty := resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, requestPreparedMetaTrackersRemove(meta, singleReq), c.logger, c.registry, false, false); explicitEmpty {
+		if _, explicitEmpty := resolveTrackersPreservingExplicitEmpty(
+			c.cfg,
+			req.Trackers,
+			requestPreparedMetaTrackersRemove(meta, singleReq),
+			c.logger,
+			c.registry,
+			false,
+			false,
+		); explicitEmpty {
 			c.logger.Debugf("core: tracker dry-run explicit trackers resolved empty source=%s", meta.SourcePath)
 			return api.TrackerDryRunPreview{SourcePath: meta.SourcePath, Trackers: []api.TrackerDryRunEntry{}}, nil
 		}
@@ -2287,8 +2485,21 @@ func (c *Core) FetchTrackerDryRunPreview(ctx context.Context, req api.Request) (
 	if !ok {
 		return api.TrackerDryRunPreview{}, fmt.Errorf("core: tracker dry-run requires prepared metadata for %s", uniquePaths[0])
 	}
-	c.logger.Debugf("core: tracker dry-run using cached prepared metadata for %s meta_no_seed=%t req_no_seed=%t", uniquePaths[0], meta.Options.NoSeed, singleReq.Options.NoSeed)
-	resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, trackerResolutionRemoveForRequest(meta, singleReq), c.logger, c.registry, false, false)
+	c.logger.Debugf(
+		"core: tracker dry-run using cached prepared metadata for %s meta_no_seed=%t req_no_seed=%t",
+		uniquePaths[0],
+		meta.Options.NoSeed,
+		singleReq.Options.NoSeed,
+	)
+	resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(
+		c.cfg,
+		req.Trackers,
+		trackerResolutionRemoveForRequest(meta, singleReq),
+		c.logger,
+		c.registry,
+		false,
+		false,
+	)
 	if explicitEmpty {
 		c.logger.Debugf("core: tracker dry-run explicit trackers resolved empty source=%s", meta.SourcePath)
 		return api.TrackerDryRunPreview{SourcePath: meta.SourcePath, Trackers: []api.TrackerDryRunEntry{}}, nil
@@ -2319,7 +2530,21 @@ func (c *Core) FetchTrackerDryRunPreview(ctx context.Context, req api.Request) (
 		return api.TrackerDryRunPreview{}, err
 	}
 
-	c.storeDupeCache(meta.SourcePath, overrideSignature(meta.ExternalIDOverrides, meta.ReleaseNameOverrides, meta.MetadataOverrides, meta.TrackerConfigOverrides, meta.TrackerSiteOverrides, meta.ClientOverrides, meta.TorrentOverrides, meta.ImageHostOverrides, meta.ScreenshotOverrides), meta)
+	c.storeDupeCache(
+		meta.SourcePath,
+		overrideSignature(
+			meta.ExternalIDOverrides,
+			meta.ReleaseNameOverrides,
+			meta.MetadataOverrides,
+			meta.TrackerConfigOverrides,
+			meta.TrackerSiteOverrides,
+			meta.ClientOverrides,
+			meta.TorrentOverrides,
+			meta.ImageHostOverrides,
+			meta.ScreenshotOverrides,
+		),
+		meta,
+	)
 
 	return api.TrackerDryRunPreview{SourcePath: meta.SourcePath, Trackers: sanitizeTrackerDryRunEntries(entries)}, nil
 }
@@ -2392,13 +2617,23 @@ func sanitizeDryRunImageHostFeedback(feedback api.ImageHostFeedback) api.ImageHo
 
 // injectTrackerDryRunTorrents injects only ready dry-run tracker torrents into
 // configured clients so debug runs can exercise client handling without upload.
-func (c *Core) injectTrackerDryRunTorrents(ctx context.Context, req api.Request, meta api.PreparedMetadata, entries []api.TrackerDryRunEntry, fallback api.TorrentResult) error {
+func (c *Core) injectTrackerDryRunTorrents(
+	ctx context.Context,
+	req api.Request,
+	meta api.PreparedMetadata,
+	entries []api.TrackerDryRunEntry,
+	fallback api.TorrentResult,
+) error {
 	ready := make([]api.TrackerDryRunEntry, 0, len(entries))
 	for _, entry := range entries {
 		if strings.EqualFold(strings.TrimSpace(entry.Status), "ready") {
 			ready = append(ready, entry)
 		} else {
-			c.logger.Debugf("core: tracker dry-run skipping client injection for tracker=%s status=%s", strings.TrimSpace(entry.Tracker), strings.TrimSpace(entry.Status))
+			c.logger.Debugf(
+				"core: tracker dry-run skipping client injection for tracker=%s status=%s",
+				strings.TrimSpace(entry.Tracker),
+				strings.TrimSpace(entry.Status),
+			)
 		}
 	}
 	if len(ready) == 0 {
@@ -2414,7 +2649,11 @@ func (c *Core) injectTrackerDryRunTorrents(ctx context.Context, req api.Request,
 		if err != nil {
 			return err
 		}
-		injectTorrent := api.TorrentResult{Path: strings.TrimSpace(injectMeta.TorrentPath), InfoHash: fallback.InfoHash, Tracker: trackerName}
+		injectTorrent := api.TorrentResult{
+			Path:     strings.TrimSpace(injectMeta.TorrentPath),
+			InfoHash: fallback.InfoHash,
+			Tracker:  trackerName,
+		}
 		if injectTorrent.Path == "" {
 			injectTorrent.Path = strings.TrimSpace(fallback.Path)
 		}
@@ -2630,7 +2869,12 @@ func (c *Core) FetchDescriptionBuilderPreview(ctx context.Context, req api.Reque
 	return preview, nil
 }
 
-func buildDescriptionBuilderGroup(entry api.PreparationDescription, overrideByGroup map[string]api.DescriptionOverride, _ api.PreparedMetadata, _ api.Logger) api.DescriptionBuilderGroup {
+func buildDescriptionBuilderGroup(
+	entry api.PreparationDescription,
+	overrideByGroup map[string]api.DescriptionOverride,
+	_ api.PreparedMetadata,
+	_ api.Logger,
+) api.DescriptionBuilderGroup {
 	groupKey := normalizeDescriptionBuilderGroupKey(entry.GroupKey, entry.Trackers)
 	descriptionText := strings.TrimSpace(entry.Description)
 	if descriptionText == "" {
@@ -2679,7 +2923,13 @@ func buildDescriptionBuilderGroup(entry api.PreparationDescription, overrideByGr
 // tracker description preparation, using the resolved tracker set for localized
 // pt-BR refreshes while preserving the original tracker list on returned
 // metadata. Cacheable GUI refreshes are stored as request-refreshed entries.
-func (c *Core) ensureDescriptionBuilderMetadata(ctx context.Context, req api.Request, path string, meta api.PreparedMetadata, resolvedTrackers []string) (api.PreparedMetadata, error) {
+func (c *Core) ensureDescriptionBuilderMetadata(
+	ctx context.Context,
+	req api.Request,
+	path string,
+	meta api.PreparedMetadata,
+	resolvedTrackers []string,
+) (api.PreparedMetadata, error) {
 	if c.services.Metadata == nil || !descriptionBuilderNeedsExternalMetadata(c.cfg, meta, resolvedTrackers, c.registry) {
 		return meta, nil
 	}
@@ -2698,7 +2948,17 @@ func (c *Core) ensureDescriptionBuilderMetadata(ctx context.Context, req api.Req
 	}
 	if req.Mode == api.ModeGUI && cacheableGUIPreparedMetaRequest(req) {
 		overrides := mergeExternalIDOverrides(req.ExternalIDOverrides, resolveExternalIDSelection(req.ExternalIDSelections, path))
-		signature := overrideSignature(overrides, req.ReleaseNameOverrides, req.MetadataOverrides, req.TrackerConfigOverrides, req.TrackerSiteOverrides, req.ClientOverrides, req.TorrentOverrides, req.ImageHostOverrides, req.ScreenshotOverrides)
+		signature := overrideSignature(
+			overrides,
+			req.ReleaseNameOverrides,
+			req.MetadataOverrides,
+			req.TrackerConfigOverrides,
+			req.TrackerSiteOverrides,
+			req.ClientOverrides,
+			req.TorrentOverrides,
+			req.ImageHostOverrides,
+			req.ScreenshotOverrides,
+		)
 		c.storeRefreshedDupeCache(path, signature, resolved)
 	}
 	return resolved, nil
@@ -2711,7 +2971,17 @@ func (c *Core) storeDescriptionBuilderPreparedCache(req api.Request, path string
 		return
 	}
 	overrides := mergeExternalIDOverrides(req.ExternalIDOverrides, resolveExternalIDSelection(req.ExternalIDSelections, path))
-	signature := overrideSignature(overrides, req.ReleaseNameOverrides, req.MetadataOverrides, req.TrackerConfigOverrides, req.TrackerSiteOverrides, req.ClientOverrides, req.TorrentOverrides, req.ImageHostOverrides, req.ScreenshotOverrides)
+	signature := overrideSignature(
+		overrides,
+		req.ReleaseNameOverrides,
+		req.MetadataOverrides,
+		req.TrackerConfigOverrides,
+		req.TrackerSiteOverrides,
+		req.ClientOverrides,
+		req.TorrentOverrides,
+		req.ImageHostOverrides,
+		req.ScreenshotOverrides,
+	)
 	c.storeDupeCache(path, signature, meta)
 }
 
@@ -2735,7 +3005,8 @@ func descriptionBuilderNeedsExternalMetadata(cfg config.Config, meta api.Prepare
 // descriptionBuilderNeedsPTBRMetadata reports whether localized tracker
 // descriptions need a missing pt-BR TMDB metadata entry.
 func descriptionBuilderNeedsPTBRMetadata(meta api.PreparedMetadata, resolvedTrackers []string, registries ...*trackers.Registry) bool {
-	if !descriptionBuilderTrackersNeedPTBR(resolvedTrackers, registries...) && !descriptionBuilderTrackersNeedPTBR(meta.Trackers, registries...) && !descriptionBuilderTrackersNeedPTBR(meta.MatchedTrackers, registries...) {
+	if !descriptionBuilderTrackersNeedPTBR(resolvedTrackers, registries...) && !descriptionBuilderTrackersNeedPTBR(meta.Trackers, registries...) &&
+		!descriptionBuilderTrackersNeedPTBR(meta.MatchedTrackers, registries...) {
 		return false
 	}
 	if meta.ExternalMetadata.TMDB == nil || meta.ExternalMetadata.TMDB.Localized == nil {
@@ -3004,7 +3275,13 @@ func (c *Core) storeDupeCacheEntry(path string, signature string, meta api.Prepa
 	}
 	c.dupeMu.Lock()
 	defer c.dupeMu.Unlock()
-	c.dupeCache[path] = dupeCacheEntry{meta: meta, dupeSummary: deepCopyDupeCheckSummary(summary), signature: signature, updatedAt: time.Now().UTC(), requestRefreshed: requestRefreshed}
+	c.dupeCache[path] = dupeCacheEntry{
+		meta:             meta,
+		dupeSummary:      deepCopyDupeCheckSummary(summary),
+		signature:        signature,
+		updatedAt:        time.Now().UTC(),
+		requestRefreshed: requestRefreshed,
+	}
 }
 
 func (c *Core) clearDupeCache(path string) {
@@ -3253,7 +3530,17 @@ func (c *Core) getGUICachedMeta(path string, signature string, overrides api.Ext
 
 func (c *Core) lookupGUICachedMetaEntry(req api.Request, path string) (dupeCacheEntry, string, bool) {
 	mergedOverrides := mergeExternalIDOverrides(req.ExternalIDOverrides, resolveExternalIDSelection(req.ExternalIDSelections, path))
-	signature := overrideSignature(mergedOverrides, req.ReleaseNameOverrides, req.MetadataOverrides, req.TrackerConfigOverrides, req.TrackerSiteOverrides, req.ClientOverrides, req.TorrentOverrides, req.ImageHostOverrides, req.ScreenshotOverrides)
+	signature := overrideSignature(
+		mergedOverrides,
+		req.ReleaseNameOverrides,
+		req.MetadataOverrides,
+		req.TrackerConfigOverrides,
+		req.TrackerSiteOverrides,
+		req.ClientOverrides,
+		req.TorrentOverrides,
+		req.ImageHostOverrides,
+		req.ScreenshotOverrides,
+	)
 	entry, ok := c.getGUICachedMetaEntry(path, signature, mergedOverrides)
 	return entry, signature, ok
 }
@@ -3496,7 +3783,17 @@ func (c *Core) ImportPreparedMetadataForGUI(ctx context.Context, req api.Request
 		return err
 	}
 	overrides := mergeExternalIDOverrides(req.ExternalIDOverrides, resolveExternalIDSelection(req.ExternalIDSelections, path))
-	signature := overrideSignature(overrides, req.ReleaseNameOverrides, req.MetadataOverrides, req.TrackerConfigOverrides, req.TrackerSiteOverrides, req.ClientOverrides, req.TorrentOverrides, req.ImageHostOverrides, req.ScreenshotOverrides)
+	signature := overrideSignature(
+		overrides,
+		req.ReleaseNameOverrides,
+		req.MetadataOverrides,
+		req.TrackerConfigOverrides,
+		req.TrackerSiteOverrides,
+		req.ClientOverrides,
+		req.TorrentOverrides,
+		req.ImageHostOverrides,
+		req.ScreenshotOverrides,
+	)
 	c.storeDupeCache(path, signature, deepCopyPreparedMetadata(meta))
 	c.logger.Debugf("core: gui prepared metadata import stored path=%s request_no_seed=%t meta_no_seed=%t", path, req.Options.NoSeed, meta.Options.NoSeed)
 	return nil
@@ -4025,7 +4322,12 @@ func (c *Core) LoadPlaylistSelection(ctx context.Context, sourcePath string) (ap
 		return api.PlaylistSelection{}, fmt.Errorf("core: %w", err)
 	}
 
-	c.logger.Debugf("core: playlist selection decision=loaded source=%q playlists=%d use_all=%v", sourcePath, len(selection.SelectedPlaylists), selection.UseAll)
+	c.logger.Debugf(
+		"core: playlist selection decision=loaded source=%q playlists=%d use_all=%v",
+		sourcePath,
+		len(selection.SelectedPlaylists),
+		selection.UseAll,
+	)
 	return selection, nil
 }
 
@@ -4714,19 +5016,39 @@ func baseFromAnnounce(announce string) string {
 func buildExternalIDInfo(ids api.ExternalIDs) []api.ExternalIDInfo {
 	result := make([]api.ExternalIDInfo, 0, 5)
 	if ids.IMDBID != 0 {
-		result = append(result, api.ExternalIDInfo{Provider: "imdb", ID: ids.IMDBID, Source: ids.SourceIMDB})
+		result = append(result, api.ExternalIDInfo{
+			Provider: "imdb",
+			ID:       ids.IMDBID,
+			Source:   ids.SourceIMDB,
+		})
 	}
 	if ids.TMDBID != 0 {
-		result = append(result, api.ExternalIDInfo{Provider: "tmdb", ID: ids.TMDBID, Source: ids.SourceTMDB})
+		result = append(result, api.ExternalIDInfo{
+			Provider: "tmdb",
+			ID:       ids.TMDBID,
+			Source:   ids.SourceTMDB,
+		})
 	}
 	if ids.TVDBID != 0 {
-		result = append(result, api.ExternalIDInfo{Provider: "tvdb", ID: ids.TVDBID, Source: ids.SourceTVDB})
+		result = append(result, api.ExternalIDInfo{
+			Provider: "tvdb",
+			ID:       ids.TVDBID,
+			Source:   ids.SourceTVDB,
+		})
 	}
 	if ids.TVmazeID != 0 {
-		result = append(result, api.ExternalIDInfo{Provider: "tvmaze", ID: ids.TVmazeID, Source: ids.SourceTVmaze})
+		result = append(result, api.ExternalIDInfo{
+			Provider: "tvmaze",
+			ID:       ids.TVmazeID,
+			Source:   ids.SourceTVmaze,
+		})
 	}
 	if ids.MALID != 0 {
-		result = append(result, api.ExternalIDInfo{Provider: "mal", ID: ids.MALID, Source: ids.SourceMAL})
+		result = append(result, api.ExternalIDInfo{
+			Provider: "mal",
+			ID:       ids.MALID,
+			Source:   ids.SourceMAL,
+		})
 	}
 	return result
 }
@@ -4735,7 +5057,11 @@ func buildExternalIDInfo(ids api.ExternalIDs) []api.ExternalIDInfo {
 func buildExternalPreviews(ids api.ExternalIDs, metadata api.ExternalMetadata) []api.ExternalPreview {
 	result := make([]api.ExternalPreview, 0, 4)
 	if ids.IMDBID != 0 && metadata.IMDB != nil {
-		preview := api.ExternalPreview{Provider: "imdb", ID: ids.IMDBID, Source: ids.SourceIMDB}
+		preview := api.ExternalPreview{
+			Provider: "imdb",
+			ID:       ids.IMDBID,
+			Source:   ids.SourceIMDB,
+		}
 		preview.Title = metadata.IMDB.Title
 		preview.Year = metadata.IMDB.Year
 		preview.Overview = metadata.IMDB.Plot
@@ -4750,7 +5076,11 @@ func buildExternalPreviews(ids api.ExternalIDs, metadata api.ExternalMetadata) [
 		result = append(result, preview)
 	}
 	if ids.TMDBID != 0 && metadata.TMDB != nil {
-		preview := api.ExternalPreview{Provider: "tmdb", ID: ids.TMDBID, Source: ids.SourceTMDB}
+		preview := api.ExternalPreview{
+			Provider: "tmdb",
+			ID:       ids.TMDBID,
+			Source:   ids.SourceTMDB,
+		}
 		preview.Title = metadata.TMDB.Title
 		preview.Year = metadata.TMDB.Year
 		preview.Overview = metadata.TMDB.Overview
@@ -4773,7 +5103,11 @@ func buildExternalPreviews(ids api.ExternalIDs, metadata api.ExternalMetadata) [
 		result = append(result, preview)
 	}
 	if ids.TVDBID != 0 && metadata.TVDB != nil {
-		preview := api.ExternalPreview{Provider: "tvdb", ID: ids.TVDBID, Source: ids.SourceTVDB}
+		preview := api.ExternalPreview{
+			Provider: "tvdb",
+			ID:       ids.TVDBID,
+			Source:   ids.SourceTVDB,
+		}
 		preview.Title = metadata.TVDB.Name
 		preview.Year = metadata.TVDB.Year
 		preview.Overview = metadata.TVDB.Overview
@@ -4788,7 +5122,11 @@ func buildExternalPreviews(ids api.ExternalIDs, metadata api.ExternalMetadata) [
 		result = append(result, preview)
 	}
 	if ids.TVmazeID != 0 && metadata.TVmaze != nil {
-		preview := api.ExternalPreview{Provider: "tvmaze", ID: ids.TVmazeID, Source: ids.SourceTVmaze}
+		preview := api.ExternalPreview{
+			Provider: "tvmaze",
+			ID:       ids.TVmazeID,
+			Source:   ids.SourceTVmaze,
+		}
 		preview.Title = metadata.TVmaze.Name
 		preview.Year = yearFromDate(metadata.TVmaze.Premiered)
 		preview.Overview = metadata.TVmaze.Summary
@@ -4808,7 +5146,11 @@ func buildExternalPreviews(ids api.ExternalIDs, metadata api.ExternalMetadata) [
 		result = append(result, preview)
 	}
 	if ids.MALID != 0 && metadata.AniList != nil {
-		preview := api.ExternalPreview{Provider: "mal", ID: ids.MALID, Source: ids.SourceMAL}
+		preview := api.ExternalPreview{
+			Provider: "mal",
+			ID:       ids.MALID,
+			Source:   ids.SourceMAL,
+		}
 		title := firstNonEmpty(
 			metadata.AniList.TitleEnglish,
 			metadata.AniList.TitleUserPreferred,
@@ -5006,7 +5348,15 @@ func (c *Core) resolveCanonicalDescriptionGroups(ctx context.Context, meta api.P
 		return nil, errors.New("core: tracker service not configured")
 	}
 
-	resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(c.cfg, req.Trackers, trackerResolutionRemoveForRequest(meta, req), c.logger, c.registry, false, false)
+	resolvedTrackers, explicitEmpty := resolveTrackersPreservingExplicitEmpty(
+		c.cfg,
+		req.Trackers,
+		trackerResolutionRemoveForRequest(meta, req),
+		c.logger,
+		c.registry,
+		false,
+		false,
+	)
 	if explicitEmpty {
 		return nil, nil
 	}

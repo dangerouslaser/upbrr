@@ -149,17 +149,31 @@ func TestNewRegistryOwnsUploadArtifactPolicies(t *testing.T) {
 		t.Fatalf("new registry: %v", err)
 	}
 	want := map[string]trackers.UploadArtifactPolicy{
-		"ACM": {Source: "AsianCinema"}, "AR": {Source: "AlphaRatio"}, "ASC": {Source: "ASC"},
+		"ACM":   {Source: "AsianCinema"},
+		"AR":    {Source: "AlphaRatio"},
+		"ASC":   {Source: "ASC"},
 		"AZ":    {Source: "AvistaZ", DefaultAnnounce: "https://tracker.avistaz.to/announce"},
-		"BHDTV": {Source: "BIT-HDTV", UseMyAnnounce: true}, "BJS": {Source: "BJ"}, "BT": {Source: "BT"},
-		"CZ":  {Source: "CinemaZ", DefaultAnnounce: "https://tracker.cinemaz.to/announce"},
-		"CZT": {Source: "CzT"}, "DC": {Source: "DigitalCore.club"}, "FF": {Source: "FunFile"},
-		"FL": {Source: "FL"}, "GPW": {Source: "GreatPosterWall"}, "HDS": {Source: "HD-Space"},
-		"HDT": {Source: "hd-torrents.org"}, "IS": {Source: "https://immortalseed.me"}, "MTV": {Source: "MTV"},
-		"NBL": {Source: "NBL"}, "PHD": {Source: "PrivateHD", DefaultAnnounce: "https://tracker.privatehd.to/announce"},
-		"PTS": {Source: "[www.ptskit.org] PTSKIT"}, "RTF": {Source: "sunshine"},
-		"THR": {Source: "[https://www.torrenthr.org] TorrentHR.org"}, "TL": {Source: "TorrentLeech.org"},
-		"TOS": {Source: "TheOldSchool"}, "TVC": {Source: "TVCHAOS"},
+		"BHDTV": {Source: "BIT-HDTV", UseMyAnnounce: true},
+		"BJS":   {Source: "BJ"},
+		"BT":    {Source: "BT"},
+		"CZ":    {Source: "CinemaZ", DefaultAnnounce: "https://tracker.cinemaz.to/announce"},
+		"CZT":   {Source: "CzT"},
+		"DC":    {Source: "DigitalCore.club"},
+		"FF":    {Source: "FunFile"},
+		"FL":    {Source: "FL"},
+		"GPW":   {Source: "GreatPosterWall"},
+		"HDS":   {Source: "HD-Space"},
+		"HDT":   {Source: "hd-torrents.org"},
+		"IS":    {Source: "https://immortalseed.me"},
+		"MTV":   {Source: "MTV"},
+		"NBL":   {Source: "NBL"},
+		"PHD":   {Source: "PrivateHD", DefaultAnnounce: "https://tracker.privatehd.to/announce"},
+		"PTS":   {Source: "[www.ptskit.org] PTSKIT"},
+		"RTF":   {Source: "sunshine"},
+		"THR":   {Source: "[https://www.torrenthr.org] TorrentHR.org"},
+		"TL":    {Source: "TorrentLeech.org"},
+		"TOS":   {Source: "TheOldSchool"},
+		"TVC":   {Source: "TVCHAOS"},
 	}
 	for name, expected := range want {
 		got, ok := registry.LookupUploadArtifactPolicy(name)
@@ -309,9 +323,17 @@ func TestNewRegistryIncludesImageHostPolicies(t *testing.T) {
 	}{
 		{tracker: "A4K", host: "onlyimage"},
 		{tracker: "BHD", host: "bhd"},
-		{tracker: "HDB", host: "hdb", disableWithoutRehost: true},
+		{
+			tracker:              "HDB",
+			host:                 "hdb",
+			disableWithoutRehost: true,
+		},
 		{tracker: "PTP", host: "passtheimage"},
-		{tracker: "THR", host: "thr", disableWithoutAPI: true},
+		{
+			tracker:           "THR",
+			host:              "thr",
+			disableWithoutAPI: true,
+		},
 		{tracker: "LST", conditionalHost: "lostimg"},
 		{tracker: "RF", conditionalHost: "reelflix"},
 	}

@@ -27,7 +27,14 @@ const flAuthResponseMaxBytes = 1 << 20
 var flAuthValidatorPattern = regexp.MustCompile(`name="validator"\s+value="([^"]+)"`)
 
 func (Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "FL", DisplayName: "FL", AuthKind: "cookies_login", SupportsCookieFile: true, SupportsLogin: true, SupportsAutoLogin: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          "FL",
+		DisplayName:        "FL",
+		AuthKind:           "cookies_login",
+		SupportsCookieFile: true,
+		SupportsLogin:      true,
+		SupportsAutoLogin:  true,
+	}
 }
 
 func (Definition) AuthSessionResolver() trackers.AuthSessionResolver { return resolveAuthSession }
@@ -52,7 +59,11 @@ func resolveAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath st
 		if loadErr == nil {
 			loadErr = cookies.ErrTrackerCookiesNotFound
 		}
-		return &trackerauth.AuthRequiredError{TrackerID: "FL", Reason: "cookies or username/password missing", Err: fmt.Errorf("trackers: FL cookies unavailable: %w", loadErr)}
+		return &trackerauth.AuthRequiredError{
+			TrackerID: "FL",
+			Reason:    "cookies or username/password missing",
+			Err:       fmt.Errorf("trackers: FL cookies unavailable: %w", loadErr),
+		}
 	}
 	return loginAuthSession(ctx, cfg, dbPath, baseURL)
 }
@@ -70,23 +81,51 @@ func validateAuthCookies(ctx context.Context, baseURL string, values []*http.Coo
 	}
 	resp, err := flAuthHTTPClient(nil).Do(req)
 	if err != nil {
-		return &trackerauth.ValidationError{TrackerID: "FL", Transient: true, Reason: "remote validation unavailable", Err: fmt.Errorf("trackers: FL session validation request: %w", err)}
+		return &trackerauth.ValidationError{
+			TrackerID: "FL",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       fmt.Errorf("trackers: FL session validation request: %w", err),
+		}
 	}
 	defer resp.Body.Close()
 	body, err := readFLAuthBody(resp)
 	if err != nil {
-		return &trackerauth.ValidationError{TrackerID: "FL", Transient: true, Reason: "remote validation unavailable", Err: err}
+		return &trackerauth.ValidationError{
+			TrackerID: "FL",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       err,
+		}
 	}
 	lower := strings.ToLower(string(body))
 	location := strings.ToLower(resp.Header.Get("Location"))
-	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(location, "login") || strings.Contains(lower, "login.php") || strings.Contains(lower, "name=\"username\"") || strings.Contains(lower, "name=\"password\"") {
-		return &trackerauth.ValidationError{TrackerID: "FL", ConfirmedInvalid: true, Reason: "stored session expired", Err: fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode)}
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(location, "login") ||
+		strings.Contains(lower, "login.php") ||
+		strings.Contains(lower, "name=\"username\"") ||
+		strings.Contains(lower, "name=\"password\"") {
+		return &trackerauth.ValidationError{
+			TrackerID:        "FL",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &trackerauth.ValidationError{TrackerID: "FL", Transient: true, Reason: "remote validation failed", Err: fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode)}
+		return &trackerauth.ValidationError{
+			TrackerID: "FL",
+			Transient: true,
+			Reason:    "remote validation failed",
+			Err:       fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if !strings.Contains(lower, "logout") {
-		return &trackerauth.ValidationError{TrackerID: "FL", ConfirmedInvalid: true, Reason: "stored session expired", Err: errors.New("trackers: FL logout marker not found")}
+		return &trackerauth.ValidationError{
+			TrackerID:        "FL",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              errors.New("trackers: FL logout marker not found"),
+		}
 	}
 	return nil
 }
@@ -117,7 +156,12 @@ func loginAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath stri
 	if len(match) < 2 {
 		return errors.New("trackers: FL validator token not found")
 	}
-	data := url.Values{"validator": {match[1]}, "username": {strings.TrimSpace(cfg.Username)}, "password": {strings.TrimSpace(cfg.Password)}, "unlock": {"1"}}
+	data := url.Values{
+		"validator": {match[1]},
+		"username":  {strings.TrimSpace(cfg.Username)},
+		"password":  {strings.TrimSpace(cfg.Password)},
+		"unlock":    {"1"},
+	}
 	loginReq, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+"/takelogin.php", strings.NewReader(data.Encode()))
 	if err != nil {
 		return fmt.Errorf("trackers: FL login request build: %w", err)
@@ -129,7 +173,12 @@ func loginAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath stri
 	}
 	defer loginResp.Body.Close()
 	if loginResp.StatusCode < 200 || loginResp.StatusCode >= 400 {
-		return &trackerauth.ValidationError{TrackerID: "FL", ConfirmedInvalid: true, Reason: "login failed", Err: fmt.Errorf("trackers: FL login failed status=%d", loginResp.StatusCode)}
+		return &trackerauth.ValidationError{
+			TrackerID:        "FL",
+			ConfirmedInvalid: true,
+			Reason:           "login failed",
+			Err:              fmt.Errorf("trackers: FL login failed status=%d", loginResp.StatusCode),
+		}
 	}
 	base, err := url.Parse(baseURL + "/")
 	if err != nil {
@@ -149,7 +198,11 @@ func loginAuthSession(ctx context.Context, cfg config.TrackerConfig, dbPath stri
 }
 
 func flAuthHTTPClient(jar http.CookieJar) *http.Client {
-	return &http.Client{Timeout: 30 * time.Second, Jar: jar, CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }}
+	return &http.Client{
+		Timeout:       30 * time.Second,
+		Jar:           jar,
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse },
+	}
 }
 
 func readFLAuthBody(resp *http.Response) ([]byte, error) {

@@ -158,7 +158,11 @@ func (s *Service) enrichTrackerDataPriority(
 				}
 			} else if !strings.EqualFold(assetSourceTracker, tracker) {
 				if s.logger != nil {
-					s.logger.Debugf("metadata: ignoring description/images from %s (source=%s)", strings.ToUpper(strings.TrimSpace(tracker)), assetSourceTracker)
+					s.logger.Debugf(
+						"metadata: ignoring description/images from %s (source=%s)",
+						strings.ToUpper(strings.TrimSpace(tracker)),
+						assetSourceTracker,
+					)
 				}
 				record.Description = ""
 				record.ImageURLs = nil
@@ -248,7 +252,11 @@ func (s *Service) enrichTrackerDataConcurrent(
 				}
 			} else if !strings.EqualFold(assetSourceTracker, outcome.tracker) {
 				if s.logger != nil {
-					s.logger.Debugf("metadata: ignoring description/images from %s (source=%s)", strings.ToUpper(strings.TrimSpace(outcome.tracker)), assetSourceTracker)
+					s.logger.Debugf(
+						"metadata: ignoring description/images from %s (source=%s)",
+						strings.ToUpper(strings.TrimSpace(outcome.tracker)),
+						assetSourceTracker,
+					)
 				}
 				outcome.record.Description = ""
 				outcome.record.ImageURLs = nil

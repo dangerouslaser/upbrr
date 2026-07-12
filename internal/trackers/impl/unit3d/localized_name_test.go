@@ -20,16 +20,24 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 			name: "Basic movie",
 			meta: api.PreparedMetadata{
 				ReleaseName: "Movie 2023 1080p WEB-DL DDP5.1 H.264-GRP",
-				Release:     api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
-				Tag:         "GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
+				Tag: "GRP",
 			},
 			want: "Movie 2023 1080p WEB-DL DDP5.1 H.264-GRP",
 		},
 		{
 			name: "Portuguese DUAL",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL H.264-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL H.264-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "GRP",
 			},
@@ -38,9 +46,13 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Custom tag with original group (same as internal)",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL H.264-CBR",
-				Filename:       "Movie.2023.1080p.WEB-DL.H.264-GRP.DUAL.mkv",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL H.264-CBR",
+				Filename:    "Movie.2023.1080p.WEB-DL.H.264-GRP.DUAL.mkv",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "CBR",
 			},
@@ -73,7 +85,11 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 			name: "TV year stripping",
 			meta: api.PreparedMetadata{
 				ReleaseName: "Show Series 2023 S01E01 1080p WEB-DL-GRP",
-				Release:     api.ReleaseInfo{Title: "Show Series", Year: 2023, Group: "GRP"},
+				Release: api.ReleaseInfo{
+					Title: "Show Series",
+					Year:  2023,
+					Group: "GRP",
+				},
 				ExternalIDs: api.ExternalIDs{Category: "TV"},
 				Tag:         "GRP",
 			},
@@ -83,9 +99,13 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 			name: "Anime year stripping",
 			meta: api.PreparedMetadata{
 				ReleaseName: "Anime Movie (2023) 1080p-GRP",
-				Release:     api.ReleaseInfo{Title: "Anime Movie", Year: 2023, Group: "GRP"},
-				Anime:       true,
-				Tag:         "GRP",
+				Release: api.ReleaseInfo{
+					Title: "Anime Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
+				Anime: true,
+				Tag:   "GRP",
 			},
 			want: "Anime Movie 1080p-GRP",
 		},
@@ -93,7 +113,11 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 			name: "Non-pt AKA removal (with spaces)",
 			meta: api.PreparedMetadata{
 				ReleaseName: "Title AKA Some AKA 2023 1080p-GRP",
-				Release:     api.ReleaseInfo{Title: "Title", Year: 2023, Group: "GRP"},
+				Release: api.ReleaseInfo{
+					Title: "Title",
+					Year:  2023,
+					Group: "GRP",
+				},
 				ExternalMetadata: api.ExternalMetadata{
 					TMDB: &api.TMDBMetadata{
 						OriginalLanguage: "en",
@@ -107,8 +131,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Portuguese MULTI",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL H.264-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL H.264-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese", "French"},
 				Tag:            "GRP",
 			},
@@ -117,8 +145,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Disc type bypass",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p BluRay REMUX AVC-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p BluRay REMUX AVC-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				DiscType:       "BDMV",
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "GRP",
@@ -128,9 +160,13 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Custom tag with original group from filename",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL-CBR",
-				Filename:       "Movie.2023.1080p.WEB-DL-ORIGGRP.DUAL.mkv",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "NEWGRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL-CBR",
+				Filename:    "Movie.2023.1080p.WEB-DL-ORIGGRP.DUAL.mkv",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "NEWGRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "CBR",
 			},
@@ -140,9 +176,13 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Custom tag and same group from filename",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL-CBR",
-				Filename:       "Movie.2023.1080p.WEB-DL-GRP.DUAL.mkv",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL-CBR",
+				Filename:    "Movie.2023.1080p.WEB-DL-GRP.DUAL.mkv",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "CBR",
 			},
@@ -153,15 +193,23 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 			name: "No group suffix",
 			meta: api.PreparedMetadata{
 				ReleaseName: "Movie 2023 1080p WEB-DL-NoGrp",
-				Release:     api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 			},
 			want: "Movie 2023 1080p WEB-DL-NoGroup",
 		},
 		{
 			name: "Blank audio entries with one usable language",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL H.264-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL H.264-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"", "Portuguese", "   "},
 				Tag:            "GRP",
 			},
@@ -170,8 +218,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Blank audio entries with two usable languages",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL H.264-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL H.264-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "", "Portuguese", "   "},
 				Tag:            "GRP",
 			},
@@ -180,8 +232,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Blank audio entries with three usable languages",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL H.264-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL H.264-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "", "Portuguese", "   ", "French"},
 				Tag:            "GRP",
 			},
@@ -190,9 +246,13 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Custom tag substring in title / source must not inject filename group",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "CBR Movie 2023 1080p WEB-DL H.264-GRP",
-				Filename:       "CBR.Movie.2023.1080p.WEB-DL-ORIGGRP.DUAL.mkv",
-				Release:        api.ReleaseInfo{Title: "CBR Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "CBR Movie 2023 1080p WEB-DL H.264-GRP",
+				Filename:    "CBR.Movie.2023.1080p.WEB-DL-ORIGGRP.DUAL.mkv",
+				Release: api.ReleaseInfo{
+					Title: "CBR Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "GRP",
 			},
@@ -202,9 +262,13 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Real configured custom suffix should still inject filename group",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie 2023 1080p WEB-DL H.264-CBR",
-				Filename:       "Movie.2023.1080p.WEB-DL-ORIGGRP.DUAL.mkv",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie 2023 1080p WEB-DL H.264-CBR",
+				Filename:    "Movie.2023.1080p.WEB-DL-ORIGGRP.DUAL.mkv",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "CBR",
 			},
@@ -214,8 +278,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Dubbed inputs with Portuguese replacement eligibility",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie Dubbed 2023 1080p WEB-DL-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie Dubbed 2023 1080p WEB-DL-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "GRP",
 			},
@@ -224,8 +292,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Dubbed inputs without Portuguese replacement eligibility",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie Dubbed 2023 1080p WEB-DL-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie Dubbed 2023 1080p WEB-DL-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English"},
 				Tag:            "GRP",
 			},
@@ -234,8 +306,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Dual-Audio inputs with Portuguese replacement eligibility",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie Dual-Audio 2023 1080p WEB-DL-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie Dual-Audio 2023 1080p WEB-DL-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English", "Portuguese"},
 				Tag:            "GRP",
 			},
@@ -244,8 +320,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Dual-Audio inputs without Portuguese replacement eligibility",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie Dual-Audio 2023 1080p WEB-DL-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie Dual-Audio 2023 1080p WEB-DL-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English"},
 				Tag:            "GRP",
 			},
@@ -254,8 +334,12 @@ func TestFormatLocalizedNamePortugueseConvention(t *testing.T) {
 		{
 			name: "Existing DD / DDP / AAC / FLAC normalization",
 			meta: api.PreparedMetadata{
-				ReleaseName:    "Movie DD+ 5.1 DD 5.1 AAC 2.0 FLAC 2.0-GRP",
-				Release:        api.ReleaseInfo{Title: "Movie", Year: 2023, Group: "GRP"},
+				ReleaseName: "Movie DD+ 5.1 DD 5.1 AAC 2.0 FLAC 2.0-GRP",
+				Release: api.ReleaseInfo{
+					Title: "Movie",
+					Year:  2023,
+					Group: "GRP",
+				},
 				AudioLanguages: []string{"English"},
 				Tag:            "GRP",
 			},

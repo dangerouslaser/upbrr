@@ -119,7 +119,11 @@ func TestEnrichTrackerDataStopsAfterFirstPriorityIDWinner(t *testing.T) {
 	repo := &fakeRepo{}
 	lookup := &stubTrackerLookup{
 		results: map[string]trackerdata.Result{
-			"ANT": {TMDBID: 123, IMDBID: 456, TrackerID: "101"},
+			"ANT": {
+				TMDBID:    123,
+				IMDBID:    456,
+				TrackerID: "101",
+			},
 			"HDB": {TMDBID: 999, TrackerID: "202"},
 		},
 		delays: map[string]time.Duration{
@@ -219,7 +223,11 @@ func TestEnrichTrackerDataUsesConcurrentWinnerWithoutClientTrackerIDs(t *testing
 	repo := &fakeRepo{}
 	lookup := &stubTrackerLookup{
 		results: map[string]trackerdata.Result{
-			"ANT": {TMDBID: 123, IMDBID: 456, TrackerID: "101"},
+			"ANT": {
+				TMDBID:    123,
+				IMDBID:    456,
+				TrackerID: "101",
+			},
 			"HDB": {TMDBID: 999, TrackerID: "202"},
 		},
 		delays: map[string]time.Duration{
@@ -552,7 +560,11 @@ func TestApplyTrackerClaimsDoesNotUseParsedSeasonFallbackForUploadIdentity(t *te
 		SourcePath: "/media/Example.Show.S02E03.mkv",
 		Trackers:   []string{"AITHER"},
 		Type:       "WEBDL",
-		Release:    api.ReleaseInfo{Resolution: "1080p", Season: 2, Episode: 3},
+		Release: api.ReleaseInfo{
+			Resolution: "1080p",
+			Season:     2,
+			Episode:    3,
+		},
 		ExternalIDs: api.ExternalIDs{
 			TMDBID:   4242,
 			Category: "TV",
@@ -853,7 +865,12 @@ func TestEnrichTrackerDataDeprioritizesBTNWhenKeepingImages(t *testing.T) {
 	repo := &fakeRepo{}
 	lookup := &stubTrackerLookup{
 		results: map[string]trackerdata.Result{
-			"BHD": {TMDBID: 513053, TrackerID: "513053", Description: "desc", Images: []bbcode.Image{{RawURL: "https://img.example/a.jpg"}}},
+			"BHD": {
+				TMDBID:      513053,
+				TrackerID:   "513053",
+				Description: "desc",
+				Images:      []bbcode.Image{{RawURL: "https://img.example/a.jpg"}},
+			},
 			"BTN": {IMDBID: 39050141, TrackerID: "2167358"},
 		},
 		delays: map[string]time.Duration{
@@ -946,7 +963,11 @@ func TestEnrichTrackerDataKeepsDescriptionFromSingleTracker(t *testing.T) {
 	lookup := &stubTrackerLookup{
 		results: map[string]trackerdata.Result{
 			"ANT": {Description: "ant description", TrackerID: "101"},
-			"HDB": {Description: "hdb description", IMDBID: 1554091, TrackerID: "202"},
+			"HDB": {
+				Description: "hdb description",
+				IMDBID:      1554091,
+				TrackerID:   "202",
+			},
 		},
 		delays: map[string]time.Duration{
 			"ANT": 5 * time.Millisecond,

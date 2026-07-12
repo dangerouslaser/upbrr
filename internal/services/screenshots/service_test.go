@@ -142,7 +142,12 @@ func TestPreviewFrameExcludesDVDMenuVOB(t *testing.T) {
 	t.Chdir(ffmpegRoot)
 
 	runner := &scriptedRunner{results: []CommandResult{{
-		Stdout:   testPNGBytes(t, color.RGBA{R: 16, G: 16, B: 16, A: 255}),
+		Stdout: testPNGBytes(t, color.RGBA{
+			R: 16,
+			G: 16,
+			B: 16,
+			A: 255,
+		}),
 		ExitCode: 0,
 	}}}
 	service := NewService(config.Config{}, api.NopLogger{}, root, runner)

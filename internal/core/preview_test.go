@@ -179,7 +179,11 @@ func TestBuildMetadataPreviewMapsAniListRichData(t *testing.T) {
 				Popularity:      12345,
 				CountryOfOrigin: "JP",
 				ExternalLinks: []api.AniListExternalLink{
-					{Site: "Official", URL: "https://example.invalid/anime", Language: "ja"},
+					{
+						Site:     "Official",
+						URL:      "https://example.invalid/anime",
+						Language: "ja",
+					},
 				},
 			},
 			UpdatedAt: updatedAt,

@@ -6,5 +6,10 @@ package hds
 import "github.com/autobrr/upbrr/pkg/api"
 
 func (Definition) AuthCapability() api.TrackerAuthCapability {
-	return api.TrackerAuthCapability{TrackerID: "HDS", DisplayName: "HDS", AuthKind: "cookies", SupportsCookieFile: true}
+	return api.TrackerAuthCapability{
+		TrackerID:          "HDS",
+		DisplayName:        "HDS",
+		AuthKind:           "cookies",
+		SupportsCookieFile: true,
+	}
 }

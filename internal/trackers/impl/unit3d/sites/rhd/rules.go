@@ -6,5 +6,10 @@ package rhd
 import "github.com/autobrr/upbrr/internal/trackers/ruletypes"
 
 func Rules() *ruletypes.RuleSet {
-	return &ruletypes.RuleSet{BlockAdult: true, MinResolution: "720p", Language: &ruletypes.LanguageRule{Languages: []string{"german", "ger", "de", "deu", "gsw"}, RequireAudio: true}, RequireSceneNFO: true}
+	return &ruletypes.RuleSet{
+		BlockAdult:      true,
+		MinResolution:   "720p",
+		Language:        &ruletypes.LanguageRule{Languages: []string{"german", "ger", "de", "deu", "gsw"}, RequireAudio: true},
+		RequireSceneNFO: true,
+	}
 }

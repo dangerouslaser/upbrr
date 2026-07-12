@@ -19,10 +19,25 @@ func Profile() unit3d.Profile {
 
 func typeID(meta api.PreparedMetadata) string {
 	name := strings.ToUpper(strings.TrimSpace(meta.ReleaseName))
-	for marker, id := range map[string]string{"DLMUX": "27", "BDMUX": "29", "WEBMUX": "26", "DVDMUX": "39", "BDRIP": "25"} {
+	for marker, id := range map[string]string{
+		"DLMUX":  "27",
+		"BDMUX":  "29",
+		"WEBMUX": "26",
+		"DVDMUX": "39",
+		"BDRIP":  "25",
+	} {
 		if strings.Contains(name, marker) {
 			return id
 		}
 	}
-	return map[string]string{"DISC": "1", "REMUX": "2", "WEBDL": "4", "WEBRIP": "5", "HDTV": "6", "ENCODE": "3", "DVDRIP": "24", "CINEMA-MD": "14"}[unit3d.InferType(meta)]
+	return map[string]string{
+		"DISC":      "1",
+		"REMUX":     "2",
+		"WEBDL":     "4",
+		"WEBRIP":    "5",
+		"HDTV":      "6",
+		"ENCODE":    "3",
+		"DVDRIP":    "24",
+		"CINEMA-MD": "14",
+	}[unit3d.InferType(meta)]
 }

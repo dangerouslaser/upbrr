@@ -112,9 +112,21 @@ func TestParseServeOptionsPortUsesDecimalSyntax(t *testing.T) {
 		args []string
 		want int
 	}{
-		{name: "separate value", args: []string{"--port", "080"}, want: 80},
-		{name: "equals value", args: []string{"--port=010"}, want: 10},
-		{name: "leading zero nine", args: []string{"--port", "009"}, want: 9},
+		{
+			name: "separate value",
+			args: []string{"--port", "080"},
+			want: 80,
+		},
+		{
+			name: "equals value",
+			args: []string{"--port=010"},
+			want: 10,
+		},
+		{
+			name: "leading zero nine",
+			args: []string{"--port", "009"},
+			want: 9,
+		},
 	}
 
 	for _, tc := range cases {
@@ -170,10 +182,30 @@ func TestApplyServeOptionOverridesAddressMatrix(t *testing.T) {
 		host string
 		port int
 	}{
-		{name: "host port", addr: "localhost:9090", host: "localhost", port: 9090},
-		{name: "colon port shorthand", addr: ":9091", host: "0.0.0.0", port: 9091},
-		{name: "bracketed ipv6", addr: "[::1]:9092", host: "::1", port: 9092},
-		{name: "scoped ipv6", addr: "[fe80::1%zone]:9093", host: "fe80::1%zone", port: 9093},
+		{
+			name: "host port",
+			addr: "localhost:9090",
+			host: "localhost",
+			port: 9090,
+		},
+		{
+			name: "colon port shorthand",
+			addr: ":9091",
+			host: "0.0.0.0",
+			port: 9091,
+		},
+		{
+			name: "bracketed ipv6",
+			addr: "[::1]:9092",
+			host: "::1",
+			port: 9092,
+		},
+		{
+			name: "scoped ipv6",
+			addr: "[fe80::1%zone]:9093",
+			host: "fe80::1%zone",
+			port: 9093,
+		},
 	}
 
 	for _, tc := range cases {
@@ -255,16 +287,32 @@ func TestApplyServeEnvOverridesRejectsEmptyBaseURL(t *testing.T) {
 func TestApplyServeOptionOverridesCLIOverridesEnv(t *testing.T) {
 	envCfg, err := applyServeEnvOverrides(
 		webserver.DefaultCLIConfig(),
-		serveEnvOptions{Host: "0.0.0.0", Port: "9090", BaseURL: "/env/"},
-		map[string]bool{"host": true, "port": true, "base-url": true},
+		serveEnvOptions{
+			Host:    "0.0.0.0",
+			Port:    "9090",
+			BaseURL: "/env/",
+		},
+		map[string]bool{
+			"host":     true,
+			"port":     true,
+			"base-url": true,
+		},
 	)
 	if err != nil {
 		t.Fatalf("apply serve env overrides: %v", err)
 	}
 	cfg, err := applyServeOptionOverrides(
 		envCfg,
-		serveOptions{Host: "127.0.0.1", Port: 9191, BaseURL: "/cli/"},
-		map[string]bool{"host": true, "port": true, "base-url": true},
+		serveOptions{
+			Host:    "127.0.0.1",
+			Port:    9191,
+			BaseURL: "/cli/",
+		},
+		map[string]bool{
+			"host":     true,
+			"port":     true,
+			"base-url": true,
+		},
 	)
 	if err != nil {
 		t.Fatalf("apply serve option overrides: %v", err)
@@ -349,15 +397,60 @@ func TestApplyServeOptionOverridesRejectsInvalidValues(t *testing.T) {
 		visited map[string]bool
 		want    string
 	}{
-		{name: "addr with host", opts: serveOptions{Addr: "localhost:7480", Host: "localhost"}, visited: map[string]bool{"addr": true, "host": true}, want: "--addr cannot be used"},
-		{name: "empty host", opts: serveOptions{Host: " "}, visited: map[string]bool{"host": true}, want: "--host cannot be empty"},
-		{name: "host includes port", opts: serveOptions{Host: "localhost:7480"}, visited: map[string]bool{"host": true}, want: "--host cannot include a port"},
-		{name: "scoped ipv6 hostport", opts: serveOptions{Host: "fe80::1%zone:9090"}, visited: map[string]bool{"host": true}, want: "--host cannot include a port"},
-		{name: "invalid port", opts: serveOptions{Port: 70000}, visited: map[string]bool{"port": true}, want: "invalid port"},
-		{name: "invalid addr", opts: serveOptions{Addr: "localhost"}, visited: map[string]bool{"addr": true}, want: "--addr must be host:port"},
-		{name: "unbracketed ipv6 addr", opts: serveOptions{Addr: "::1:9090"}, visited: map[string]bool{"addr": true}, want: "--addr must be host:port"},
-		{name: "empty base url", opts: serveOptions{BaseURL: " "}, visited: map[string]bool{"base-url": true}, want: "--base-url cannot be empty"},
-		{name: "invalid base url", opts: serveOptions{BaseURL: "javascript:alert(1)"}, visited: map[string]bool{"base-url": true}, want: "http or https"},
+		{
+			name:    "addr with host",
+			opts:    serveOptions{Addr: "localhost:7480", Host: "localhost"},
+			visited: map[string]bool{"addr": true, "host": true},
+			want:    "--addr cannot be used",
+		},
+		{
+			name:    "empty host",
+			opts:    serveOptions{Host: " "},
+			visited: map[string]bool{"host": true},
+			want:    "--host cannot be empty",
+		},
+		{
+			name:    "host includes port",
+			opts:    serveOptions{Host: "localhost:7480"},
+			visited: map[string]bool{"host": true},
+			want:    "--host cannot include a port",
+		},
+		{
+			name:    "scoped ipv6 hostport",
+			opts:    serveOptions{Host: "fe80::1%zone:9090"},
+			visited: map[string]bool{"host": true},
+			want:    "--host cannot include a port",
+		},
+		{
+			name:    "invalid port",
+			opts:    serveOptions{Port: 70000},
+			visited: map[string]bool{"port": true},
+			want:    "invalid port",
+		},
+		{
+			name:    "invalid addr",
+			opts:    serveOptions{Addr: "localhost"},
+			visited: map[string]bool{"addr": true},
+			want:    "--addr must be host:port",
+		},
+		{
+			name:    "unbracketed ipv6 addr",
+			opts:    serveOptions{Addr: "::1:9090"},
+			visited: map[string]bool{"addr": true},
+			want:    "--addr must be host:port",
+		},
+		{
+			name:    "empty base url",
+			opts:    serveOptions{BaseURL: " "},
+			visited: map[string]bool{"base-url": true},
+			want:    "--base-url cannot be empty",
+		},
+		{
+			name:    "invalid base url",
+			opts:    serveOptions{BaseURL: "javascript:alert(1)"},
+			visited: map[string]bool{"base-url": true},
+			want:    "http or https",
+		},
 	}
 
 	for _, tc := range cases {
@@ -378,11 +471,31 @@ func TestParseServeHostRejectsMalformedBrackets(t *testing.T) {
 		host string
 		want string
 	}{
-		{name: "leading bracket only", host: "[::1", want: "invalid bracket syntax"},
-		{name: "trailing bracket only", host: "::1]", want: "invalid bracket syntax"},
-		{name: "nested brackets", host: "[[::1]]", want: "invalid bracket syntax"},
-		{name: "empty brackets", host: "[]", want: "invalid bracket syntax"},
-		{name: "bracketed hostname", host: "[localhost]", want: "IPv6 literals"},
+		{
+			name: "leading bracket only",
+			host: "[::1",
+			want: "invalid bracket syntax",
+		},
+		{
+			name: "trailing bracket only",
+			host: "::1]",
+			want: "invalid bracket syntax",
+		},
+		{
+			name: "nested brackets",
+			host: "[[::1]]",
+			want: "invalid bracket syntax",
+		},
+		{
+			name: "empty brackets",
+			host: "[]",
+			want: "invalid bracket syntax",
+		},
+		{
+			name: "bracketed hostname",
+			host: "[localhost]",
+			want: "IPv6 literals",
+		},
 	}
 
 	for _, tc := range cases {
@@ -1048,8 +1161,16 @@ func TestPrintDryRunDetails(t *testing.T) {
 			entry: api.TrackerDryRunEntry{
 				Endpoint: "https://tracker.test/upload",
 				Files: []api.TrackerDryRunFile{
-					{Field: "torrent", Path: "C:\\Users\\Tester\\.upbrr\\tmp\\file.torrent", Present: true},
-					{Field: "nfo", Path: "", Present: false},
+					{
+						Field:   "torrent",
+						Path:    "C:\\Users\\Tester\\.upbrr\\tmp\\file.torrent",
+						Present: true,
+					},
+					{
+						Field:   "nfo",
+						Path:    "",
+						Present: false,
+					},
 				},
 				Payload: map[string]string{
 					"category":    "MOVIE",
@@ -1104,7 +1225,11 @@ func TestPrintDryRunDetails(t *testing.T) {
 						Title:    "BTN final upload payload after autofill",
 						Endpoint: "https://tracker.test/upload.php?api_key=secret-key",
 						Files: []api.TrackerDryRunFile{
-							{Field: "file_input", Path: "C:\\Users\\Tester\\.upbrr\\tmp\\file.torrent", Present: true},
+							{
+								Field:   "file_input",
+								Path:    "C:\\Users\\Tester\\.upbrr\\tmp\\file.torrent",
+								Present: true,
+							},
 						},
 						Payload: map[string]string{
 							"artist":       "Example Show",

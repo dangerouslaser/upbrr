@@ -73,7 +73,12 @@ func TestRunDVDMenuCaptureJobClassifiesCancellation(t *testing.T) {
 			return api.DVDMenuCaptureResult{}, ctx.Err()
 		},
 	}
-	job := &dvdMenuCaptureJob{id: "dvd-job-1", core: coreSvc, status: "queued", startedAt: time.Now().UTC()}
+	job := &dvdMenuCaptureJob{
+		id:        "dvd-job-1",
+		core:      coreSvc,
+		status:    "queued",
+		startedAt: time.Now().UTC(),
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
@@ -92,7 +97,12 @@ func TestRunDVDMenuCaptureJobRedactsFailureMessage(t *testing.T) {
 			return api.DVDMenuCaptureResult{}, errors.New("provider rejected api_key=secret-value")
 		},
 	}
-	job := &dvdMenuCaptureJob{id: "dvd-job-1", core: coreSvc, status: "queued", startedAt: time.Now().UTC()}
+	job := &dvdMenuCaptureJob{
+		id:        "dvd-job-1",
+		core:      coreSvc,
+		status:    "queued",
+		startedAt: time.Now().UTC(),
+	}
 
 	(&App{}).runDVDMenuCaptureJob(context.Background(), nil, job)
 	snapshot := buildDVDMenuCaptureSnapshot(job)
@@ -114,9 +124,21 @@ func TestPruneCompletedDVDMenuJobsKeepsNewestBoundedSet(t *testing.T) {
 		finishedAt:     now.Add(-3 * time.Minute),
 		retentionTimer: time.NewTimer(time.Hour),
 	}
-	middle := &dvdMenuCaptureJob{id: "middle", status: "failed", finishedAt: now.Add(-2 * time.Minute)}
-	newest := &dvdMenuCaptureJob{id: "newest", status: "canceled", finishedAt: now.Add(-time.Minute)}
-	running := &dvdMenuCaptureJob{id: "running", status: "running", startedAt: now}
+	middle := &dvdMenuCaptureJob{
+		id:         "middle",
+		status:     "failed",
+		finishedAt: now.Add(-2 * time.Minute),
+	}
+	newest := &dvdMenuCaptureJob{
+		id:         "newest",
+		status:     "canceled",
+		finishedAt: now.Add(-time.Minute),
+	}
+	running := &dvdMenuCaptureJob{
+		id:        "running",
+		status:    "running",
+		startedAt: now,
+	}
 	app := &App{dvdMenus: map[string]*dvdMenuCaptureJob{
 		oldest.id:  oldest,
 		middle.id:  middle,

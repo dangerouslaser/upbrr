@@ -16,7 +16,12 @@ func New() *Definition          { return &Definition{} }
 func (Definition) Name() string { return "SPD" }
 
 func (Definition) BannedGroupPolicy() *trackers.BannedGroupPolicy {
-	return &trackers.BannedGroupPolicy{DefaultEndpoint: "https://speedapp.io/api/torrent/release-group/blacklist", EndpointPath: "/api/torrent/release-group/blacklist", RequireAPIKey: true, RawAPIKeyFallback: true}
+	return &trackers.BannedGroupPolicy{
+		DefaultEndpoint:   "https://speedapp.io/api/torrent/release-group/blacklist",
+		EndpointPath:      "/api/torrent/release-group/blacklist",
+		RequireAPIKey:     true,
+		RawAPIKeyFallback: true,
+	}
 }
 
 func (Definition) Upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary, error) {

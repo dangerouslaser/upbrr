@@ -32,5 +32,12 @@ func typeID(meta api.PreparedMetadata) string {
 	if typeValue == "DVDRIP" {
 		return "8"
 	}
-	return map[string]string{"DISC": "1", "REMUX": "2", "WEBDL": "4", "WEBRIP": "5", "HDTV": "6", "ENCODE": "3"}[typeValue]
+	return map[string]string{
+		"DISC":   "1",
+		"REMUX":  "2",
+		"WEBDL":  "4",
+		"WEBRIP": "5",
+		"HDTV":   "6",
+		"ENCODE": "3",
+	}[typeValue]
 }

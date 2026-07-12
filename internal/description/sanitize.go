@@ -63,16 +63,30 @@ var allowedAttrs = map[string]map[string]bool{
 	"a":          {"href": true, "title": true},
 	"blockquote": {"style": true, "align": true},
 	"details":    {"class": true},
-	"div":        {"style": true, "class": true, "align": true},
+	"div": {
+		"style": true,
+		"class": true,
+		"align": true,
+	},
 	"figcaption": {"class": true},
 	"figure":     {"class": true},
-	"img":        {"src": true, "alt": true, "title": true, "class": true, "width": true},
-	"p":          {"style": true, "align": true},
-	"section":    {"class": true},
-	"span":       {"style": true, "class": true, "align": true},
-	"summary":    {"class": true},
-	"ul":         {"class": true},
-	"li":         {"class": true},
+	"img": {
+		"src":   true,
+		"alt":   true,
+		"title": true,
+		"class": true,
+		"width": true,
+	},
+	"p":       {"style": true, "align": true},
+	"section": {"class": true},
+	"span": {
+		"style": true,
+		"class": true,
+		"align": true,
+	},
+	"summary": {"class": true},
+	"ul":      {"class": true},
+	"li":      {"class": true},
 }
 
 func sanitizeHTML(input string) string {
@@ -112,7 +126,11 @@ func tryParseUnescapedHTML(input string) ([]*xhtml.Node, bool) {
 }
 
 func fragmentContext() *xhtml.Node {
-	return &xhtml.Node{Type: xhtml.ElementNode, Data: "div", DataAtom: xatom.Div}
+	return &xhtml.Node{
+		Type:     xhtml.ElementNode,
+		Data:     "div",
+		DataAtom: xatom.Div,
+	}
 }
 
 func hasElementNodes(nodes []*xhtml.Node) bool {

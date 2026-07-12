@@ -173,7 +173,12 @@ func (s *claimChecker) loadBTNClaimedTitles(ctx context.Context, cachePath strin
 		if len(cached) == 0 {
 			s.logger.Debugf("metadata: BTN claims cache miss path=%s", cachePath)
 		} else {
-			s.logger.Debugf("metadata: BTN claims cache stale path=%s age=%s ttl=%s", cachePath, time.Since(time.Unix(fetchedAt, 0)).Round(time.Second), cacheTTL)
+			s.logger.Debugf(
+				"metadata: BTN claims cache stale path=%s age=%s ttl=%s",
+				cachePath,
+				time.Since(time.Unix(fetchedAt, 0)).Round(time.Second),
+				cacheTTL,
+			)
 		}
 	}
 
@@ -803,7 +808,16 @@ func btnClaimWindowExpired(meta api.PreparedMetadata, graceHours int) (bool, int
 
 	var airedAt time.Time
 	if hasTime {
-		airedAt = time.Date(airedDateValue.Year(), airedDateValue.Month(), airedDateValue.Day(), airsTime.Hour(), airsTime.Minute(), airsTime.Second(), 0, location)
+		airedAt = time.Date(
+			airedDateValue.Year(),
+			airedDateValue.Month(),
+			airedDateValue.Day(),
+			airsTime.Hour(),
+			airsTime.Minute(),
+			airsTime.Second(),
+			0,
+			location,
+		)
 	} else {
 		airedAt = time.Date(airedDateValue.Year(), airedDateValue.Month(), airedDateValue.Day(), 0, 0, 0, 0, time.UTC)
 	}

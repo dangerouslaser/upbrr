@@ -16,14 +16,26 @@ func Profile() unit3d.Profile {
 	}
 }
 func typeID(meta api.PreparedMetadata) string {
-	value := map[string]string{"DISC": "1", "REMUX": "2", "ENCODE": "3", "WEBDL": "4", "WEBRIP": "5", "HDTV": "6"}[unit3d.InferType(meta)]
+	value := map[string]string{
+		"DISC":   "1",
+		"REMUX":  "2",
+		"ENCODE": "3",
+		"WEBDL":  "4",
+		"WEBRIP": "5",
+		"HDTV":   "6",
+	}[unit3d.InferType(meta)]
 	if value == "" {
 		return "3"
 	}
 	return value
 }
 func resolutionID(meta api.PreparedMetadata) string {
-	if value, ok := map[string]string{"4320p": "1", "2160p": "2", "1080p": "3", "1080i": "4"}[unit3d.Resolution(meta)]; ok {
+	if value, ok := map[string]string{
+		"4320p": "1",
+		"2160p": "2",
+		"1080p": "3",
+		"1080i": "4",
+	}[unit3d.Resolution(meta)]; ok {
 		return value
 	}
 	return "11"

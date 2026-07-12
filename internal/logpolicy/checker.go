@@ -364,11 +364,17 @@ func checkProjectLoggerPathSanitization(fset *token.FileSet, root string) ([]Vio
 		if logfFormatsThroughSanitizeMessage(fn.Body) {
 			return violations, nil
 		}
-		violations = append(violations, violationAt(fset, relPath, fn.Name.Pos(), "project logger logf must sanitize formatted messages with SanitizeMessage before output"))
+		violations = append(
+			violations,
+			violationAt(fset, relPath, fn.Name.Pos(), "project logger logf must sanitize formatted messages with SanitizeMessage before output"),
+		)
 		return violations, nil
 	}
 
-	violations = append(violations, violationAt(fset, relPath, file.Package, "project logger logf not found; logger output path sanitization cannot be verified"))
+	violations = append(
+		violations,
+		violationAt(fset, relPath, file.Package, "project logger logf not found; logger output path sanitization cannot be verified"),
+	)
 	return violations, nil
 }
 
@@ -393,7 +399,9 @@ func checkProjectLoggerURLPathPreservation(fset *token.FileSet, relPath string, 
 // checkProjectLoggerSecretRedaction guards the logger boundary shared by
 // console, file, buffered, and frontend-streamed output.
 func checkProjectLoggerSecretRedaction(fset *token.FileSet, relPath string, pos token.Pos, sanitize func(string) string) []Violation {
-	sanitized := sanitize(`tracker: request: Get "https://tracker.example/api/torrents/filter?api_token=policy-secret&name=Example.Release.2026.1080p-GRP": timeout`)
+	sanitized := sanitize(
+		`tracker: request: Get "https://tracker.example/api/torrents/filter?api_token=policy-secret&name=Example.Release.2026.1080p-GRP": timeout`,
+	)
 	if strings.Contains(sanitized, "policy-secret") || !strings.Contains(sanitized, "api_token=[REDACTED]") {
 		return []Violation{violationAt(fset, relPath, pos, "project logger sanitizer must redact secret-bearing request URLs")}
 	}
@@ -518,8 +526,12 @@ var (
 	// Frontend secret-output patterns scan complete TS/TSX test files so
 	// typed declarations, multiline matchers, and JSX attributes are covered.
 	frontendEncryptedEnvelopeDeclRe = regexp.MustCompile("\\b(?:const|let|var)\\s+([A-Za-z_$][\\w$]*)\\s*(?::[^=;]+)?=\\s*[\"'`]upbrr-enc:")
-	frontendDirectEnvelopeMatcherRe = regexp.MustCompile("\\.(?:toBe|toEqual|toStrictEqual|toContain|toMatch)\\s*\\(\\s*(?:[\"'`]upbrr-enc:|([A-Za-z_$][\\w$]*))")
-	frontendRawPayloadDOMRe         = regexp.MustCompile("(?s)(?:[\"']data-testid[\"']\\s*:\\s*[\"']payload[\"'][^;]*buildSavePayload\\s*\\(\\)|buildSavePayload\\s*\\(\\)[^;]*[\"']data-testid[\"']\\s*:\\s*[\"']payload[\"']|data-testid\\s*=\\s*(?:[\"']payload[\"']|\\{\\s*[\"']payload[\"']\\s*\\})[^;]*buildSavePayload\\s*\\(\\)|buildSavePayload\\s*\\(\\)[^;]*data-testid\\s*=\\s*(?:[\"']payload[\"']|\\{\\s*[\"']payload[\"']\\s*\\}))")
+	frontendDirectEnvelopeMatcherRe = regexp.MustCompile(
+		"\\.(?:toBe|toEqual|toStrictEqual|toContain|toMatch)\\s*\\(\\s*(?:[\"'`]upbrr-enc:|([A-Za-z_$][\\w$]*))",
+	)
+	frontendRawPayloadDOMRe = regexp.MustCompile(
+		"(?s)(?:[\"']data-testid[\"']\\s*:\\s*[\"']payload[\"'][^;]*buildSavePayload\\s*\\(\\)|buildSavePayload\\s*\\(\\)[^;]*[\"']data-testid[\"']\\s*:\\s*[\"']payload[\"']|data-testid\\s*=\\s*(?:[\"']payload[\"']|\\{\\s*[\"']payload[\"']\\s*\\})[^;]*buildSavePayload\\s*\\(\\)|buildSavePayload\\s*\\(\\)[^;]*data-testid\\s*=\\s*(?:[\"']payload[\"']|\\{\\s*[\"']payload[\"']\\s*\\}))",
+	)
 )
 
 // checkFrontendTestSensitiveMatchers scans frontend tests for assertions and DOM
@@ -668,10 +680,16 @@ func checkCLISensitiveOutputFile(fset *token.FileSet, root string, path string) 
 				violations = append(violations, violationAt(fset, relPath, arg.Pos(), "dry-run payload output must be redacted before printing"))
 			}
 			if containsDryRunFilePathExpr(arg, dryRunFileVars) && !isSafeDryRunOutputExpr(arg) {
-				violations = append(violations, violationAt(fset, relPath, arg.Pos(), "dry-run file path output must be reduced to a DB-relative or basename label before printing"))
+				violations = append(
+					violations,
+					violationAt(fset, relPath, arg.Pos(), "dry-run file path output must be reduced to a DB-relative or basename label before printing"),
+				)
 			}
 			if containsLocalPathOutputExpr(arg, localPathVars, aliases) && !isSafeLocalPathOutputExpr(arg) {
-				violations = append(violations, violationAt(fset, relPath, arg.Pos(), "local filesystem path output must be reduced to a stable path label before printing"))
+				violations = append(
+					violations,
+					violationAt(fset, relPath, arg.Pos(), "local filesystem path output must be reduced to a stable path label before printing"),
+				)
 			}
 		}
 		if strings.Contains(strings.ToLower(format), "endpoint:") {
@@ -821,14 +839,28 @@ func checkFile(fset *token.FileSet, root string, path string) ([]Violation, erro
 			importPath := aliases[packageName.Name]
 			if methods, found := disallowedStdlibCalls[importPath]; found {
 				if _, banned := methods[selector.Sel.Name]; banned {
-					appendLogpolicyViolation(fset, relPath, allows, &violations, selector.Sel.Pos(), fmt.Sprintf("use the project logger instead of %s.%s in internal packages", packageName.Name, selector.Sel.Name))
+					appendLogpolicyViolation(
+						fset,
+						relPath,
+						allows,
+						&violations,
+						selector.Sel.Pos(),
+						fmt.Sprintf("use the project logger instead of %s.%s in internal packages", packageName.Name, selector.Sel.Name),
+					)
 				}
 			}
 			if isTerminalStderrOutputCall(call, aliases) {
 				format := cliOutputFormat(call)
 				for _, arg := range fmtOutputArgs(call) {
 					if isUnsafeTerminalDiagnosticArg(format, arg, aliases) {
-						appendLogpolicyViolation(fset, relPath, allows, &violations, arg.Pos(), "terminal error/warning output must be sanitized before printing")
+						appendLogpolicyViolation(
+							fset,
+							relPath,
+							allows,
+							&violations,
+							arg.Pos(),
+							"terminal error/warning output must be sanitized before printing",
+						)
 					}
 				}
 			}
@@ -856,7 +888,14 @@ func checkFile(fset *token.FileSet, root string, path string) ([]Violation, erro
 		trimmed := strings.TrimSpace(format)
 		lowerFormat := strings.ToLower(trimmed)
 		if _, bare := bareFormats[trimmed]; bare {
-			appendLogpolicyViolation(fset, relPath, allows, &violations, firstArg.Pos(), selector.Sel.Name+" must include contextual text instead of logging a bare format string")
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				firstArg.Pos(),
+				selector.Sel.Name+" must include contextual text instead of logging a bare format string",
+			)
 		}
 		if selector.Sel.Name == "Infof" {
 			for _, message := range infoLevelHygieneViolations(lowerFormat, trimmed) {
@@ -903,7 +942,14 @@ func checkFile(fset *token.FileSet, root string, path string) ([]Violation, erro
 		if isAuthSensitiveFormat(lowerFormat) {
 			for _, arg := range call.Args[1:] {
 				if isRawErrorLikeExpr(arg) {
-					appendLogpolicyViolation(fset, relPath, allows, &violations, arg.Pos(), "auth-sensitive log arguments must not include raw errors; log a stable incident code and operator-safe context instead")
+					appendLogpolicyViolation(
+						fset,
+						relPath,
+						allows,
+						&violations,
+						arg.Pos(),
+						"auth-sensitive log arguments must not include raw errors; log a stable incident code and operator-safe context instead",
+					)
 				}
 			}
 		}
@@ -1055,7 +1101,14 @@ func checkSensitiveOutputFile(fset *token.FileSet, root string, path string, tes
 
 // checkSensitiveOutputParsed runs the sensitive-value visitor after import
 // aliases and inline allow directives have been collected for the file.
-func checkSensitiveOutputParsed(fset *token.FileSet, relPath string, file *ast.File, aliases map[string]string, allows map[int]*logpolicyAllow, testFile bool) []Violation {
+func checkSensitiveOutputParsed(
+	fset *token.FileSet,
+	relPath string,
+	file *ast.File,
+	aliases map[string]string,
+	allows map[int]*logpolicyAllow,
+	testFile bool,
+) []Violation {
 	violations := make([]Violation, 0)
 	for _, decl := range file.Decls {
 		fn, ok := decl.(*ast.FuncDecl)
@@ -1103,7 +1156,14 @@ func checkDiagnosticArtifactWrites(fset *token.FileSet, relPath string, file *as
 			if isSafeSensitiveOutputExpr(call.Args[1]) || isSanitizedBindingBefore(fn.Body, call.Args[1], call.Pos()) {
 				return true
 			}
-			appendLogpolicyViolation(fset, relPath, allows, &violations, call.Args[1].Pos(), "diagnostic response artifacts must redact body/payload data before writing")
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				call.Args[1].Pos(),
+				"diagnostic response artifacts must redact body/payload data before writing",
+			)
 			return true
 		})
 	}
@@ -1233,7 +1293,14 @@ func checkFrontendVisibleRawErrors(fset *token.FileSet, relPath string, file *as
 				if rhsIndex >= len(typed.Rhs) || isShareableMessageSanitizedExpr(typed.Rhs[rhsIndex]) || !isRawErrorLikeExpr(typed.Rhs[rhsIndex]) {
 					continue
 				}
-				appendLogpolicyViolation(fset, relPath, allows, &violations, typed.Rhs[rhsIndex].Pos(), "frontend-visible error/message fields must redact raw errors before assignment")
+				appendLogpolicyViolation(
+					fset,
+					relPath,
+					allows,
+					&violations,
+					typed.Rhs[rhsIndex].Pos(),
+					"frontend-visible error/message fields must redact raw errors before assignment",
+				)
 			}
 		case *ast.CompositeLit:
 			if !isAPICompositeType(typed.Type, aliases) {
@@ -1248,7 +1315,14 @@ func checkFrontendVisibleRawErrors(fset *token.FileSet, relPath string, file *as
 				if !ok || !isFrontendDiagnosticField(key.Name) || isShareableMessageSanitizedExpr(field.Value) || !isRawErrorLikeExpr(field.Value) {
 					continue
 				}
-				appendLogpolicyViolation(fset, relPath, allows, &violations, field.Value.Pos(), "frontend-visible API error/message fields must redact raw errors before serialization")
+				appendLogpolicyViolation(
+					fset,
+					relPath,
+					allows,
+					&violations,
+					field.Value.Pos(),
+					"frontend-visible API error/message fields must redact raw errors before serialization",
+				)
 			}
 		case *ast.CallExpr:
 			if !bridgeFile || callName(typed) != "failTrackerUploadJob" || len(typed.Args) < 3 {
@@ -1258,7 +1332,14 @@ func checkFrontendVisibleRawErrors(fset *token.FileSet, relPath string, file *as
 			if isShareableMessageSanitizedExpr(message) || !isRawErrorLikeExpr(message) {
 				return true
 			}
-			appendLogpolicyViolation(fset, relPath, allows, &violations, message.Pos(), "frontend-visible upload job failure messages must redact raw errors before state update and event emission")
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				message.Pos(),
+				"frontend-visible upload job failure messages must redact raw errors before state update and event emission",
+			)
 		}
 		return true
 	})
@@ -1318,7 +1399,14 @@ func checkDryRunPreviewSerialization(fset *token.FileSet, relPath string, file *
 			if !ok || key.Name != "Trackers" || isEmptyCompositeLiteral(field.Value) || isSanitizedDryRunEntriesExpr(field.Value) {
 				continue
 			}
-			appendLogpolicyViolation(fset, relPath, allows, &violations, field.Value.Pos(), "TrackerDryRunPreview entries must be sanitized before bridge/API serialization")
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				field.Value.Pos(),
+				"TrackerDryRunPreview entries must be sanitized before bridge/API serialization",
+			)
 		}
 		return true
 	})
@@ -1353,7 +1441,14 @@ func isSanitizedDryRunEntriesExpr(expr ast.Expr) bool {
 // checkResponseJSONParseErrorOutput flags parse errors from raw JSON envelope
 // fields when they reach returned errors, logs, HTTP responses, or terminal
 // output without a recognized redaction wrapper.
-func checkResponseJSONParseErrorOutput(fset *token.FileSet, relPath string, aliases map[string]string, allows map[int]*logpolicyAllow, violations *[]Violation, body *ast.BlockStmt) {
+func checkResponseJSONParseErrorOutput(
+	fset *token.FileSet,
+	relPath string,
+	aliases map[string]string,
+	allows map[int]*logpolicyAllow,
+	violations *[]Violation,
+	body *ast.BlockStmt,
+) {
 	rawMessageMaps := responseJSONRawMessageMapVars(body, aliases)
 	ast.Inspect(body, func(node ast.Node) bool {
 		if node == nil {
@@ -1856,7 +1951,11 @@ func sinkArgs(exprs []ast.Expr, forceRawError bool) []sinkArg {
 func sinkArgsWithFormat(exprs []ast.Expr, forceRawError bool, format string) []sinkArg {
 	result := make([]sinkArg, 0, len(exprs))
 	for _, expr := range exprs {
-		result = append(result, sinkArg{expr: expr, forceRawError: forceRawError && isRawErrorLikeExpr(expr), format: format})
+		result = append(result, sinkArg{
+			expr:          expr,
+			forceRawError: forceRawError && isRawErrorLikeExpr(expr),
+			format:        format,
+		})
 	}
 	return result
 }
@@ -1941,7 +2040,15 @@ func checkTestHandlerFatalCalls(fset *token.FileSet, root string, path string) (
 				return true
 			}
 			if isTestingFatalCall(call) {
-				violations = append(violations, violationAt(fset, relPath, call.Pos(), "httptest handlers must not call t.Fatal/t.Fatalf from the request goroutine; record the error and assert from the test goroutine"))
+				violations = append(
+					violations,
+					violationAt(
+						fset,
+						relPath,
+						call.Pos(),
+						"httptest handlers must not call t.Fatal/t.Fatalf from the request goroutine; record the error and assert from the test goroutine",
+					),
+				)
 			}
 			return true
 		})
@@ -2037,7 +2144,10 @@ func checkUnboundedResponseBodyUses(fset *token.FileSet, relPath string, file *a
 				markUnboundedBodyAssignments(typed, aliases, unboundedBodyVars)
 			case *ast.CallExpr:
 				if isUnboundedResponseBodyUseCall(typed, unboundedBodyVars) {
-					violations = append(violations, violationAt(fset, relPath, typed.Pos(), "response body reads used for logs/errors/artifacts must be bounded before redaction"))
+					violations = append(
+						violations,
+						violationAt(fset, relPath, typed.Pos(), "response body reads used for logs/errors/artifacts must be bounded before redaction"),
+					)
 				}
 			}
 			return true
@@ -2597,7 +2707,21 @@ func isConfigOwnerTestPath(relPath string) bool {
 
 func isSensitiveConfigFieldName(name string) bool {
 	switch canonicalSensitiveKeyName(name) {
-	case "apikey", "apitoken", "password", "passkey", "token", "authkey", "anticsrftoken", "otpuri", "tmdbapi", "sonarrapikey", "radarrapikey", "qbitpass", "rsskey", "torrentpass", "secret":
+	case "apikey",
+		"apitoken",
+		"password",
+		"passkey",
+		"token",
+		"authkey",
+		"anticsrftoken",
+		"otpuri",
+		"tmdbapi",
+		"sonarrapikey",
+		"radarrapikey",
+		"qbitpass",
+		"rsskey",
+		"torrentpass",
+		"secret":
 		return true
 	default:
 		return false
@@ -3496,7 +3620,14 @@ func checkUnit3DQueryCredentialAuth(fset *token.FileSet, relPath string, file *a
 		}
 		switch canonicalSensitiveKeyName(key) {
 		case "apikey", "apitoken", "authkey", "passkey", "token":
-			appendLogpolicyViolation(fset, relPath, allows, &violations, call.Args[0].Pos(), "Unit3D API credentials must use Authorization: Bearer instead of URL query parameters")
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				call.Args[0].Pos(),
+				"Unit3D API credentials must use Authorization: Bearer instead of URL query parameters",
+			)
 		}
 		return true
 	})
@@ -3537,7 +3668,9 @@ func isRawBodyStringConversion(expr ast.Expr) bool {
 
 func isSuspiciousBodyName(name string) bool {
 	lower := strings.ToLower(strings.TrimSpace(name))
-	return lower == "body" || lower == "payload" || strings.HasSuffix(lower, "body") || strings.HasSuffix(lower, "payload") || strings.Contains(lower, "bodystr") || strings.Contains(lower, "bodypreview")
+	return lower == "body" || lower == "payload" || strings.HasSuffix(lower, "body") || strings.HasSuffix(lower, "payload") ||
+		strings.Contains(lower, "bodystr") ||
+		strings.Contains(lower, "bodypreview")
 }
 
 func isSensitiveUsernameName(name string) bool {
@@ -3754,13 +3887,39 @@ func checkWorkflowLoggingCoverage(fset *token.FileSet, relPath string, file *ast
 			continue
 		}
 		if summary.explicitLoggerParam && summary.totalLoggerCalls() == 0 {
-			appendLogpolicyViolation(fset, relPath, allows, &violations, fn.Name.Pos(), "workflow-like function has no logging; add Infof/Warnf/Debugf/Tracef progress or decision logs, or add logpolicy allow with reason")
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				fn.Name.Pos(),
+				"workflow-like function has no logging; add Infof/Warnf/Debugf/Tracef progress or decision logs, or add logpolicy allow with reason",
+			)
 		}
-		if enableWorkflowBranchErrorCheck && summary.enforceWorkflowLogChecks() && summary.errorReturns > 0 && summary.contextualErrorReturns < summary.errorReturns && summary.totalLoggerCalls() > 0 && summary.loggerCalls["Warnf"] == 0 && summary.loggerCalls["Errorf"] == 0 {
-			appendLogpolicyViolation(fset, relPath, allows, &violations, fn.Name.Pos(), "workflow-like function has branch error returns without Warnf/Errorf blocked-outcome logging")
+		if enableWorkflowBranchErrorCheck && summary.enforceWorkflowLogChecks() && summary.errorReturns > 0 &&
+			summary.contextualErrorReturns < summary.errorReturns &&
+			summary.totalLoggerCalls() > 0 &&
+			summary.loggerCalls["Warnf"] == 0 &&
+			summary.loggerCalls["Errorf"] == 0 {
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				fn.Name.Pos(),
+				"workflow-like function has branch error returns without Warnf/Errorf blocked-outcome logging",
+			)
 		}
-		if enableWorkflowDecisionCheck && summary.enforceWorkflowLogChecks() && summary.decisionSignals > 0 && summary.totalLoggerCalls() > 0 && summary.decisionLoggerCalls == 0 {
-			appendLogpolicyViolation(fset, relPath, allows, &violations, fn.Name.Pos(), "workflow decision lacks logging; add stable decision/state context at Debugf, Infof, or Warnf")
+		if enableWorkflowDecisionCheck && summary.enforceWorkflowLogChecks() && summary.decisionSignals > 0 && summary.totalLoggerCalls() > 0 &&
+			summary.decisionLoggerCalls == 0 {
+			appendLogpolicyViolation(
+				fset,
+				relPath,
+				allows,
+				&violations,
+				fn.Name.Pos(),
+				"workflow decision lacks logging; add stable decision/state context at Debugf, Infof, or Warnf",
+			)
 		}
 		for _, logViolation := range summary.logViolations {
 			appendLogpolicyViolation(fset, relPath, allows, &violations, logViolation.pos, logViolation.message)
@@ -4021,7 +4180,29 @@ func isWorkflowOperationCall(call *ast.CallExpr) bool {
 	if name == "" {
 		return false
 	}
-	signals := []string{"upload", "search", "check", "validate", "load", "save", "read", "write", "request", "post", "get", "create", "build", "resolve", "migrate", "discover", "generate", "submit", "start", "run", "decode"}
+	signals := []string{
+		"upload",
+		"search",
+		"check",
+		"validate",
+		"load",
+		"save",
+		"read",
+		"write",
+		"request",
+		"post",
+		"get",
+		"create",
+		"build",
+		"resolve",
+		"migrate",
+		"discover",
+		"generate",
+		"submit",
+		"start",
+		"run",
+		"decode",
+	}
 	for _, signal := range signals {
 		if strings.Contains(name, signal) {
 			return true
@@ -4052,7 +4233,22 @@ func containsDecisionSignal(node ast.Node) bool {
 
 func isDecisionSignal(value string) bool {
 	lower := strings.ToLower(value)
-	signals := []string{"skip", "selected", "ready", "blocked", "fallback", "retry", "prompt", "dryrun", "dry_run", "unattended", "auth", "dupe", "rule", "decision"}
+	signals := []string{
+		"skip",
+		"selected",
+		"ready",
+		"blocked",
+		"fallback",
+		"retry",
+		"prompt",
+		"dryrun",
+		"dry_run",
+		"unattended",
+		"auth",
+		"dupe",
+		"rule",
+		"decision",
+	}
 	for _, signal := range signals {
 		if strings.Contains(lower, signal) {
 			return true
@@ -4063,7 +4259,40 @@ func isDecisionSignal(value string) bool {
 
 func isWorkflowName(name string) bool {
 	lower := strings.ToLower(name)
-	signals := []string{"run", "upload", "prepare", "process", "execute", "build", "resolve", "search", "validate", "check", "import", "export", "save", "load", "migrate", "discover", "generate", "create", "submit", "start", "tracker", "torrent", "dupe", "auth", "metadata", "screenshot", "image", "client", "queue", "config", "database", "runtime"}
+	signals := []string{
+		"run",
+		"upload",
+		"prepare",
+		"process",
+		"execute",
+		"build",
+		"resolve",
+		"search",
+		"validate",
+		"check",
+		"import",
+		"export",
+		"save",
+		"load",
+		"migrate",
+		"discover",
+		"generate",
+		"create",
+		"submit",
+		"start",
+		"tracker",
+		"torrent",
+		"dupe",
+		"auth",
+		"metadata",
+		"screenshot",
+		"image",
+		"client",
+		"queue",
+		"config",
+		"database",
+		"runtime",
+	}
 	for _, signal := range signals {
 		if strings.Contains(lower, signal) {
 			return true

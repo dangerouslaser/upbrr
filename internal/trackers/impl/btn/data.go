@@ -24,7 +24,11 @@ type dataLookup struct {
 }
 
 func (d *Definition) NewDataLookup(cfg config.Config, httpClient *http.Client, _ api.Logger) trackers.DataLookup {
-	return &dataLookup{cfg: cfg, http: httpClient, endpoint: "https://api.broadcasthe.net/"}
+	return &dataLookup{
+		cfg:      cfg,
+		http:     httpClient,
+		endpoint: "https://api.broadcasthe.net/",
+	}
 }
 
 func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest) (datatypes.Result, error) {
@@ -33,7 +37,12 @@ func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest)
 	if len(token) < 25 || trackerID == "" {
 		return datatypes.Result{}, nil
 	}
-	payload := map[string]any{"jsonrpc": "2.0", "id": "ua-go", "method": "getTorrentsSearch", "params": []any{token, map[string]any{"id": trackerID}, 50}}
+	payload := map[string]any{
+		"jsonrpc": "2.0",
+		"id":      "ua-go",
+		"method":  "getTorrentsSearch",
+		"params":  []any{token, map[string]any{"id": trackerID}, 50},
+	}
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return datatypes.Result{}, fmt.Errorf("trackerdata: btn encode request: %w", err)
@@ -64,7 +73,11 @@ func (l *dataLookup) Lookup(ctx context.Context, req trackers.DataLookupRequest)
 		return datatypes.Result{}, nil
 	}
 	for _, value := range decoded.Result.Torrents {
-		return datatypes.Result{TrackerID: trackerID, IMDBID: int(btnInt(value["ImdbID"])), TVDBID: int(btnInt(value["TvdbID"]))}, nil
+		return datatypes.Result{
+			TrackerID: trackerID,
+			IMDBID:    int(btnInt(value["ImdbID"])),
+			TVDBID:    int(btnInt(value["TvdbID"])),
+		}, nil
 	}
 	return datatypes.Result{}, nil
 }

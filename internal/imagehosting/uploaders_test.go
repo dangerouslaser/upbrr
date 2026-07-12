@@ -186,7 +186,11 @@ func TestHDBUploadBatchChunksLargeUploads(t *testing.T) {
 		}),
 	}
 
-	uploader := &hdbUploader{username: "user", passkey: "pass", client: client}
+	uploader := &hdbUploader{
+		username: "user",
+		passkey:  "pass",
+		client:   client,
+	}
 	results, err := uploader.UploadBatchWithName(context.Background(), paths, "release")
 	if err != nil {
 		t.Fatalf("UploadBatchWithName returned error: %v", err)

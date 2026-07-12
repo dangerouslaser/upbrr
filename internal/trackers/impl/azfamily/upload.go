@@ -33,7 +33,12 @@ func upload(ctx context.Context, site siteDefinition, req trackers.UploadRequest
 		return api.UploadSummary{}, err
 	}
 	if media.Missing || strings.TrimSpace(media.MediaCode) == "" {
-		return api.UploadSummary{}, fmt.Errorf("trackers: %s media missing from tracker database; add it on-site at %s/add/%s then retry", site.Name, site.BaseURL, categorySlug(req.Meta))
+		return api.UploadSummary{}, fmt.Errorf(
+			"trackers: %s media missing from tracker database; add it on-site at %s/add/%s then retry",
+			site.Name,
+			site.BaseURL,
+			categorySlug(req.Meta),
+		)
 	}
 	if requests, err := searchRequests(ctx, site, state, req.Meta); err == nil && len(requests) > 0 && req.Logger != nil {
 		req.Logger.Infof("trackers: %s matched %d open request(s)", site.Name, len(requests))
@@ -152,7 +157,13 @@ func buildUploadDryRun(ctx context.Context, site siteDefinition, req trackers.Up
 	}, nil
 }
 
-func createTask(ctx context.Context, site siteDefinition, state sessionState, req trackers.UploadRequest, mediaCode, fileInfo, torrentPath string) (taskInfo, error) {
+func createTask(
+	ctx context.Context,
+	site siteDefinition,
+	state sessionState,
+	req trackers.UploadRequest,
+	mediaCode, fileInfo, torrentPath string,
+) (taskInfo, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	for key, value := range map[string]string{

@@ -62,9 +62,17 @@ func resolveARSessionForTrackerAuth(ctx context.Context, cfg config.TrackerConfi
 			return validationErr
 		}
 	case err != nil && !errors.Is(err, cookies.ErrTrackerCookiesNotFound):
-		return &AuthRequiredError{TrackerID: "AR", Reason: "cookies unavailable", Err: cookieLoadError("AR", err)}
+		return &AuthRequiredError{
+			TrackerID: "AR",
+			Reason:    "cookies unavailable",
+			Err:       cookieLoadError("AR", err),
+		}
 	case !hasLoginCredentials(cfg):
-		return &AuthRequiredError{TrackerID: "AR", Reason: "cookies missing", Err: cookieLoadError("AR", err)}
+		return &AuthRequiredError{
+			TrackerID: "AR",
+			Reason:    "cookies missing",
+			Err:       cookieLoadError("AR", err),
+		}
 	}
 
 	return loginARForTrackerAuth(ctx, cfg, dbPath, baseURL)
@@ -80,21 +88,46 @@ func validateARStoredCookies(ctx context.Context, baseURL string, values []*http
 
 	resp, err := noRedirectHTTPClient().Do(req)
 	if err != nil {
-		return &ValidationError{TrackerID: "AR", Transient: true, Reason: "remote validation unavailable", Err: fmt.Errorf("trackers: AR session validation request: %w", err)}
+		return &ValidationError{
+			TrackerID: "AR",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       fmt.Errorf("trackers: AR session validation request: %w", err),
+		}
 	}
 	defer resp.Body.Close()
 	body, readErr := readTrackerAuthResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 300)
 	if readErr != nil {
-		return &ValidationError{TrackerID: "AR", Transient: true, Reason: "remote validation unavailable", Err: readErr}
+		return &ValidationError{
+			TrackerID: "AR",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       readErr,
+		}
 	}
 	if isLoginRedirect(resp) || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || arLooksLoggedOut(string(body)) {
-		return &ValidationError{TrackerID: "AR", ConfirmedInvalid: true, Reason: "stored session expired", Err: fmt.Errorf("trackers: AR session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID:        "AR",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              fmt.Errorf("trackers: AR session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &ValidationError{TrackerID: "AR", Transient: true, Reason: "remote validation failed", Err: fmt.Errorf("trackers: AR session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID: "AR",
+			Transient: true,
+			Reason:    "remote validation failed",
+			Err:       fmt.Errorf("trackers: AR session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if !arLooksLoggedIn(string(body)) {
-		return &ValidationError{TrackerID: "AR", ConfirmedInvalid: true, Reason: "stored session expired", Err: errors.New("trackers: AR logout marker not found")}
+		return &ValidationError{
+			TrackerID:        "AR",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              errors.New("trackers: AR logout marker not found"),
+		}
 	}
 	return nil
 }
@@ -120,15 +153,30 @@ func loginARForTrackerAuth(ctx context.Context, cfg config.TrackerConfig, dbPath
 	loginReq.Header.Set("User-Agent", "upbrr")
 	loginResp, err := client.Do(loginReq)
 	if err != nil {
-		return &ValidationError{TrackerID: "AR", Transient: true, Reason: "remote login unavailable", Err: fmt.Errorf("trackers: AR login request: %w", err)}
+		return &ValidationError{
+			TrackerID: "AR",
+			Transient: true,
+			Reason:    "remote login unavailable",
+			Err:       fmt.Errorf("trackers: AR login request: %w", err),
+		}
 	}
 	defer loginResp.Body.Close()
 	body, readErr := readTrackerAuthResponseBody(loginResp, loginResp.StatusCode >= 200 && loginResp.StatusCode < 400)
 	if readErr != nil {
-		return &ValidationError{TrackerID: "AR", Transient: true, Reason: "remote login unavailable", Err: readErr}
+		return &ValidationError{
+			TrackerID: "AR",
+			Transient: true,
+			Reason:    "remote login unavailable",
+			Err:       readErr,
+		}
 	}
 	if loginResp.StatusCode < 200 || loginResp.StatusCode >= 400 || arLooksLoggedOut(string(body)) {
-		return &ValidationError{TrackerID: "AR", ConfirmedInvalid: true, Reason: "login failed", Err: fmt.Errorf("trackers: AR login failed status=%d", loginResp.StatusCode)}
+		return &ValidationError{
+			TrackerID:        "AR",
+			ConfirmedInvalid: true,
+			Reason:           "login failed",
+			Err:              fmt.Errorf("trackers: AR login failed status=%d", loginResp.StatusCode),
+		}
 	}
 
 	base, err := url.Parse(strings.TrimRight(baseURL, "/") + "/")
@@ -137,7 +185,12 @@ func loginARForTrackerAuth(ctx context.Context, cfg config.TrackerConfig, dbPath
 	}
 	loginCookies := jar.Cookies(base)
 	if len(usableHTTPCookies(loginCookies)) == 0 {
-		return &ValidationError{TrackerID: "AR", ConfirmedInvalid: true, Reason: "login failed", Err: errors.New("trackers: AR login returned no usable cookies")}
+		return &ValidationError{
+			TrackerID:        "AR",
+			ConfirmedInvalid: true,
+			Reason:           "login failed",
+			Err:              errors.New("trackers: AR login returned no usable cookies"),
+		}
 	}
 	if validationErr := validateARStoredCookies(ctx, baseURL, loginCookies); validationErr != nil {
 		return validationErr
@@ -163,7 +216,11 @@ func resolveFFSessionForTrackerAuth(ctx context.Context, cfg config.TrackerConfi
 		}
 	}
 	if !hasLoginCredentials(cfg) {
-		return &AuthRequiredError{TrackerID: "FF", Reason: "cookies or username/password missing", Err: cookieLoadError("FF", err)}
+		return &AuthRequiredError{
+			TrackerID: "FF",
+			Reason:    "cookies or username/password missing",
+			Err:       cookieLoadError("FF", err),
+		}
 	}
 	return loginFFForTrackerAuth(ctx, cfg, dbPath, baseURL)
 }
@@ -181,21 +238,46 @@ func validateFFStoredCookies(ctx context.Context, baseURL string, values []*http
 
 	resp, err := noRedirectHTTPClient().Do(req)
 	if err != nil {
-		return &ValidationError{TrackerID: "FF", Transient: true, Reason: "remote validation unavailable", Err: fmt.Errorf("trackers: FF session validation request: %w", err)}
+		return &ValidationError{
+			TrackerID: "FF",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       fmt.Errorf("trackers: FF session validation request: %w", err),
+		}
 	}
 	defer resp.Body.Close()
 	body, readErr := readTrackerAuthResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 300)
 	if readErr != nil {
-		return &ValidationError{TrackerID: "FF", Transient: true, Reason: "remote validation unavailable", Err: readErr}
+		return &ValidationError{
+			TrackerID: "FF",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       readErr,
+		}
 	}
 	if isLoginRedirect(resp) || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || ffLooksLoggedOut(string(body)) {
-		return &ValidationError{TrackerID: "FF", ConfirmedInvalid: true, Reason: "stored session expired", Err: fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID:        "FF",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &ValidationError{TrackerID: "FF", Transient: true, Reason: "remote validation failed", Err: fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID: "FF",
+			Transient: true,
+			Reason:    "remote validation failed",
+			Err:       fmt.Errorf("trackers: FF session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if !ffLooksLoggedIn(string(body)) {
-		return &ValidationError{TrackerID: "FF", ConfirmedInvalid: true, Reason: "stored session expired", Err: errors.New("trackers: FF login marker not found")}
+		return &ValidationError{
+			TrackerID:        "FF",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              errors.New("trackers: FF login marker not found"),
+		}
 	}
 	return nil
 }
@@ -220,7 +302,12 @@ func loginFFForTrackerAuth(ctx context.Context, cfg config.TrackerConfig, dbPath
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusFound {
-		return &ValidationError{TrackerID: "FF", ConfirmedInvalid: true, Reason: "login failed", Err: fmt.Errorf("trackers: FF login failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID:        "FF",
+			ConfirmedInvalid: true,
+			Reason:           "login failed",
+			Err:              fmt.Errorf("trackers: FF login failed status=%d", resp.StatusCode),
+		}
 	}
 	loginCookies := usableHTTPCookies(resp.Cookies())
 	if len(loginCookies) == 0 {
@@ -250,7 +337,11 @@ func resolveFLSessionForTrackerAuth(ctx context.Context, cfg config.TrackerConfi
 		}
 	}
 	if !hasLoginCredentials(cfg) {
-		return &AuthRequiredError{TrackerID: "FL", Reason: "cookies or username/password missing", Err: cookieLoadError("FL", err)}
+		return &AuthRequiredError{
+			TrackerID: "FL",
+			Reason:    "cookies or username/password missing",
+			Err:       cookieLoadError("FL", err),
+		}
 	}
 	return loginFLForTrackerAuth(ctx, cfg, dbPath, baseURL)
 }
@@ -267,21 +358,46 @@ func validateFLStoredCookies(ctx context.Context, baseURL string, values []*http
 
 	resp, err := noRedirectHTTPClient().Do(req)
 	if err != nil {
-		return &ValidationError{TrackerID: "FL", Transient: true, Reason: "remote validation unavailable", Err: fmt.Errorf("trackers: FL session validation request: %w", err)}
+		return &ValidationError{
+			TrackerID: "FL",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       fmt.Errorf("trackers: FL session validation request: %w", err),
+		}
 	}
 	defer resp.Body.Close()
 	body, readErr := readTrackerAuthResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 300)
 	if readErr != nil {
-		return &ValidationError{TrackerID: "FL", Transient: true, Reason: "remote validation unavailable", Err: readErr}
+		return &ValidationError{
+			TrackerID: "FL",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       readErr,
+		}
 	}
 	if isLoginRedirect(resp) || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || flLooksLoggedOut(string(body)) {
-		return &ValidationError{TrackerID: "FL", ConfirmedInvalid: true, Reason: "stored session expired", Err: fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID:        "FL",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &ValidationError{TrackerID: "FL", Transient: true, Reason: "remote validation failed", Err: fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID: "FL",
+			Transient: true,
+			Reason:    "remote validation failed",
+			Err:       fmt.Errorf("trackers: FL session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if !flLooksLoggedIn(string(body)) {
-		return &ValidationError{TrackerID: "FL", ConfirmedInvalid: true, Reason: "stored session expired", Err: errors.New("trackers: FL logout marker not found")}
+		return &ValidationError{
+			TrackerID:        "FL",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              errors.New("trackers: FL logout marker not found"),
+		}
 	}
 	return nil
 }
@@ -327,7 +443,12 @@ func loginFLForTrackerAuth(ctx context.Context, cfg config.TrackerConfig, dbPath
 	}
 	defer loginResp.Body.Close()
 	if loginResp.StatusCode < 200 || loginResp.StatusCode >= 400 {
-		return &ValidationError{TrackerID: "FL", ConfirmedInvalid: true, Reason: "login failed", Err: fmt.Errorf("trackers: FL login failed status=%d", loginResp.StatusCode)}
+		return &ValidationError{
+			TrackerID:        "FL",
+			ConfirmedInvalid: true,
+			Reason:           "login failed",
+			Err:              fmt.Errorf("trackers: FL login failed status=%d", loginResp.StatusCode),
+		}
 	}
 	base, err := url.Parse(strings.TrimRight(baseURL, "/") + "/")
 	if err != nil {
@@ -349,11 +470,19 @@ func loginFLForTrackerAuth(ctx context.Context, cfg config.TrackerConfig, dbPath
 // transient so a temporary tracker outage does not discard auth material.
 func resolveHDBStoredSessionForTrackerAuth(ctx context.Context, cfg config.TrackerConfig, dbPath string, _ api.TrackerAuthLoginRequest) error {
 	if strings.TrimSpace(cfg.Username) == "" || strings.TrimSpace(cfg.Passkey) == "" {
-		return &AuthRequiredError{TrackerID: "HDB", Reason: "username/passkey missing", Err: errors.New("trackers: HDB missing username/passkey")}
+		return &AuthRequiredError{
+			TrackerID: "HDB",
+			Reason:    "username/passkey missing",
+			Err:       errors.New("trackers: HDB missing username/passkey"),
+		}
 	}
 	values, err := cookies.LoadTrackerHTTPCookies(ctx, dbPath, "HDB", "hdbits.org")
 	if err != nil || len(values) == 0 {
-		return &AuthRequiredError{TrackerID: "HDB", Reason: "cookies missing", Err: cookieLoadError("HDB", err)}
+		return &AuthRequiredError{
+			TrackerID: "HDB",
+			Reason:    "cookies missing",
+			Err:       cookieLoadError("HDB", err),
+		}
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, joinAuthURL(resolveAuthBaseURL(cfg, hdbDefaultBaseURL), hdbUploadPath), nil)
 	if err != nil {
@@ -364,21 +493,46 @@ func resolveHDBStoredSessionForTrackerAuth(ctx context.Context, cfg config.Track
 
 	resp, err := noRedirectHTTPClient().Do(req)
 	if err != nil {
-		return &ValidationError{TrackerID: "HDB", Transient: true, Reason: "remote validation unavailable", Err: fmt.Errorf("trackers: HDB session validation request: %w", err)}
+		return &ValidationError{
+			TrackerID: "HDB",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       fmt.Errorf("trackers: HDB session validation request: %w", err),
+		}
 	}
 	defer resp.Body.Close()
 	body, readErr := readTrackerAuthResponseBody(resp, resp.StatusCode >= 200 && resp.StatusCode < 300)
 	if readErr != nil {
-		return &ValidationError{TrackerID: "HDB", Transient: true, Reason: "remote validation unavailable", Err: readErr}
+		return &ValidationError{
+			TrackerID: "HDB",
+			Transient: true,
+			Reason:    "remote validation unavailable",
+			Err:       readErr,
+		}
 	}
 	if isLoginRedirect(resp) || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || hdbLooksLoggedOut(string(body)) {
-		return &ValidationError{TrackerID: "HDB", ConfirmedInvalid: true, Reason: "stored session expired", Err: fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID:        "HDB",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &ValidationError{TrackerID: "HDB", Transient: true, Reason: "remote validation failed", Err: fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode)}
+		return &ValidationError{
+			TrackerID: "HDB",
+			Transient: true,
+			Reason:    "remote validation failed",
+			Err:       fmt.Errorf("trackers: HDB session validation failed status=%d", resp.StatusCode),
+		}
 	}
 	if !hdbLooksLikeUploadPage(string(body)) {
-		return &ValidationError{TrackerID: "HDB", ConfirmedInvalid: true, Reason: "stored session expired", Err: errors.New("trackers: HDB upload marker not found")}
+		return &ValidationError{
+			TrackerID:        "HDB",
+			ConfirmedInvalid: true,
+			Reason:           "stored session expired",
+			Err:              errors.New("trackers: HDB upload marker not found"),
+		}
 	}
 	return nil
 }

@@ -118,7 +118,11 @@ func orderedServiceAliases(services map[string]string) []serviceAlias {
 		if len(tokens) == 0 {
 			continue
 		}
-		aliases = append(aliases, serviceAlias{name: name, service: service, tokens: tokens})
+		aliases = append(aliases, serviceAlias{
+			name:    name,
+			service: service,
+			tokens:  tokens,
+		})
 	}
 	sort.Slice(aliases, func(i, j int) bool {
 		iWeight := serviceAliasTokenWeight(aliases[i])

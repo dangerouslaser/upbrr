@@ -110,7 +110,11 @@ func TestUploadSuccess(t *testing.T) {
 			MediaInfoTextPath: mediaInfoPath,
 			ExternalIDs:       api.ExternalIDs{Category: "MOVIE", IMDBID: 123},
 			ReleaseName:       "Movie.2024.1080p.WEB-DL.x265-GRP",
-			Release:           api.ReleaseInfo{Title: "Movie", Year: 2024, Resolution: "1080p"},
+			Release: api.ReleaseInfo{
+				Title:      "Movie",
+				Year:       2024,
+				Resolution: "1080p",
+			},
 			Type:              "WEBDL",
 			Container:         "mkv",
 			AudioLanguages:    []string{"English"},

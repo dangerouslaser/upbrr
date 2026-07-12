@@ -70,7 +70,13 @@ func (c *Client) Lookup(
 ) (Result, error) {
 	normalized := strings.ToUpper(strings.TrimSpace(tracker))
 	if lookup, ok := c.lookups[normalized]; ok {
-		result, err := lookup.Lookup(ctx, trackers.DataLookupRequest{TrackerID: trackerID, Meta: meta, SearchName: searchFileName, OnlyID: onlyID, KeepImages: keepImages})
+		result, err := lookup.Lookup(ctx, trackers.DataLookupRequest{
+			TrackerID:  trackerID,
+			Meta:       meta,
+			SearchName: searchFileName,
+			OnlyID:     onlyID,
+			KeepImages: keepImages,
+		})
 		if err != nil {
 			return Result{}, fmt.Errorf("trackerdata: %s lookup: %w", normalized, err)
 		}

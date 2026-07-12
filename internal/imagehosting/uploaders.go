@@ -50,22 +50,34 @@ const maxResponseBodyPreviewBytes int64 = 64 * 1024
 func newUploaderRegistry(cfg config.Config, client *http.Client) map[string]uploader {
 	client = httpclient.CloneWithTimeout(client, httpclient.UploadTimeout)
 	return map[string]uploader{
-		"imgbb":        &imgbbUploader{apiKey: cfg.ImageHosting.ImgBBAPI, client: client},
-		"imgbox":       &imgboxUploader{client: client},
-		"hdb":          &hdbUploader{username: cfg.Trackers.Trackers["HDB"].Username, passkey: cfg.Trackers.Trackers["HDB"].Passkey, client: client},
-		"pixhost":      &pixhostUploader{client: client},
-		"lensdump":     &lensdumpUploader{apiKey: cfg.ImageHosting.LensdumpAPI, client: client},
-		"lostimg":      &lostimgUploader{apiKey: cfg.ImageHosting.LostimgAPI, client: client},
-		"ptscreens":    &ptScreensUploader{apiKey: cfg.ImageHosting.PTScreensAPI, client: client},
-		"onlyimage":    &onlyImageUploader{apiKey: cfg.ImageHosting.OnlyImageAPI, client: client},
-		"dalexni":      &dalexniUploader{apiKey: cfg.ImageHosting.DalexniAPI, client: client},
-		"zipline":      &ziplineUploader{apiKey: cfg.ImageHosting.ZiplineAPIKey, url: cfg.ImageHosting.ZiplineURL, client: client},
+		"imgbb":  &imgbbUploader{apiKey: cfg.ImageHosting.ImgBBAPI, client: client},
+		"imgbox": &imgboxUploader{client: client},
+		"hdb": &hdbUploader{
+			username: cfg.Trackers.Trackers["HDB"].Username,
+			passkey:  cfg.Trackers.Trackers["HDB"].Passkey,
+			client:   client,
+		},
+		"pixhost":   &pixhostUploader{client: client},
+		"lensdump":  &lensdumpUploader{apiKey: cfg.ImageHosting.LensdumpAPI, client: client},
+		"lostimg":   &lostimgUploader{apiKey: cfg.ImageHosting.LostimgAPI, client: client},
+		"ptscreens": &ptScreensUploader{apiKey: cfg.ImageHosting.PTScreensAPI, client: client},
+		"onlyimage": &onlyImageUploader{apiKey: cfg.ImageHosting.OnlyImageAPI, client: client},
+		"dalexni":   &dalexniUploader{apiKey: cfg.ImageHosting.DalexniAPI, client: client},
+		"zipline": &ziplineUploader{
+			apiKey: cfg.ImageHosting.ZiplineAPIKey,
+			url:    cfg.ImageHosting.ZiplineURL,
+			client: client,
+		},
 		"passtheimage": &passTheImageUploader{apiKey: cfg.ImageHosting.PassTheImageAPI, client: client},
 		"reelflix":     &reelflixUploader{apiKey: cfg.Trackers.Trackers["RF"].ImgAPI, client: client},
 		"seedpool_cdn": &seedpoolUploader{apiKey: cfg.ImageHosting.SeedpoolCDNAPI, client: client},
-		"sharex":       &shareXUploader{apiKey: cfg.ImageHosting.ShareXAPIKey, url: cfg.ImageHosting.ShareXURL, client: client},
-		"thr":          &thrUploader{apiKey: cfg.Trackers.Trackers["THR"].ImgAPI, client: client},
-		"utppm":        &utppmUploader{apiKey: cfg.ImageHosting.UTPPMAPI, client: client},
+		"sharex": &shareXUploader{
+			apiKey: cfg.ImageHosting.ShareXAPIKey,
+			url:    cfg.ImageHosting.ShareXURL,
+			client: client,
+		},
+		"thr":   &thrUploader{apiKey: cfg.Trackers.Trackers["THR"].ImgAPI, client: client},
+		"utppm": &utppmUploader{apiKey: cfg.ImageHosting.UTPPMAPI, client: client},
 	}
 }
 
@@ -758,7 +770,11 @@ func (u *thrUploader) Upload(ctx context.Context, imagePath string) (uploadResul
 		}
 		return uploadResult{}, fmt.Errorf("thr upload failed: %s", message)
 	}
-	return uploadResult{ImgURL: imageURL, RawURL: imageURL, WebURL: imageURL}, nil
+	return uploadResult{
+		ImgURL: imageURL,
+		RawURL: imageURL,
+		WebURL: imageURL,
+	}, nil
 }
 
 type lostimgUploader struct {
@@ -830,7 +846,11 @@ func (u *lostimgUploader) uploadBatch(ctx context.Context, imagePaths []string) 
 		if imageURL == "" {
 			return nil, errors.New("lostimg upload returned empty image URL")
 		}
-		results = append(results, uploadResult{ImgURL: imageURL, RawURL: imageURL, WebURL: imageURL})
+		results = append(results, uploadResult{
+			ImgURL: imageURL,
+			RawURL: imageURL,
+			WebURL: imageURL,
+		})
 	}
 	return results, nil
 }
@@ -867,7 +887,11 @@ func (u *pixhostUploader) Upload(ctx context.Context, imagePath string) (uploadR
 	rawURL := strings.ReplaceAll(response.ThumbnailURL, "https://t", "https://img")
 	rawURL = strings.ReplaceAll(rawURL, "/thumbs/", "/images/")
 
-	return uploadResult{ImgURL: response.ThumbnailURL, RawURL: rawURL, WebURL: response.ShowURL}, nil
+	return uploadResult{
+		ImgURL: response.ThumbnailURL,
+		RawURL: rawURL,
+		WebURL: response.ShowURL,
+	}, nil
 }
 
 type ziplineUploader struct {
@@ -911,7 +935,11 @@ func (u *ziplineUploader) Upload(ctx context.Context, imagePath string) (uploadR
 	}
 	rawURL := strings.Replace(urlValue, "/u/", "/r/", 1)
 
-	return uploadResult{ImgURL: urlValue, RawURL: rawURL, WebURL: rawURL}, nil
+	return uploadResult{
+		ImgURL: urlValue,
+		RawURL: rawURL,
+		WebURL: rawURL,
+	}, nil
 }
 
 type passTheImageUploader struct {
@@ -1067,7 +1095,11 @@ func (u *seedpoolUploader) Upload(ctx context.Context, imagePath string) (upload
 		imgURL = file.URL
 	}
 
-	return uploadResult{ImgURL: imgURL, RawURL: file.URL, WebURL: file.URL}, nil
+	return uploadResult{
+		ImgURL: imgURL,
+		RawURL: file.URL,
+		WebURL: file.URL,
+	}, nil
 }
 
 type shareXUploader struct {
@@ -1120,7 +1152,11 @@ func (u *shareXUploader) Upload(ctx context.Context, imagePath string) (uploadRe
 		return uploadResult{}, fmt.Errorf("sharex upload failed: %s", message)
 	}
 
-	return uploadResult{ImgURL: link, RawURL: link, WebURL: link}, nil
+	return uploadResult{
+		ImgURL: link,
+		RawURL: link,
+		WebURL: link,
+	}, nil
 }
 
 func postForm(ctx context.Context, client *http.Client, target string, data url.Values, headers map[string]string) ([]byte, int, error) {
@@ -1144,11 +1180,26 @@ func postForm(ctx context.Context, client *http.Client, target string, data url.
 	return body, resp.StatusCode, nil
 }
 
-func postMultipart(ctx context.Context, client *http.Client, target string, fields map[string]string, fileField string, filePath string, headers map[string]string) ([]byte, int, error) {
+func postMultipart(
+	ctx context.Context,
+	client *http.Client,
+	target string,
+	fields map[string]string,
+	fileField string,
+	filePath string,
+	headers map[string]string,
+) ([]byte, int, error) {
 	return postMultipartWithFields(ctx, client, target, fields, map[string]string{fileField: filePath}, headers)
 }
 
-func postMultipartWithFields(ctx context.Context, client *http.Client, target string, fields map[string]string, fileFields map[string]string, headers map[string]string) ([]byte, int, error) {
+func postMultipartWithFields(
+	ctx context.Context,
+	client *http.Client,
+	target string,
+	fields map[string]string,
+	fileFields map[string]string,
+	headers map[string]string,
+) ([]byte, int, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fieldKeys := make([]string, 0, len(fields))
@@ -1211,7 +1262,14 @@ func postMultipartWithFields(ctx context.Context, client *http.Client, target st
 	return bodyBytes, resp.StatusCode, nil
 }
 
-func postMultipartRepeatedFileField(ctx context.Context, client *http.Client, target string, fileField string, filePaths []string, headers map[string]string) ([]byte, int, error) {
+func postMultipartRepeatedFileField(
+	ctx context.Context,
+	client *http.Client,
+	target string,
+	fileField string,
+	filePaths []string,
+	headers map[string]string,
+) ([]byte, int, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	for _, filePath := range filePaths {

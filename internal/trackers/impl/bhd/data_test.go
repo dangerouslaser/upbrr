@@ -23,7 +23,16 @@ func TestDataLookup(t *testing.T) {
 			http.NotFound(w, r)
 			return
 		}
-		_ = json.NewEncoder(w).Encode(map[string]any{"status_code": 1, "success": true, "results": []any{map[string]any{"id": "99", "imdb_id": "tt1234567", "tmdb_id": "movie/765", "description": "hello\n[url=https://pixhost.to/full/example][img]https://pixhost.to/example.png[/img][/url]"}}})
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"status_code": 1,
+			"success":     true,
+			"results": []any{map[string]any{
+				"id":          "99",
+				"imdb_id":     "tt1234567",
+				"tmdb_id":     "movie/765",
+				"description": "hello\n[url=https://pixhost.to/full/example][img]https://pixhost.to/example.png[/img][/url]",
+			}},
+		})
 	}))
 	defer server.Close()
 
@@ -33,7 +42,11 @@ func TestDataLookup(t *testing.T) {
 		t.Fatal("expected BHD data lookup")
 	}
 	lookup.baseURL = server.URL + "/bhd"
-	result, err := lookup.Lookup(context.Background(), trackers.DataLookupRequest{Meta: api.PreparedMetadata{SourcePath: "/tmp/release"}, SearchName: "release.mkv", KeepImages: true})
+	result, err := lookup.Lookup(context.Background(), trackers.DataLookupRequest{
+		Meta:       api.PreparedMetadata{SourcePath: "/tmp/release"},
+		SearchName: "release.mkv",
+		KeepImages: true,
+	})
 	if err != nil {
 		t.Fatalf("lookup: %v", err)
 	}

@@ -377,11 +377,36 @@ func TestCZTHandlerSearchRemoteFailuresReturnErrors(t *testing.T) {
 		body       string
 		wantError  string
 	}{
-		{name: "non 2xx", statusCode: http.StatusUnauthorized, body: `{"error":"bad auth"}`, wantError: "HTTP status 401"},
-		{name: "auth object", statusCode: http.StatusOK, body: `{"error":"bad auth"}`, wantError: "unexpected response shape"},
-		{name: "null", statusCode: http.StatusOK, body: `null`, wantError: "empty response"},
-		{name: "scalar", statusCode: http.StatusOK, body: `"ok"`, wantError: "unexpected response shape"},
-		{name: "malformed", statusCode: http.StatusOK, body: `{`, wantError: "decode JSON GET response"},
+		{
+			name:       "non 2xx",
+			statusCode: http.StatusUnauthorized,
+			body:       `{"error":"bad auth"}`,
+			wantError:  "HTTP status 401",
+		},
+		{
+			name:       "auth object",
+			statusCode: http.StatusOK,
+			body:       `{"error":"bad auth"}`,
+			wantError:  "unexpected response shape",
+		},
+		{
+			name:       "null",
+			statusCode: http.StatusOK,
+			body:       `null`,
+			wantError:  "empty response",
+		},
+		{
+			name:       "scalar",
+			statusCode: http.StatusOK,
+			body:       `"ok"`,
+			wantError:  "unexpected response shape",
+		},
+		{
+			name:       "malformed",
+			statusCode: http.StatusOK,
+			body:       `{`,
+			wantError:  "decode JSON GET response",
+		},
 	}
 
 	for _, tc := range tests {

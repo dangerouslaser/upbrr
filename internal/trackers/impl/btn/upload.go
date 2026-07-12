@@ -65,6 +65,7 @@ var (
 	btnIMDBEpisodePattern = regexp.MustCompile(`(?i)(?:^|\bE|episode\s*)(\d{1,4})(?:\b|$)`)
 	// btnCountryMap maps normalized BTN country option labels and exact
 	// metadata-source country codes to BTN's country select values.
+	//literalpolicy:allow aliases are grouped by BTN country value
 	btnCountryMap = map[string]string{
 		"se": "1", "swe": "1", "sweden": "1",
 		"us": "2", "usa": "2", "united states": "2", "united states of america": "2",
@@ -321,7 +322,11 @@ func upload(ctx context.Context, req trackers.UploadRequest) (api.UploadSummary,
 		if !matched && groupID == "" && torrentID == "" {
 			failurePath, _ := commonhttp.WriteFailureArtifact(req.Meta, req.AppConfig.MainSettings.DBPath, "BTN", "upload-failure", responsePreview, ".html")
 			if failurePath != "" {
-				return api.UploadSummary{}, fmt.Errorf("%w failure=%s", commonhttp.UploadHTTPErrorWithURL("BTN", resp.StatusCode, finalURL, responsePreview), failurePath)
+				return api.UploadSummary{}, fmt.Errorf(
+					"%w failure=%s",
+					commonhttp.UploadHTTPErrorWithURL("BTN", resp.StatusCode, finalURL, responsePreview),
+					failurePath,
+				)
 			}
 			return api.UploadSummary{}, commonhttp.UploadHTTPErrorWithURL("BTN", resp.StatusCode, finalURL, responsePreview)
 		}
@@ -692,7 +697,8 @@ func validateBTNClientSession(ctx context.Context, client *http.Client, baseURL 
 		return fmt.Errorf("trackers: BTN read upload auth response: %w", readErr)
 	}
 	bodyText := string(body)
-	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(finalPath, "login") || btnLoggedOutPage(bodyText) {
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || strings.Contains(finalPath, "login") ||
+		btnLoggedOutPage(bodyText) {
 		return fmt.Errorf("%w: login required", errBTNSessionConfirmedInvalid)
 	}
 	if resp.StatusCode >= 500 {
@@ -1154,10 +1160,25 @@ func buildAlbumDesc(meta api.PreparedMetadata, fields map[string]string) string 
 		return desc
 	}
 	tvdb := meta.ExternalMetadata.TVDB
-	overview := metautil.FirstNonEmptyTrimmed(preferredBTNTVDBOverview(tvdb), preferredBTNIMDBOverview(meta.ExternalMetadata.IMDB), strings.TrimSpace(meta.EpisodeOverview))
-	aired := metautil.FirstNonEmptyTrimmed(btnTVDBEpisodeAired(tvdb), btnIMDBEpisodeAired(meta), strings.TrimSpace(meta.TVDBAiredDate), strings.TrimSpace(meta.DailyEpisodeDate), "TBA")
+	overview := metautil.FirstNonEmptyTrimmed(
+		preferredBTNTVDBOverview(tvdb),
+		preferredBTNIMDBOverview(meta.ExternalMetadata.IMDB),
+		strings.TrimSpace(meta.EpisodeOverview),
+	)
+	aired := metautil.FirstNonEmptyTrimmed(
+		btnTVDBEpisodeAired(tvdb),
+		btnIMDBEpisodeAired(meta),
+		strings.TrimSpace(meta.TVDBAiredDate),
+		strings.TrimSpace(meta.DailyEpisodeDate),
+		"TBA",
+	)
 	season, episode := resolveBTNTVSeasonEpisode(meta)
-	episodeTitle := metautil.FirstNonEmptyTrimmed(preferredBTNTVDBEpisodeTitle(tvdb), preferredBTNIMDBEpisodeTitle(meta), strings.TrimSpace(meta.EpisodeTitle), "TBA")
+	episodeTitle := metautil.FirstNonEmptyTrimmed(
+		preferredBTNTVDBEpisodeTitle(tvdb),
+		preferredBTNIMDBEpisodeTitle(meta),
+		strings.TrimSpace(meta.EpisodeTitle),
+		"TBA",
+	)
 	return formatBTNEpisodeAlbumDesc([]api.TVDBEpisodeMetadata{{
 		SeasonNumber:    season,
 		EpisodeNumber:   episode,
@@ -1607,7 +1628,11 @@ func resolveBTNDryRunFiles(meta api.PreparedMetadata, torrentPath string) []api.
 		Present: strings.TrimSpace(torrentPath) != "",
 	}}
 	if nfoPath := resolveBTNSceneNFOPath(meta); nfoPath != "" {
-		files = append(files, api.TrackerDryRunFile{Field: "nfo", Path: nfoPath, Present: true})
+		files = append(files, api.TrackerDryRunFile{
+			Field:   "nfo",
+			Path:    nfoPath,
+			Present: true,
+		})
 	}
 	return files
 }
@@ -1709,7 +1734,13 @@ type btnUploadIntermediateResult struct {
 // resolveBTNUploadIntermediatePage handles BTN's post-upload warning page that
 // requires continuing to the canonical torrent page before the final torrent id
 // is available. It returns handled=false for ordinary upload responses.
-func resolveBTNUploadIntermediatePage(ctx context.Context, client *http.Client, baseURL string, currentURL string, body []byte) (btnUploadIntermediateResult, bool, error) {
+func resolveBTNUploadIntermediatePage(
+	ctx context.Context,
+	client *http.Client,
+	baseURL string,
+	currentURL string,
+	body []byte,
+) (btnUploadIntermediateResult, bool, error) {
 	if !isBTNUploadIntermediatePage(body) {
 		return btnUploadIntermediateResult{}, false, nil
 	}
@@ -1999,7 +2030,14 @@ func consumeBTNJSONDelim(dec *json.Decoder, want json.Delim) error {
 // API, validates the returned DownloadURL, and writes the fetched bencoded
 // torrent to outputPath. The selected BTN torrent and group ids are returned
 // so upload summaries reflect the torrent that was actually downloaded.
-func resolveAndDownloadViaAPI(ctx context.Context, apiURL string, apiToken string, req trackers.UploadRequest, groupID string, outputPath string) (string, string, error) {
+func resolveAndDownloadViaAPI(
+	ctx context.Context,
+	apiURL string,
+	apiToken string,
+	req trackers.UploadRequest,
+	groupID string,
+	outputPath string,
+) (string, string, error) {
 	if strings.TrimSpace(apiToken) == "" {
 		return "", "", errors.New("trackers: BTN api token missing for torrent resolution")
 	}
@@ -2152,7 +2190,12 @@ func setBTNCookies(jar http.CookieJar, baseURL string, values map[string]string)
 	jarCookies := make([]*http.Cookie, 0, len(values))
 	for name, value := range values {
 		// #nosec G124 -- Outbound tracker jar cookie mirrors configured BTN session values.
-		jarCookies = append(jarCookies, &http.Cookie{Name: name, Value: value, Domain: parsed.Hostname(), Path: "/"})
+		jarCookies = append(jarCookies, &http.Cookie{
+			Name:   name,
+			Value:  value,
+			Domain: parsed.Hostname(),
+			Path:   "/",
+		})
 	}
 	jar.SetCookies(parsed, jarCookies)
 }
@@ -2319,9 +2362,33 @@ func stripHTML(value string) string {
 // mapContainer maps local container metadata to BTN's format dropdown. Autofill
 // is used only when metadata does not resolve to a BTN-supported value.
 func mapContainer(meta api.PreparedMetadata, fields map[string]string) string {
-	allowed := map[string]struct{}{"AVI": {}, "MKV": {}, "VOB": {}, "MPEG": {}, "MP4": {}, "ISO": {}, "WMV": {}, "TS": {}, "M4V": {}, "M2TS": {}, "Mixed": {}}
+	allowed := map[string]struct{}{
+		"AVI":   {},
+		"MKV":   {},
+		"VOB":   {},
+		"MPEG":  {},
+		"MP4":   {},
+		"ISO":   {},
+		"WMV":   {},
+		"TS":    {},
+		"M4V":   {},
+		"M2TS":  {},
+		"Mixed": {},
+	}
 	container := strings.ToLower(strings.TrimSpace(meta.Container))
-	mapped := map[string]string{"avi": "AVI", "mkv": "MKV", "vob": "VOB", "mpg": "MPEG", "mpeg": "MPEG", "mp4": "MP4", "iso": "ISO", "wmv": "WMV", "ts": "TS", "m4v": "M4V", "m2ts": "M2TS"}[container]
+	mapped := map[string]string{
+		"avi":  "AVI",
+		"mkv":  "MKV",
+		"vob":  "VOB",
+		"mpg":  "MPEG",
+		"mpeg": "MPEG",
+		"mp4":  "MP4",
+		"iso":  "ISO",
+		"wmv":  "WMV",
+		"ts":   "TS",
+		"m4v":  "M4V",
+		"m2ts": "M2TS",
+	}[container]
 	if mapped == "" && strings.EqualFold(strings.TrimSpace(meta.DiscType), "BDMV") {
 		mapped = "M2TS"
 	}
@@ -2339,16 +2406,46 @@ func mapContainer(meta api.PreparedMetadata, fields map[string]string) string {
 // mapCodec maps local video codec metadata to BTN's bitrate dropdown. Autofill
 // is used only when metadata does not resolve to a BTN-supported value.
 func mapCodec(meta api.PreparedMetadata, fields map[string]string) string {
-	allowed := map[string]struct{}{"XViD": {}, "MPEG2": {}, "DiVX": {}, "DVDR": {}, "VC-1": {}, "H.264": {}, "H.265": {}, "WMV": {}, "BD": {}, "x264-Hi10P": {}, "VP9": {}, "Mixed": {}}
+	allowed := map[string]struct{}{
+		"XViD":       {},
+		"MPEG2":      {},
+		"DiVX":       {},
+		"DVDR":       {},
+		"VC-1":       {},
+		"H.264":      {},
+		"H.265":      {},
+		"WMV":        {},
+		"BD":         {},
+		"x264-Hi10P": {},
+		"VP9":        {},
+		"Mixed":      {},
+	}
 	videoEncode := strings.ToLower(strings.TrimSpace(meta.VideoEncode))
 	videoCodec := strings.ToLower(strings.TrimSpace(meta.VideoCodec))
 	bitDepth := strings.TrimSpace(meta.BitDepth)
 	mapped := ""
-	if (strings.Contains(videoEncode, "hi10") || bitDepth == "10") && (strings.Contains(videoEncode, "x264") || strings.Contains(videoCodec, "avc") || strings.Contains(videoCodec, "h.264")) {
+	if (strings.Contains(videoEncode, "hi10") || bitDepth == "10") &&
+		(strings.Contains(videoEncode, "x264") || strings.Contains(videoCodec, "avc") || strings.Contains(videoCodec, "h.264")) {
 		mapped = "x264-Hi10P"
 	}
 	if mapped == "" {
-		lookup := map[string]string{"xvid": "XViD", "divx": "DiVX", "mpeg-2": "MPEG2", "mpeg2": "MPEG2", "vc-1": "VC-1", "wmv": "WMV", "vp9": "VP9", "avc": "H.264", "h.264": "H.264", "h264": "H.264", "x264": "H.264", "hevc": "H.265", "h.265": "H.265", "h265": "H.265", "x265": "H.265"}
+		lookup := map[string]string{
+			"xvid":   "XViD",
+			"divx":   "DiVX",
+			"mpeg-2": "MPEG2",
+			"mpeg2":  "MPEG2",
+			"vc-1":   "VC-1",
+			"wmv":    "WMV",
+			"vp9":    "VP9",
+			"avc":    "H.264",
+			"h.264":  "H.264",
+			"h264":   "H.264",
+			"x264":   "H.264",
+			"hevc":   "H.265",
+			"h.265":  "H.265",
+			"h265":   "H.265",
+			"x265":   "H.265",
+		}
 		for _, value := range []string{videoEncode, videoCodec} {
 			for needle, resolved := range lookup {
 				if strings.Contains(value, needle) {
@@ -2372,7 +2469,28 @@ func mapCodec(meta api.PreparedMetadata, fields map[string]string) string {
 // mapSource maps local source metadata to BTN's media dropdown. Autofill is
 // used only when metadata does not resolve to a BTN-supported value.
 func mapSource(meta api.PreparedMetadata, fields map[string]string) string {
-	allowed := map[string]struct{}{"HDTV": {}, "PDTV": {}, "DSR": {}, "DVDRip": {}, "TVRip": {}, "VHSRip": {}, "Bluray": {}, "BDRip": {}, "BRRip": {}, "DVD5": {}, "DVD9": {}, "HDDVD": {}, "WEB-DL": {}, "WEBRip": {}, "BD5": {}, "BD9": {}, "BD25": {}, "BD50": {}, "Mixed": {}, "Unknown": {}}
+	allowed := map[string]struct{}{
+		"HDTV":    {},
+		"PDTV":    {},
+		"DSR":     {},
+		"DVDRip":  {},
+		"TVRip":   {},
+		"VHSRip":  {},
+		"Bluray":  {},
+		"BDRip":   {},
+		"BRRip":   {},
+		"DVD5":    {},
+		"DVD9":    {},
+		"HDDVD":   {},
+		"WEB-DL":  {},
+		"WEBRip":  {},
+		"BD5":     {},
+		"BD9":     {},
+		"BD25":    {},
+		"BD50":    {},
+		"Mixed":   {},
+		"Unknown": {},
+	}
 	source := strings.ToLower(strings.TrimSpace(meta.Source))
 	typeName := strings.ToUpper(strings.TrimSpace(meta.Type))
 	resolution := strings.ToUpper(strings.TrimSpace(meta.Release.Resolution))
@@ -2393,7 +2511,24 @@ func mapSource(meta api.PreparedMetadata, fields map[string]string) string {
 	case resolution == "SD" && (source == "bluray" || source == "blu-ray"):
 		mapped = "BDRip"
 	default:
-		mapped = map[string]string{"bluray": "Bluray", "blu-ray": "Bluray", "bdrip": "BDRip", "brrip": "BRRip", "dvd5": "DVD5", "dvd9": "DVD9", "web-dl": "WEB-DL", "webrip": "WEBRip", "pdtv": "PDTV", "dsr": "DSR", "tvrip": "TVRip", "vhsrip": "VHSRip", "bd5": "BD5", "bd9": "BD9", "bd25": "BD25", "bd50": "BD50"}[source]
+		mapped = map[string]string{
+			"bluray":  "Bluray",
+			"blu-ray": "Bluray",
+			"bdrip":   "BDRip",
+			"brrip":   "BRRip",
+			"dvd5":    "DVD5",
+			"dvd9":    "DVD9",
+			"web-dl":  "WEB-DL",
+			"webrip":  "WEBRip",
+			"pdtv":    "PDTV",
+			"dsr":     "DSR",
+			"tvrip":   "TVRip",
+			"vhsrip":  "VHSRip",
+			"bd5":     "BD5",
+			"bd9":     "BD9",
+			"bd25":    "BD25",
+			"bd50":    "BD50",
+		}[source]
 	}
 	for _, candidate := range []string{mapped, fields["media"], "Unknown"} {
 		if _, ok := allowed[candidate]; ok {
@@ -2575,7 +2710,8 @@ func resolveBTNURLAddrs(ctx context.Context, parsed *url.URL, lookup btnLookupIP
 // multicast, unspecified, and otherwise non-global-unicast addresses.
 func validateBTNPublicResolvedAddrs(host string, addrs []netip.Addr) error {
 	for _, addr := range addrs {
-		if !addr.IsValid() || !addr.IsGlobalUnicast() || addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast() || addr.IsMulticast() || addr.IsUnspecified() {
+		if !addr.IsValid() || !addr.IsGlobalUnicast() || addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast() || addr.IsMulticast() ||
+			addr.IsUnspecified() {
 			return fmt.Errorf("host %q resolved to blocked address %q", host, addr)
 		}
 	}

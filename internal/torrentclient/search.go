@@ -259,7 +259,13 @@ func (s *Service) SearchPathedTorrents(ctx context.Context, meta api.PreparedMet
 		if err != nil {
 			return api.ClientSearchResult{}, err
 		}
-		s.logger.Tracef("clients: pathed search client %s results matches=%d trackerMatch=%t preferred=%q", name, len(matches), clientResult.FoundTrackerMatch, clientResult.FoundPreferredPiece)
+		s.logger.Tracef(
+			"clients: pathed search client %s results matches=%d trackerMatch=%t preferred=%q",
+			name,
+			len(matches),
+			clientResult.FoundTrackerMatch,
+			clientResult.FoundPreferredPiece,
+		)
 		if len(matches) == 0 {
 			if meta.Options.Debug {
 				s.logger.Debugf("clients: no torrent matches found in %s", name)
@@ -474,7 +480,13 @@ func selectSearchClientNames(clients map[string]config.TorrentClientConfig, sele
 	return result
 }
 
-func (s *Service) searchQbitClient(ctx context.Context, name string, clientCfg config.TorrentClientConfig, meta api.PreparedMetadata, constraints pieceConstraints) (api.ClientSearchResult, []api.TorrentMatch, error) {
+func (s *Service) searchQbitClient(
+	ctx context.Context,
+	name string,
+	clientCfg config.TorrentClientConfig,
+	meta api.PreparedMetadata,
+	constraints pieceConstraints,
+) (api.ClientSearchResult, []api.TorrentMatch, error) {
 	searchTerms := buildSearchTerms(meta)
 	if len(searchTerms) == 0 {
 		s.logger.Debugf("clients: %s search term empty for source=%s", name, meta.SourcePath)
@@ -868,7 +880,13 @@ func buildProxySearchURL(proxyBase, searchTerm string) (string, error) {
 	return parsed.String(), nil
 }
 
-func fetchTorrentProperties(ctx context.Context, client *qbittorrent.Client, httpClient *http.Client, proxyBase, hash string, useProxy bool) (qbittorrent.TorrentProperties, error) {
+func fetchTorrentProperties(
+	ctx context.Context,
+	client *qbittorrent.Client,
+	httpClient *http.Client,
+	proxyBase, hash string,
+	useProxy bool,
+) (qbittorrent.TorrentProperties, error) {
 	if !useProxy {
 		props, err := client.GetTorrentPropertiesCtx(ctx, hash)
 		if err != nil {
@@ -906,7 +924,14 @@ func fetchTorrentProperties(ctx context.Context, client *qbittorrent.Client, htt
 	return props, nil
 }
 
-func fetchTorrentTrackers(ctx context.Context, client *qbittorrent.Client, httpClient *http.Client, proxyBase, hash string, useProxy bool, fallback []qbittorrent.TorrentTracker) ([]qbittorrent.TorrentTracker, error) {
+func fetchTorrentTrackers(
+	ctx context.Context,
+	client *qbittorrent.Client,
+	httpClient *http.Client,
+	proxyBase, hash string,
+	useProxy bool,
+	fallback []qbittorrent.TorrentTracker,
+) ([]qbittorrent.TorrentTracker, error) {
 	if useProxy {
 		if len(fallback) > 0 {
 			return fallback, nil
@@ -966,7 +991,13 @@ func extractTrackerMatches(comment string, trackerURLs []string, hasWorkingTrack
 	return extractTrackerMatchesWithPatterns(comment, trackerURLs, hasWorkingTracker, priority, trackerIDPatterns)
 }
 
-func extractTrackerMatchesWithPatterns(comment string, trackerURLs []string, hasWorkingTracker bool, priority []string, patterns map[string]trackerPattern) ([]api.TrackerMatch, bool) {
+func extractTrackerMatchesWithPatterns(
+	comment string,
+	trackerURLs []string,
+	hasWorkingTracker bool,
+	priority []string,
+	patterns map[string]trackerPattern,
+) ([]api.TrackerMatch, bool) {
 	matches := make([]api.TrackerMatch, 0)
 	trackerFound := false
 	lowerComment := strings.ToLower(comment)
@@ -1558,7 +1589,11 @@ func validateTorrentData(meta api.PreparedMetadata, hash string, data []byte, co
 	pieceSize := info.PieceLength
 	pieces := info.NumPieces()
 	if pieceSize <= 0 || pieces <= 0 {
-		return torrentDataValidation{pieceSize: pieceSize, infoHash: infoHash, reason: "piece_metadata_invalid"}
+		return torrentDataValidation{
+			pieceSize: pieceSize,
+			infoHash:  infoHash,
+			reason:    "piece_metadata_invalid",
+		}
 	}
 
 	if wrongFile {

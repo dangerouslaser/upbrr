@@ -153,7 +153,11 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 		if err == nil && len(screenshots) > 0 {
 			feedback.SelectedHost = host
 			feedback.Message = buildReuseMessage(tracker, host, usageScope, false)
-			return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: usageScope}, nil
+			return descriptionImageHostResolution{
+				screenshots: screenshots,
+				feedback:    feedback,
+				usageScope:  usageScope,
+			}, nil
 		}
 		urls := resolveTrackerImageURLs(ctx, tracker, meta, repo, logger, preloaded)
 		screenshots = resolveTrackerScreenshots(urls)
@@ -162,23 +166,41 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 			feedback.Message = buildReuseMessage(tracker, feedback.SelectedHost, globalImageUsageScope, false)
 		}
 		if len(screenshots) > 0 || preferredHost == "" {
-			return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: globalImageUsageScope}, nil
+			return descriptionImageHostResolution{
+				screenshots: screenshots,
+				feedback:    feedback,
+				usageScope:  globalImageUsageScope,
+			}, nil
 		}
 		policy = optionalImageHostUploadPolicy(policy, preferredHosts...)
 		selectionPolicy = reusableImageHostSelectionPolicy(policy, preferredHosts...)
 	}
 
-	if screenshots, host, usageScope, err := selectScreenshotsFromSlots(tracker, slots, selectionPolicy); err == nil && len(screenshots) > 0 && reusableSelectionMatchesPolicy(host, selectionPolicy) {
+	if screenshots, host, usageScope, err := selectScreenshotsFromSlots(
+		tracker,
+		slots,
+		selectionPolicy,
+	); err == nil && len(screenshots) > 0 &&
+		reusableSelectionMatchesPolicy(host, selectionPolicy) {
 		feedback.SelectedHost = host
 		feedback.Message = buildReuseMessage(tracker, host, usageScope, host != preferredHost(selectionPolicy))
-		return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: usageScope}, nil
-	} else if err != nil && allRenderableSlotsHaveEligibleVariant(slots, tracker, selectionPolicy) {
+		return descriptionImageHostResolution{
+			screenshots: screenshots,
+			feedback:    feedback,
+			usageScope:  usageScope,
+		}, nil
+	} else if err != nil &&
+		allRenderableSlotsHaveEligibleVariant(slots, tracker, selectionPolicy) {
 		return descriptionImageHostResolution{}, err
 	}
 
 	if skipUpload {
 		feedback.Status = "warning"
-		feedback.Message = fmt.Sprintf("%s requires screenshots from %s, but automatic image-host uploads are disabled.", tracker, imageHostRequirementLabel(policy))
+		feedback.Message = fmt.Sprintf(
+			"%s requires screenshots from %s, but automatic image-host uploads are disabled.",
+			tracker,
+			imageHostRequirementLabel(policy),
+		)
 		return descriptionImageHostResolution{feedback: feedback}, nil
 	}
 
@@ -197,7 +219,15 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 		if appendSourceImageSlots(&slots, meta.SourcePath, localTrackerImages) {
 			changed = true
 		}
-		if materialized, materializeChanged := materializeDescriptionSlotImages(ctx, meta, appCfg, tracker, slots, logger); len(materialized) > 0 || materializeChanged {
+		if materialized, materializeChanged := materializeDescriptionSlotImages(
+			ctx,
+			meta,
+			appCfg,
+			tracker,
+			slots,
+			logger,
+		); len(materialized) > 0 ||
+			materializeChanged {
 			changed = changed || materializeChanged
 		}
 		if changed {
@@ -210,13 +240,25 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 	}
 	if len(sourceImages) == 0 {
 		urls := resolveTrackerImageURLs(ctx, tracker, meta, repo, logger, preloaded)
-		if screenshots, host := resolveTrackerScreenshotsForAllowedHost(urls, selectionPolicy); len(screenshots) > 0 && reusableSelectionMatchesPolicy(host, selectionPolicy) {
+		if screenshots, host := resolveTrackerScreenshotsForAllowedHost(
+			urls,
+			selectionPolicy,
+		); len(screenshots) > 0 &&
+			reusableSelectionMatchesPolicy(host, selectionPolicy) {
 			feedback.SelectedHost = host
 			feedback.Message = buildReuseMessage(tracker, host, globalImageUsageScope, host != preferredHost(selectionPolicy))
-			return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: globalImageUsageScope}, nil
+			return descriptionImageHostResolution{
+				screenshots: screenshots,
+				feedback:    feedback,
+				usageScope:  globalImageUsageScope,
+			}, nil
 		}
 		feedback.Status = "warning"
-		feedback.Message = fmt.Sprintf("%s requires screenshots from %s, but no local screenshots are available to rehost.", tracker, imageHostRequirementLabel(policy))
+		feedback.Message = fmt.Sprintf(
+			"%s requires screenshots from %s, but no local screenshots are available to rehost.",
+			tracker,
+			imageHostRequirementLabel(policy),
+		)
 		return descriptionImageHostResolution{feedback: feedback}, nil
 	}
 
@@ -229,7 +271,11 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 		if len(screenshots) > 0 {
 			feedback.SelectedHost = host
 			feedback.Message = buildReuseMessage(tracker, host, usageScope, host != preferredHost(selectionPolicy))
-			return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: usageScope}, nil
+			return descriptionImageHostResolution{
+				screenshots: screenshots,
+				feedback:    feedback,
+				usageScope:  usageScope,
+			}, nil
 		}
 	}
 
@@ -238,7 +284,11 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 		if screenshots, host, usageScope, err := selectScreenshotsFromSlots(tracker, slots, fallbackPolicy); err == nil && len(screenshots) > 0 {
 			feedback.SelectedHost = host
 			feedback.Message = buildReuseMessage(tracker, host, usageScope, host != preferredHost(selectionPolicy))
-			return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: usageScope}, nil
+			return descriptionImageHostResolution{
+				screenshots: screenshots,
+				feedback:    feedback,
+				usageScope:  usageScope,
+			}, nil
 		}
 		for _, host := range reusableHostCandidates(fallbackPolicy) {
 			usageScope := usageScopeForHost(host)
@@ -249,7 +299,11 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 			if len(screenshots) > 0 {
 				feedback.SelectedHost = host
 				feedback.Message = buildReuseMessage(tracker, host, usageScope, host != preferredHost(selectionPolicy))
-				return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: usageScope}, nil
+				return descriptionImageHostResolution{
+					screenshots: screenshots,
+					feedback:    feedback,
+					usageScope:  usageScope,
+				}, nil
 			}
 		}
 		feedback.Status = "warning"
@@ -319,7 +373,11 @@ func ensureDescriptionImageHostWithDataAndRegistry(
 		} else {
 			feedback.Message = uploadSuccessMessage(tracker, host, usageScope, feedback.Warnings)
 		}
-		return descriptionImageHostResolution{screenshots: screenshots, feedback: feedback, usageScope: usageScope}, nil
+		return descriptionImageHostResolution{
+			screenshots: screenshots,
+			feedback:    feedback,
+			usageScope:  usageScope,
+		}, nil
 	}
 
 	feedback.Status = "warning"
@@ -533,7 +591,13 @@ func cleanupUploadedImages(ctx context.Context, repo api.MetadataRepository, sou
 		}
 		seen[key] = struct{}{}
 		if err := repo.DeleteUploadedImage(ctx, sourcePath, pathValue, hostValue); err != nil && logger != nil {
-			logger.Warnf("trackers: failed to roll back uploaded image tracker=%s host=%s path=%s: %v", strings.TrimSpace(sourcePath), hostValue, pathValue, err)
+			logger.Warnf(
+				"trackers: failed to roll back uploaded image tracker=%s host=%s path=%s: %v",
+				strings.TrimSpace(sourcePath),
+				hostValue,
+				pathValue,
+				err,
+			)
 		}
 	}
 }
@@ -1000,7 +1064,8 @@ func resolveDescriptionSlotImagePublicAddrs(ctx context.Context, host string) ([
 
 func isDescriptionSlotPublicIP(addr netip.Addr) bool {
 	addr = addr.Unmap()
-	if !addr.IsValid() || !addr.IsGlobalUnicast() || addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast() || addr.IsMulticast() || addr.IsUnspecified() {
+	if !addr.IsValid() || !addr.IsGlobalUnicast() || addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast() || addr.IsMulticast() ||
+		addr.IsUnspecified() {
 		return false
 	}
 	for _, blocked := range descriptionSlotImageBlockedIPRanges {

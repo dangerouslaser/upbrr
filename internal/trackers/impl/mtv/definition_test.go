@@ -130,7 +130,11 @@ func TestDefinitionUploadLoginBootstrapSuccess(t *testing.T) {
 				t.Error("unexpected login credentials")
 				return
 			}
-			http.SetCookie(w, &http.Cookie{Name: "session", Value: "cookievalue", Path: "/"})
+			http.SetCookie(w, &http.Cookie{
+				Name:  "session",
+				Value: "cookievalue",
+				Path:  "/",
+			})
 			http.Redirect(w, r, "/index.php", http.StatusFound)
 		case "/index.php":
 			if _, err := r.Cookie("session"); err != nil {
@@ -173,9 +177,13 @@ func TestDefinitionUploadLoginBootstrapSuccess(t *testing.T) {
 			ReleaseName:     "My.Release.2026.2160p.WEBDL.HEVC",
 			ServiceLongName: "Netflix",
 		},
-		TrackerConfig: config.TrackerConfig{URL: server.URL, Username: "user", Password: "pass"},
-		AppConfig:     config.Config{MainSettings: config.MainSettingsConfig{DBPath: dbPath}},
-		Logger:        api.NopLogger{},
+		TrackerConfig: config.TrackerConfig{
+			URL:      server.URL,
+			Username: "user",
+			Password: "pass",
+		},
+		AppConfig: config.Config{MainSettings: config.MainSettingsConfig{DBPath: dbPath}},
+		Logger:    api.NopLogger{},
 	})
 	if err != nil {
 		t.Fatalf("unexpected upload error: %v", err)

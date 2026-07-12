@@ -18,7 +18,13 @@ import (
 func TestDataLookup(t *testing.T) {
 	t.Parallel()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		_ = json.NewEncoder(w).Encode(map[string]any{"status": 0, "data": []any{map[string]any{"id": "321", "hash": "deadbeef", "imdb": map[string]any{"id": "998877"}, "tvdb": map[string]any{"id": "5544"}, "descr": "Text\n[url=https://imgbox.com/abc][img]https://thumbs2.imgbox.com/abc_t.png[/img][/url]"}}})
+		_ = json.NewEncoder(w).Encode(map[string]any{"status": 0, "data": []any{map[string]any{
+			"id":    "321",
+			"hash":  "deadbeef",
+			"imdb":  map[string]any{"id": "998877"},
+			"tvdb":  map[string]any{"id": "5544"},
+			"descr": "Text\n[url=https://imgbox.com/abc][img]https://thumbs2.imgbox.com/abc_t.png[/img][/url]",
+		}}})
 	}))
 	defer server.Close()
 	lookup, ok := New().NewDataLookup(config.Config{Trackers: config.TrackersConfig{Trackers: map[string]config.TrackerConfig{"HDB": {Username: "user", Passkey: "pass"}}}}, server.Client(), nil).(*dataLookup)

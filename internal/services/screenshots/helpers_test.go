@@ -89,12 +89,28 @@ func TestBuildScreenshotSelectionsUsesLongMediaInfoDuration(t *testing.T) {
 
 func TestFilterScreenshotsMatchingSelectionsRejectsStaleTimestamps(t *testing.T) {
 	selections := []api.ScreenshotSelection{
-		{Index: 0, TimestampSeconds: 528.5, Frame: 12671},
-		{Index: 1, TimestampSeconds: 2322.0, Frame: 55671},
+		{
+			Index:            0,
+			TimestampSeconds: 528.5,
+			Frame:            12671,
+		},
+		{
+			Index:            1,
+			TimestampSeconds: 2322.0,
+			Frame:            55671,
+		},
 	}
 	images := []api.ScreenshotImage{
-		{Index: 0, TimestampSeconds: 0.5, Path: "stale.png"},
-		{Index: 1, TimestampSeconds: 2322.1, Path: "current.png"},
+		{
+			Index:            0,
+			TimestampSeconds: 0.5,
+			Path:             "stale.png",
+		},
+		{
+			Index:            1,
+			TimestampSeconds: 2322.1,
+			Path:             "current.png",
+		},
 	}
 
 	filtered := filterScreenshotsMatchingSelections(images, selections, 23.976)
@@ -335,8 +351,16 @@ func TestResolveSegmentCandidatesFallsForwardFromPrimarySegment(t *testing.T) {
 	info := videoInfo{
 		SourcePath: "VTS_01_1.VOB",
 		Segments: []videoSegment{
-			{SourcePath: "VTS_01_1.VOB", StartSeconds: 0, DurationSeconds: 2},
-			{SourcePath: "VTS_01_2.VOB", StartSeconds: 2, DurationSeconds: 98},
+			{
+				SourcePath:      "VTS_01_1.VOB",
+				StartSeconds:    0,
+				DurationSeconds: 2,
+			},
+			{
+				SourcePath:      "VTS_01_2.VOB",
+				StartSeconds:    2,
+				DurationSeconds: 98,
+			},
 		},
 	}
 

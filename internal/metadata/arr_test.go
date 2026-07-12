@@ -95,7 +95,11 @@ func TestResolveExternalIDsPrefersArrBeforeSearch(t *testing.T) {
 	}
 	imdbClient := &stubIMDB{
 		searchResult: imdb.SearchResult{IMDbID: 888},
-		info:         imdb.Info{IMDbID: "tt0000123", Title: "Example", Year: 2021},
+		info: imdb.Info{
+			IMDbID: "tt0000123",
+			Title:  "Example",
+			Year:   2021,
+		},
 	}
 	svc := NewService(
 		repo,
@@ -137,7 +141,11 @@ func TestResolveExternalIDsDoesNotOverwriteExplicitOverridesWithArr(t *testing.T
 		repo,
 		WithConfig(config.Config{MainSettings: config.MainSettingsConfig{TMDBAPI: "token"}}),
 		WithTMDBClient(&stubTMDB{metadata: tmdb.MetadataResult{Title: "Example", Year: 2022}}),
-		WithIMDBClient(&stubIMDB{info: imdb.Info{IMDbID: "tt0000777", Title: "Example", Year: 2022}}),
+		WithIMDBClient(&stubIMDB{info: imdb.Info{
+			IMDbID: "tt0000777",
+			Title:  "Example",
+			Year:   2022,
+		}}),
 		WithTVDBClient(&stubTVDB{}),
 		WithTVmazeClient(&stubTVmaze{}),
 	)

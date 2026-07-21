@@ -1854,6 +1854,8 @@ h2 {
   content: "";
   flex: 1;
   border-top: 1px solid var(--border);
+}
+
 /* autobrr's topographic background texture, applied to #root (copied verbatim from autobrr web/src/index.css). */
 .pattern {
   min-height: 100vh;

@@ -1858,14 +1858,19 @@ h2 {
    identity provider. It is styled to match the primary submit button. */
 .web-auth-shell .web-auth-card__sso {
   display: block;
-  border-radius: 1rem;
-  padding: 0.9rem 1rem;
-  background: linear-gradient(135deg, #f97316, #fb7185);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  background: #2563eb;
   color: white;
-  font-weight: 700;
+  font-weight: 500;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.web-auth-shell .web-auth-card__sso:hover {
+  background: #1d4ed8;
 }
 
 .web-auth-card__divider {
@@ -1873,7 +1878,7 @@ h2 {
   align-items: center;
   gap: 0.75rem;
   margin: 0;
-  color: rgb(148 163 184);
+  color: var(--muted);
   font-size: 0.85rem;
   text-transform: uppercase;
 }
@@ -1882,7 +1887,7 @@ h2 {
 .web-auth-card__divider::after {
   content: "";
   flex: 1;
-  border-top: 1px solid rgb(148 163 184 / 30%);
+  border-top: 1px solid var(--border);
 }
 
 /* Tailwind utilities stay enabled for incremental migration; see README "Frontend Styling Strategy" before adding broad custom CSS. */

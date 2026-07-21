@@ -190,6 +190,7 @@ export default function WebRoot() {
       <div className="web-shell">
         <App
           webUsername={status.username}
+          webOidc={status.oidcEnabled && status.oidcDisableBuiltInLogin}
           onWebLogout={() => {
             void browserAuth.logout().then(() => {
               updateBrowserCSRFToken("");

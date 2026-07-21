@@ -170,6 +170,17 @@ function HeaderGlyph({
   );
 }
 
+const openidPath =
+  "M271.5 432l-68 32C88.5 453.7 0 392.5 0 318.2c0-71.5 82.5-131 191.7-144.3v43c-71.5 12.5-124 53-124 101.3 0 51 58.5 93.3 135.7 103v-340l68-33.2v384zM448 291l-131.3-28.5 36.8-20.7c-19.5-11.5-43.5-20-70-24.8v-43c46.2 5.5 87.7 19.5 120.3 39.3l35-19.8L448 291z";
+
+function OpenidGlyph({ className }: { className: string }) {
+  return (
+    <svg className={className} viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
+      <path d={openidPath} />
+    </svg>
+  );
+}
+
 function ThemeGlyph({ theme }: { theme: string }) {
   return (
     <svg
@@ -818,10 +829,12 @@ const emptyWebAuthStatus: WebAuthStatus = {
 
 type AppProps = {
   webUsername?: string;
+  /** True when the web session was established through OIDC single sign-on. */
+  webOidc?: boolean;
   onWebLogout?: () => void;
 };
 
-export default function App({ webUsername, onWebLogout }: AppProps = {}) {
+export default function App({ webUsername, webOidc, onWebLogout }: AppProps = {}) {
   const browserMode = isBrowserMode();
   const browserNativeBrowseAvailable = useSyncExternalStore(
     subscribeBrowserNativeBrowseAvailability,
@@ -4334,7 +4347,11 @@ export default function App({ webUsername, onWebLogout }: AppProps = {}) {
                           >
                             <span className="sr-only">Open user menu for </span>
                             {webUsername}
-                            <HeaderGlyph name="user" className="ml-1 inline h-5 w-5" />
+                            {webOidc ? (
+                              <OpenidGlyph className="ml-1 inline h-4 w-4 text-gray-500 dark:text-gray-500" />
+                            ) : (
+                              <HeaderGlyph name="user" className="ml-1 inline h-5 w-5" />
+                            )}
                           </button>
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Portal>

@@ -4,19 +4,19 @@ go 1.26.5
 
 require (
 	github.com/autobrr/go-bdinfo v0.4.0
-	github.com/autobrr/go-mediainfo v0.5.0
-	github.com/autobrr/go-qbittorrent v1.17.0
-	github.com/autobrr/go-torrent v1.1.0
+	github.com/autobrr/go-mediainfo v0.7.0
+	github.com/autobrr/go-qbittorrent v1.18.0
+	github.com/autobrr/go-torrent v1.1.1
 	github.com/autobrr/mkbrr v1.24.1
 	github.com/frustra/bbcode v0.0.0-20201127003707-6ef347fbe1c8
 	github.com/moistari/rls v0.6.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
-	golang.org/x/crypto v0.53.0
-	golang.org/x/net v0.56.0
-	golang.org/x/sync v0.21.0
-	golang.org/x/sys v0.46.0
-	golang.org/x/term v0.44.0
-	golang.org/x/text v0.38.0
+	golang.org/x/crypto v0.54.0
+	golang.org/x/net v0.57.0
+	golang.org/x/sync v0.22.0
+	golang.org/x/sys v0.47.0
+	golang.org/x/term v0.45.0
+	golang.org/x/text v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 	modernc.org/sqlite v1.50.1
 )
